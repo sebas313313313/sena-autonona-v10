@@ -14,7 +14,7 @@ class Users_Role extends Model
         llamando al usuario al cual esta relacionado con rol_usuario 
         (ESTO RESPECTA A LAS DEMAS FUNCIONES CON "belongsTo") 
     */
-     
+    
     public function User(){
         return $this->belongsTo('App\Models\User'); 
     }

@@ -43,5 +43,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    
+    public function User_Roles()
+    {
+        return $this->hasMany('App\Models\User_Roles');
+    }
 }
