@@ -18,4 +18,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('municipalities', MunicipalityController::class);
+// Moviendo la ruta de municipalities a api.php
