@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('jobs', function (Blueprint $table) {
             $table->id();
+            $table->string('description');
+            $table->foreignId('component_id')->references('id')->on('components')->onDelete('cascade');
             $table->timestamps();
         });
     }

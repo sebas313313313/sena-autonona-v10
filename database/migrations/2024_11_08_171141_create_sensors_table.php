@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('sensors', function (Blueprint $table) {
             $table->id();
+            $table->string('description', 100); // Equivalente a 'descripcion character varying(100)'
             $table->timestamps();
         });
     }

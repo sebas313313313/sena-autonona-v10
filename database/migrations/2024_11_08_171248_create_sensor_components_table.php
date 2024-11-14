@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('sensor_components', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('farm_component_id')->references('id')->on('farm_components')->onDelete('cascade');
+            $table->foreignId('sensor_id')->references('id')->on('sensors')->onDelete('cascade');
+            $table->double('min'); // Equivalente a 'min double precision'
+            $table->double('max'); // Equivalente a 'max double precision'
             $table->timestamps();
         });
     }
