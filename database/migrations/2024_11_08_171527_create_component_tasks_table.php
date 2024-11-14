@@ -17,16 +17,16 @@ return new class extends Migration
             $table->time('time');
             $table->string('status', 50);
             $table->text('comments')->nullable();
-            $table->timestamp('created_at');
-
+            
             $table->foreignId('task_id')->references('id')->on('tasks')->onDelete('cascade');
-
+            
             $table->foreignId('farm_component_id')->references('id')->on('farm_components')->onDelete('cascade');
-
+            
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-
+            
             $table->index('date');
             $table->index('status');
+            $table->timestamp('created_at');
         });
     }
 

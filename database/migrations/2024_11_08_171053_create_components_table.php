@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('components', function (Blueprint $table) {
             $table->id();
-            $table->id('component_id'); // Equivalente a 'id_componente serial'
             $table->string('description', 100); // Equivalente a 'descripcion character varying(100)'
             $table->timestamps();
         });

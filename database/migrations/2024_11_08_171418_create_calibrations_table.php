@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('calibrations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sensor_component_id')->references('id')->on('sensor_components')->onDelete('cascade');
-            $table->date('date');
-            $table->date('date');
-            $table->integer('parameters', 50);
-            $table->integer('alert', 10);
+            $table->date('date')->null;
+            $table->integer('parameters')->null; 
+            $table->integer('alert'); 
+            $table->foreignId('sensor_component_id')->constrained('sensor_components')->onDelete('cascade');
             $table->timestamps();
         });
+        
     }
 
     /**

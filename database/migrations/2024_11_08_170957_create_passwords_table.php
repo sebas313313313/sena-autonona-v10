@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('passwords', function (Blueprint $table) {
-            $table->id();
+            $table->id(); 
+            $table->string('password', 250);
+            $table->string('question', 250);
+            $table->string('answer', 250);
+            $table->date('date');
+            $table->foreignId('user_role_id')->constrained('users_roles')->onDelete('cascade');
             $table->timestamps();
         });
     }
