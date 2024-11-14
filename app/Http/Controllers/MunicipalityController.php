@@ -13,7 +13,7 @@ class MunicipalityController extends Controller
     public function index()
     {
         $municipalities = Municipality::all();
-        return view('municipalities.index', compact('municipalities'));
+        return response()->json(['data' => $municipalities]);
     }
 
     /**
@@ -21,7 +21,8 @@ class MunicipalityController extends Controller
      */
     public function create()
     {
-        return view('municipalities.create');
+        // No necesario para API
+        return response()->json(['message' => 'Method not allowed'], 405);
     }
 
     /**
@@ -35,8 +36,8 @@ class MunicipalityController extends Controller
             'department' => 'nullable|string|max:50'
         ]);
 
-        Municipality::create($request->all());
-        return redirect()->route('municipalities.index')->with('success', 'Municipality created successfully.');
+        $municipality = Municipality::create($request->all());
+        return response()->json(['data' => $municipality, 'message' => 'Municipality created successfully'], 201);
     }
 
     /**
@@ -44,7 +45,7 @@ class MunicipalityController extends Controller
      */
     public function show(Municipality $municipality)
     {
-        return view('municipalities.show', compact('municipality'));
+        return response()->json(['data' => $municipality]);
     }
 
     /**
@@ -52,7 +53,8 @@ class MunicipalityController extends Controller
      */
     public function edit(Municipality $municipality)
     {
-        return view('municipalities.edit', compact('municipality'));
+        // No necesario para API
+        return response()->json(['message' => 'Method not allowed'], 405);
     }
 
     /**
@@ -67,7 +69,7 @@ class MunicipalityController extends Controller
         ]);
 
         $municipality->update($request->all());
-        return redirect()->route('municipalities.index')->with('success', 'Municipality updated successfully.');
+        return response()->json(['data' => $municipality, 'message' => 'Municipality updated successfully']);
     }
 
     /**
@@ -76,6 +78,6 @@ class MunicipalityController extends Controller
     public function destroy(Municipality $municipality)
     {
         $municipality->delete();
-        return redirect()->route('municipalities.index')->with('success', 'Municipality deleted successfully.');
+        return response()->json(['message' => 'Municipality deleted successfully']);
     }
 }
