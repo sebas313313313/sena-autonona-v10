@@ -12,7 +12,8 @@ class MunicipalityController extends Controller
      */
     public function index()
     {
-        //
+        $municipalities = Municipality::all();
+        return view('municipalities.index', compact('municipalities'));
     }
 
     /**
@@ -20,7 +21,7 @@ class MunicipalityController extends Controller
      */
     public function create()
     {
-        //
+        return view('municipalities.create');
     }
 
     /**
@@ -28,7 +29,14 @@ class MunicipalityController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:100',
+            'department' => 'nullable|string|max:50'
+        ]);
+
+        Municipality::create($request->all());
+        return redirect()->route('municipalities.index')->with('success', 'Municipality created successfully.');
     }
 
     /**
@@ -36,7 +44,7 @@ class MunicipalityController extends Controller
      */
     public function show(Municipality $municipality)
     {
-        //
+        return view('municipalities.show', compact('municipality'));
     }
 
     /**
@@ -44,7 +52,7 @@ class MunicipalityController extends Controller
      */
     public function edit(Municipality $municipality)
     {
-        //
+        return view('municipalities.edit', compact('municipality'));
     }
 
     /**
@@ -52,7 +60,14 @@ class MunicipalityController extends Controller
      */
     public function update(Request $request, Municipality $municipality)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:100',
+            'department' => 'nullable|string|max:50'
+        ]);
+
+        $municipality->update($request->all());
+        return redirect()->route('municipalities.index')->with('success', 'Municipality updated successfully.');
     }
 
     /**
@@ -60,6 +75,7 @@ class MunicipalityController extends Controller
      */
     public function destroy(Municipality $municipality)
     {
-        //
+        $municipality->delete();
+        return redirect()->route('municipalities.index')->with('success', 'Municipality deleted successfully.');
     }
 }

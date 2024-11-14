@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('municipalities', function (Blueprint $table) {
             $table->id();
-            $table->text('descripction', 100)->null;
-            $table->text('departament', 50)->null;
+            $table->string('name', 100);
+            $table->string('description', 100)->nullable();
+            $table->string('department', 50)->nullable();
             $table->timestamps();
         });
     }
