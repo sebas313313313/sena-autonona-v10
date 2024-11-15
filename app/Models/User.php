@@ -47,4 +47,8 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Models\User_Roles');
     }
+
+    public function Component_Task() {
+        return $this->belongsTo('App\Models\Component_Task');
+    }
 }

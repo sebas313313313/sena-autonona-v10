@@ -12,20 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('component_tasks', function (Blueprint $table) {
-            $table->id('task_component_id');
+            $table->id();
             $table->date('date');
+            $table->index('date');
             $table->time('time');
+            $table->index('status');
             $table->string('status', 50);
             $table->text('comments')->nullable();
-            
-            $table->foreignId('task_id')->references('id')->on('tasks')->onDelete('cascade');
-            
+            $table->foreignId('job_id')->references('id')->on('jobs')->onDelete('cascade');
             $table->foreignId('farm_component_id')->references('id')->on('farm_components')->onDelete('cascade');
-            
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            
-            $table->index('date');
-            $table->index('status');
             $table->timestamp('created_at');
         });
     }

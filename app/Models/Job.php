@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Job extends Model
 {
     use HasFactory;
+
+    public function Component_Task() {
+        return $this->belongsTo('App\Models\Component_Task');
+    }
 }

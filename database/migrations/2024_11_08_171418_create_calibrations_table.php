@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('calibrations', function (Blueprint $table) {
             $table->id();
-            $table->date('date')->null;
-            $table->integer('parameters')->null; 
+            $table->date('date')->nullable();
+            $table->integer('parameters')->nullable(); 
             $table->integer('alert'); 
             $table->foreignId('sensor_component_id')->constrained('sensor_components')->onDelete('cascade');
             $table->timestamps();

@@ -7,59 +7,58 @@ use Illuminate\Http\Request;
 
 class ComponentTaskController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    /* En el metodo INDEX es por donde vamos a recibir todos los questions/preguntas que estan en nuestra bd. */
     public function index()
     {
-        //
+        $component_task = Component_Task::all();
+        return response()->json($component_task);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    /* En el metodo CREATE es por donde vamos a ingresar nuestro nuevo questions/preguntas y guardarlo en la bd. */
+    public function create(Request $request)
     {
-        //
+        $request->validate([
+            'date' => 'required|date',
+            'time' => 'required|time',
+            'status' => 'required|string|max:50',
+            'comments' => 'required|text|nullable',
+            'date' => 'required|index',
+            'status' => 'required|index',
+            'job_id' => 'required|exists:jobs,id',
+            'farm_component_id' => 'required|exists:farm_components,id',
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $component_task = Component_Task::create($request->all());
+        return response()->json(['message' => "Tarea Creada Exitosamente", $component_task]);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    /* En el metodo SHOW es por donde vamos a mostrar un questions/preguntas especifico alojado en nuestra bd. */
+    public function show($id)
     {
-        //
+        $component_task = Component_Task::findOrFail($id);
+        return response()->json(['message' => "Tarea Enseñada Exitosamente", $component_task]);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Component_Task $component_Task)
+    /* En el metodo UPDATE es donde actualizamos el questions/preguntas especifico alojado en nuestra bd. */
+    public function update(Request $request, Component_Task $component_task)
     {
-        //
+        $request->validate([
+            'date' => 'required|date',
+            'time' => 'required|time',
+            'status' => 'required|string|max:50',
+            'comments' => 'required|text|nullable',
+            'date' => 'required|index',
+            'status' => 'required|index',
+            'job_id' => 'required|exists:jobs,id',
+            'farm_component_id' => 'required|exists:farm_components,id',
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $component_task->update($request->all());
+        return response()->json(['message' => "Tarea Actualizada Exitosamente", $component_task]);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Component_Task $component_Task)
+    /* Con el metodo DESTROY eliminamos cualquier questions/preguntas especifico alojado en nuestra bd. */
+    public function destroy(Component_Task $component_task)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Component_Task $component_Task)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Component_Task $component_Task)
-    {
-        //
+        $component_task->delete();
+        return response()->json(['message' => "Tarea Elimiinada Exitosamente", $component_task]);
     }
 }

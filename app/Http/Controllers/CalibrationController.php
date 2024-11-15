@@ -7,59 +7,48 @@ use Illuminate\Http\Request;
 
 class CalibrationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    /* En el metodo INDEX es por donde vamos a recibir todos los questions/preguntas que estan en nuestra bd. */
     public function index()
     {
-        //
+        $calibration = Calibration::all();
+        return response()->json($calibration);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    /* En el metodo CREATE es por donde vamos a ingresar nuestro nuevo questions/preguntas y guardarlo en la bd. */
+    public function create (Request $request)
     {
-        //
-    }
+        $request->validate([
+            'date' => 'required|date|nullable',
+            'parameters' => 'required|integer|nullable',
+            'alert' => 'required|integer',
+            'sensor_component_id' => 'required|exists:sensor_components,id'
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+        $calibration = Calibration::create($request->all());
+        return response()->json(['message' => "Registro Creado Exitosamente", $calibration]);
+    }
+    /* En el metodo SHOW es por donde vamos a mostrar un questions/preguntas especifico alojado en nuestra bd. */
+    public function show($id)
     {
-        //
+        $calibration = Calibration::findOrFail($id);
+        return response()->json(['message' => "Registgro Enseñado Exitosamente", $calibration]);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Calibration $calibration)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Calibration $calibration)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
+    /* En el metodo UPDATE es donde actualizamos el questions/preguntas especifico alojado en nuestra bd. */
     public function update(Request $request, Calibration $calibration)
     {
-        //
-    }
+        $request->validate([
+            'date' => 'required|date|nullable',
+            'parameters' => 'required|integer|nullable',
+            'alert' => 'required|integer',
+            'sensor_component_id' => 'required|exists:sensor_components,id'
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
+        $calibration->update($request->all());
+        return response()->json(['message' => "Registro Actualizado Exitosamente", $calibration]);
+    }
+    /* Con el metodo DESTROY eliminamos cualquier questions/preguntas especifico alojado en nuestra bd. */
     public function destroy(Calibration $calibration)
     {
-        //
+        $calibration->delete();
+        return response()->json(['message' => "Registro Elimiinado Exitosamente", $calibration]);
     }
 }
