@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('farms', function (Blueprint $table) {
-            $table->id('farm_id'); // Equivalente a 'id_granja serial'
+            $table->id(); // Equivalente a 'id_granja serial'
             $table->double('latitude', 15, 8); // Equivalente a 'coordenadas_latitud double precision'
             $table->double('longitude', 15, 8); // Equivalente a 'coordenadas_longitud double precision'
             $table->string('address', 50); // Equivalente a 'direccion character varying(50)'

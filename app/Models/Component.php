@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Component extends Model
 {
     use HasFactory;
+
+    protected $fillable =['description'];
+
+    public function Farm_Component() {
+        return $this->belongsTo('App\Models\Farm_Component');
+    }
 }

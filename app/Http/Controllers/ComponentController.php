@@ -7,59 +7,42 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    /* En el metodo INDEX es por donde vamos a recibir todos los questions/preguntas que estan en nuestra bd. */
     public function index()
     {
-        //
+        $component = Component::all();
+        return response()->json($component);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    /* En el metodo CREATE es por donde vamos a ingresar nuestro nuevo questions/preguntas y guardarlo en la bd. */
+    public function create(Request $request)
     {
-        //
-    }
+        $request->validate([
+        'description' => 'required|string|max:100',
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+        $component = Component::create($request->all());
+        return response()->json(['message' => "Registro Creado Exitosamente", $component]);
+    }
+    /* En el metodo SHOW es por donde vamos a mostrar un questions/preguntas especifico alojado en nuestra bd. */
+    public function show($id)
     {
-        //
+        $component = Component::findOrFail($id);
+        return response()->json(['message' => "Registgro Enseñado Exitosamente", $component]);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Component $component)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Component $component)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
+    /* En el metodo UPDATE es donde actualizamos el questions/preguntas especifico alojado en nuestra bd. */
     public function update(Request $request, Component $component)
     {
-        //
-    }
+        $request->validate([
+        'description' => 'required|string|max:100',
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
+        $component->update($request->all());
+        return response()->json(['message' => "Registro Actualizado Exitosamente", $component]);
+    }
+    /* Con el metodo DESTROY eliminamos cualquier questions/preguntas especifico alojado en nuestra bd. */
     public function destroy(Component $component)
     {
-        //
+        $component->delete();
+        return response()->json(['message' => "Registro Elimiinado Exitosamente", $component]);
     }
 }

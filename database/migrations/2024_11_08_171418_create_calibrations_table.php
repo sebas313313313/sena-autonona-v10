@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('calibraciones', function (Blueprint $table) {
-            $table->id('id_calibracion');
-            $table->foreignId('id_sensor_cte')->constrained('sensor_componentes')->onDelete('cascade');
-            $table->date('fecha');
-            $table->string('parametros', 50);
-            $table->string('alerta', 10)->nullable();
+        Schema::create('calibrations', function (Blueprint $table) {
+            $table->id();
+            $table->date('date')->nullable();
+            $table->integer('parameters')->nullable(); 
+            $table->integer('alert'); 
+            $table->foreignId('sensor_component_id')->constrained('sensor_components')->onDelete('cascade');
             $table->timestamps();
         });
+        
     }
 
     /**
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('calibraciones');
+        Schema::dropIfExists('calibrations');
     }
 };

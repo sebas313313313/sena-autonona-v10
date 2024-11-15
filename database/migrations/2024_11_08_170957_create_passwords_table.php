@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('passwords', function (Blueprint $table) {
             $table->id();
             $table->foreignId('users_role_id')->constrained('users_roles')->onDelete('cascade');
-            $table->string('contrasena');
-            $table->string('pregunta');
-            $table->string('respuesta');
+            $table->string('contrasena', 250);
+            $table->string('pregunta', 250);
+            $table->string('respuesta', 250);
             $table->timestamp('fecha');
             $table->timestamps();
         });
