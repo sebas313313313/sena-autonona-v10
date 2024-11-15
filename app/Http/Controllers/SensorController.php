@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sensor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SensorController extends Controller
 {
@@ -12,15 +13,8 @@ class SensorController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $sensors = Sensor::all();
+        return response()->json(['data' => $sensors]);
     }
 
     /**
@@ -28,7 +22,19 @@ class SensorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'description' => 'required|string|max:255'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $sensor = Sensor::create($request->all());
+        return response()->json([
+            'message' => 'Sensor creado exitosamente',
+            'data' => $sensor
+        ], 201);
     }
 
     /**
@@ -36,15 +42,7 @@ class SensorController extends Controller
      */
     public function show(Sensor $sensor)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sensor $sensor)
-    {
-        //
+        return response()->json(['data' => $sensor]);
     }
 
     /**
@@ -52,14 +50,29 @@ class SensorController extends Controller
      */
     public function update(Request $request, Sensor $sensor)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'description' => 'required|string|max:255'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $sensor->update($request->all());
+        return response()->json([
+            'message' => 'Sensor actualizado exitosamente',
+            'data' => $sensor
+        ]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource.
      */
     public function destroy(Sensor $sensor)
     {
-        //
+        $sensor->delete();
+        return response()->json([
+            'message' => 'Sensor eliminado exitosamente'
+        ]);
     }
 }

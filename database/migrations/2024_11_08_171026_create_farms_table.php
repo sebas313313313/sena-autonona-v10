@@ -21,8 +21,8 @@ return new class extends Migration
             $table->timestamps();
             
             // Relaciones de claves foráneas (si existen tablas de referencia)
-            $table->foreignId('user_role_id')->references('id')->on('user_roles')->onDelete('cascade');
-            $table->foreignId('municipality_id')->references('id')->on('municipalities')->onDelete('cascade');
+            $table->foreignId('users_role_id')->constrained('users_roles')->onDelete('cascade');
+            $table->foreignId('municipality_id')->constrained('municipalities')->onDelete('cascade');
         });
     }
 

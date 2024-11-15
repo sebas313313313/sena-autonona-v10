@@ -14,15 +14,17 @@ return new class extends Migration
         Schema::create('component_tasks', function (Blueprint $table) {
             $table->id();
             $table->date('date');
-            $table->index('date');
             $table->time('time');
-            $table->index('status');
             $table->string('status', 50);
             $table->text('comments')->nullable();
-            $table->foreignId('job_id')->references('id')->on('jobs')->onDelete('cascade');
-            $table->foreignId('farm_component_id')->references('id')->on('farm_components')->onDelete('cascade');
-            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->timestamp('created_at');
+            $table->foreignId('job_id')->constrained()->onDelete('cascade');
+            $table->foreignId('farm_component_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+
+            // Índices
+            $table->index('date');
+            $table->index('status');
         });
     }
 

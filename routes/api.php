@@ -9,6 +9,10 @@ use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\Users_RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\IdentificationTypeController;
+use App\Http\Controllers\JobController;
+use App\Http\Controllers\FarmController;
+use App\Http\Controllers\SensorController;
+use App\Http\Controllers\SensorComponentController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +42,9 @@ Route::middleware('api')->group(function () {
     
     Route::apiResource('users', UserController::class);
     Route::apiResource('identification-types', IdentificationTypeController::class);
+    Route::apiResource('jobs', JobController::class);
+    Route::apiResource('farms', FarmController::class);
+    Route::apiResource('sensors', SensorController::class);
 });
 
 /*
@@ -80,4 +87,13 @@ Route::prefix('farm_component')->group(function () {
     Route::get('/show/{id}', [FarmComponentController::class, 'show']);
     Route::put('/update/{farm_component}', [FarmComponentController::class, 'update']);
     Route::delete('/destroy/{farm_component}', [FarmComponentController::class, 'destroy']);
+});
+
+// RUTAS_SENSOR_COMPONENT
+Route::prefix('sensor_component')->group(function () {
+    Route::get('/index', [SensorComponentController::class, 'index']);
+    Route::post('/create', [SensorComponentController::class, 'create']);
+    Route::get('/show/{id}', [SensorComponentController::class, 'show']);
+    Route::put('/update/{sensor_component}', [SensorComponentController::class, 'update']);
+    Route::delete('/destroy/{sensor_component}', [SensorComponentController::class, 'destroy']);
 });

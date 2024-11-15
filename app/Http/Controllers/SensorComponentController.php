@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sensor_Component;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SensorComponentController extends Controller
 {
@@ -12,54 +13,73 @@ class SensorComponentController extends Controller
      */
     public function index()
     {
-        //
+        $sensor_components = Sensor_Component::with(['sensor', 'farmComponent'])->get();
+        return response()->json(['data' => $sensor_components]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Create a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
-    }
+        $validator = Validator::make($request->all(), [
+            'farm_component_id' => 'required|exists:farm_components,id',
+            'sensor_id' => 'required|exists:sensors,id',
+            'min' => 'required|numeric',
+            'max' => 'required|numeric|gt:min'
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $sensor_component = Sensor_Component::create($request->all());
+        return response()->json([
+            'message' => 'Componente de sensor creado exitosamente',
+            'data' => $sensor_component->load(['sensor', 'farmComponent'])
+        ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Sensor_Component $sensor_Component)
+    public function show($id)
     {
-        //
+        $sensor_component = Sensor_Component::with(['sensor', 'farmComponent'])->findOrFail($id);
+        return response()->json(['data' => $sensor_component]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Update the specified resource.
      */
-    public function edit(Sensor_Component $sensor_Component)
+    public function update(Request $request, Sensor_Component $sensor_component)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'farm_component_id' => 'sometimes|required|exists:farm_components,id',
+            'sensor_id' => 'sometimes|required|exists:sensors,id',
+            'min' => 'sometimes|required|numeric',
+            'max' => 'sometimes|required|numeric|gt:min'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $sensor_component->update($request->all());
+        return response()->json([
+            'message' => 'Componente de sensor actualizado exitosamente',
+            'data' => $sensor_component->load(['sensor', 'farmComponent'])
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Remove the specified resource.
      */
-    public function update(Request $request, Sensor_Component $sensor_Component)
+    public function destroy(Sensor_Component $sensor_component)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Sensor_Component $sensor_Component)
-    {
-        //
+        $sensor_component->delete();
+        return response()->json([
+            'message' => 'Componente de sensor eliminado exitosamente'
+        ]);
     }
 }

@@ -4,61 +4,88 @@ namespace App\Http\Controllers;
 
 use App\Models\Component_Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ComponentTaskController extends Controller
 {
-    /* En el metodo INDEX es por donde vamos a recibir todos los questions/preguntas que estan en nuestra bd. */
+    /**
+     * Mostrar todas las tareas de componentes
+     */
     public function index()
     {
-        $component_task = Component_Task::all();
-        return response()->json($component_task);
+        $component_tasks = Component_Task::with(['user', 'job', 'farmComponent'])->get();
+        return response()->json(['data' => $component_tasks]);
     }
-    /* En el metodo CREATE es por donde vamos a ingresar nuestro nuevo questions/preguntas y guardarlo en la bd. */
+
+    /**
+     * Crear una nueva tarea de componente
+     */
     public function create(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'date' => 'required|date',
-            'time' => 'required|time',
+            'time' => 'required|date_format:H:i:s',
             'status' => 'required|string|max:50',
-            'comments' => 'required|text|nullable',
-            'date' => 'required|index',
-            'status' => 'required|index',
+            'comments' => 'nullable|string',
             'job_id' => 'required|exists:jobs,id',
             'farm_component_id' => 'required|exists:farm_components,id',
             'user_id' => 'required|exists:users,id'
         ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         $component_task = Component_Task::create($request->all());
-        return response()->json(['message' => "Tarea Creada Exitosamente", $component_task]);
+        return response()->json([
+            'message' => 'Tarea creada exitosamente',
+            'data' => $component_task->load(['user', 'job', 'farmComponent'])
+        ], 201);
     }
-    /* En el metodo SHOW es por donde vamos a mostrar un questions/preguntas especifico alojado en nuestra bd. */
+
+    /**
+     * Mostrar una tarea de componente específica
+     */
     public function show($id)
     {
-        $component_task = Component_Task::findOrFail($id);
-        return response()->json(['message' => "Tarea Enseñada Exitosamente", $component_task]);
+        $component_task = Component_Task::with(['user', 'job', 'farmComponent'])->findOrFail($id);
+        return response()->json(['data' => $component_task]);
     }
-    /* En el metodo UPDATE es donde actualizamos el questions/preguntas especifico alojado en nuestra bd. */
+
+    /**
+     * Actualizar una tarea de componente
+     */
     public function update(Request $request, Component_Task $component_task)
     {
-        $request->validate([
-            'date' => 'required|date',
-            'time' => 'required|time',
-            'status' => 'required|string|max:50',
-            'comments' => 'required|text|nullable',
-            'date' => 'required|index',
-            'status' => 'required|index',
-            'job_id' => 'required|exists:jobs,id',
-            'farm_component_id' => 'required|exists:farm_components,id',
-            'user_id' => 'required|exists:users,id'
+        $validator = Validator::make($request->all(), [
+            'date' => 'sometimes|required|date',
+            'time' => 'sometimes|required|date_format:H:i:s',
+            'status' => 'sometimes|required|string|max:50',
+            'comments' => 'nullable|string',
+            'job_id' => 'sometimes|required|exists:jobs,id',
+            'farm_component_id' => 'sometimes|required|exists:farm_components,id',
+            'user_id' => 'sometimes|required|exists:users,id'
         ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
         $component_task->update($request->all());
-        return response()->json(['message' => "Tarea Actualizada Exitosamente", $component_task]);
+        return response()->json([
+            'message' => 'Tarea actualizada exitosamente',
+            'data' => $component_task->load(['user', 'job', 'farmComponent'])
+        ]);
     }
-    /* Con el metodo DESTROY eliminamos cualquier questions/preguntas especifico alojado en nuestra bd. */
+
+    /**
+     * Eliminar una tarea de componente
+     */
     public function destroy(Component_Task $component_task)
     {
         $component_task->delete();
-        return response()->json(['message' => "Tarea Elimiinada Exitosamente", $component_task]);
+        return response()->json([
+            'message' => 'Tarea eliminada exitosamente'
+        ]);
     }
 }

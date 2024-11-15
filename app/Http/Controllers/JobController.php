@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class JobController extends Controller
 {
@@ -12,15 +13,8 @@ class JobController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $jobs = Job::with('componentTasks')->get();
+        return response()->json(['data' => $jobs]);
     }
 
     /**
@@ -28,7 +22,20 @@ class JobController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $job = Job::create($request->all());
+        return response()->json([
+            'message' => 'Trabajo creado exitosamente',
+            'data' => $job
+        ], 201);
     }
 
     /**
@@ -36,15 +43,9 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Job $job)
-    {
-        //
+        return response()->json([
+            'data' => $job->load('componentTasks')
+        ]);
     }
 
     /**
@@ -52,7 +53,20 @@ class JobController extends Controller
      */
     public function update(Request $request, Job $job)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $job->update($request->all());
+        return response()->json([
+            'message' => 'Trabajo actualizado exitosamente',
+            'data' => $job
+        ]);
     }
 
     /**
@@ -60,6 +74,9 @@ class JobController extends Controller
      */
     public function destroy(Job $job)
     {
-        //
+        $job->delete();
+        return response()->json([
+            'message' => 'Trabajo eliminado exitosamente'
+        ]);
     }
 }

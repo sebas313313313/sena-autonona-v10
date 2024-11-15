@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('farm_components', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('farm_id')->references('id')->on('farms')->onDelete('cascade');
-            $table->foreignId('component_id')->references('id')->on('components')->onDelete('cascade');
+            $table->string('description');
+            $table->foreignId('farm_id')->constrained()->onDelete('cascade');
+            $table->foreignId('component_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
