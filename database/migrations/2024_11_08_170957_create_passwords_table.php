@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('passwords', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('users_role_id')->constrained('users_roles')->onDelete('cascade');
+            $table->string('contrasena');
+            $table->string('pregunta');
+            $table->string('respuesta');
+            $table->timestamp('fecha');
             $table->timestamps();
         });
     }

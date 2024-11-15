@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('identification_types', function (Blueprint $table) {
             $table->id();
-            $table->text('descripction', 100)->null;
+            $table->string('description', 100);
             $table->timestamps();
         });
     }

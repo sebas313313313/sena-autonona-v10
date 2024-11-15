@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('components', function (Blueprint $table) {
-            $table->id();
-            $table->id('component_id'); // Equivalente a 'id_componente serial'
-            $table->string('description', 100); // Equivalente a 'descripcion character varying(100)'
+        Schema::create('componentes', function (Blueprint $table) {
+            $table->id('id_componente');
+            $table->string('descripcion', 100);
             $table->timestamps();
         });
     }
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('components');
+        Schema::dropIfExists('componentes');
     }
 };
