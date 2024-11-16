@@ -14,7 +14,7 @@ class ComponentTaskController extends Controller
     public function index()
     {
         $component_tasks = Component_Task::with(['user', 'job', 'farmComponent'])->get();
-        return response()->json(['data' => $component_tasks]);
+        return response()->json($component_tasks);
     }
 
     /**
@@ -49,7 +49,7 @@ class ComponentTaskController extends Controller
     public function show($id)
     {
         $component_task = Component_Task::with(['user', 'job', 'farmComponent'])->findOrFail($id);
-        return response()->json(['data' => $component_task]);
+        return response()->json($component_task);
     }
 
     /**

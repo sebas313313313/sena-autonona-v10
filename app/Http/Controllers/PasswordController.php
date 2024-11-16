@@ -23,7 +23,7 @@ class PasswordController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_rol_usuario' => 'required|exists:users_roles,id',
+            'users_role_id' => 'required|exists:users_roles,id',
             'contrasena' => 'required|min:6',
             'pregunta' => 'required|string',
             'respuesta' => 'required|string',
@@ -31,7 +31,7 @@ class PasswordController extends Controller
         ]);
 
         $password = Password::create([
-            'id_rol_usuario' => $request->id_rol_usuario,
+            'users_role_id' => $request->users_role_id,
             'contrasena' => Hash::make($request->contrasena),
             'pregunta' => $request->pregunta,
             'respuesta' => Hash::make($request->respuesta),
@@ -58,14 +58,14 @@ class PasswordController extends Controller
     public function update(Request $request, Password $password)
     {
         $request->validate([
-            'id_rol_usuario' => 'exists:users_roles,id',
+            'users_role_id' => 'exists:users_roles,id',
             'contrasena' => 'min:6',
             'pregunta' => 'string',
             'respuesta' => 'string',
             'fecha' => 'date'
         ]);
 
-        $updateData = $request->only(['id_rol_usuario', 'pregunta', 'fecha']);
+        $updateData = $request->only(['users_role_id', 'pregunta', 'fecha']);
         
         if ($request->has('contrasena')) {
             $updateData['contrasena'] = Hash::make($request->contrasena);
