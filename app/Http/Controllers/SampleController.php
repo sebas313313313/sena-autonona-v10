@@ -11,13 +11,34 @@ class SampleController extends Controller
     /**
      * Mostrar todas las muestras de sensores.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $samples = Sample::with('sensorComponent')->get();
-            return response()->json(['data' => $samples]);
+            $samples = Sample::filter($request->all())
+                           ->with('sensorComponent.sensor')
+                           ->latest('fecha_hora')
+                           ->get();
+
+            return response()->json([
+                'message' => 'Muestras obtenidas exitosamente',
+                'data' => $samples,
+                'filters_applied' => array_intersect_key(
+                    $request->all(),
+                    array_flip(['fecha_inicio', 'fecha_fin', 'valor_minimo', 'valor_maximo', 'sensor_id'])
+                )
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al obtener las muestras', 'details' => $e->getMessage()], 500);
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener muestras',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudieron obtener las muestras. Por favor, intente más tarde'], 500);
         }
     }
 
@@ -27,23 +48,35 @@ class SampleController extends Controller
     public function store(Request $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
+            $request->validate([
                 'sensor_component_id' => 'required|exists:sensor_components,id',
                 'fecha_hora' => 'required|date',
-                'value' => 'required|integer'
+                'value' => 'required|numeric'
             ]);
 
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
-            }
-
             $sample = Sample::create($request->all());
+            
             return response()->json([
                 'message' => 'Muestra registrada exitosamente',
-                'data' => $sample->load('sensorComponent')
+                'data' => $sample->load('sensorComponent.sensor')
             ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Error de validación',
+                'details' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al crear la muestra', 'details' => $e->getMessage()], 500);
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al crear la muestra',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo crear la muestra. Por favor, intente más tarde'], 500);
         }
     }
 
@@ -54,10 +87,21 @@ class SampleController extends Controller
     {
         try {
             return response()->json([
-                'data' => $sample->load('sensorComponent')
+                'message' => 'Muestra obtenida exitosamente',
+                'data' => $sample->load('sensorComponent.sensor')
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al obtener la muestra', 'details' => $e->getMessage()], 500);
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener la muestra',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo obtener la muestra. Por favor, intente más tarde'], 500);
         }
     }
 
@@ -67,23 +111,35 @@ class SampleController extends Controller
     public function update(Request $request, Sample $sample)
     {
         try {
-            $validator = Validator::make($request->all(), [
+            $request->validate([
                 'sensor_component_id' => 'exists:sensor_components,id',
                 'fecha_hora' => 'date',
-                'value' => 'integer'
+                'value' => 'numeric'
             ]);
-
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
-            }
 
             $sample->update($request->all());
+            
             return response()->json([
                 'message' => 'Muestra actualizada exitosamente',
-                'data' => $sample->load('sensorComponent')
+                'data' => $sample->load('sensorComponent.sensor')
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Error de validación',
+                'details' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al actualizar la muestra', 'details' => $e->getMessage()], 500);
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al actualizar la muestra',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo actualizar la muestra. Por favor, intente más tarde'], 500);
         }
     }
 
@@ -94,9 +150,21 @@ class SampleController extends Controller
     {
         try {
             $sample->delete();
-            return response()->json(['message' => 'Muestra eliminada exitosamente']);
+            return response()->json([
+                'message' => 'Muestra eliminada exitosamente'
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al eliminar la muestra', 'details' => $e->getMessage()], 500);
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al eliminar la muestra',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo eliminar la muestra. Por favor, intente más tarde'], 500);
         }
     }
 }
