@@ -13,8 +13,22 @@ class IdentificationTypeController extends Controller
      */
     public function index()
     {
-        $types = Identification_Type::all();
-        return response()->json(['data' => $types]);
+        try {
+            $types = Identification_Type::all();
+            return response()->json(['data' => $types]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener tipos de identificación',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudieron cargar los tipos de identificación. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
@@ -22,19 +36,33 @@ class IdentificationTypeController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'description' => 'required|string|max:100'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'description' => 'required|string|max:100'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $type = Identification_Type::create($request->all());
+            return response()->json([
+                'message' => 'Tipo de identificación creado exitosamente',
+                'data' => $type
+            ], 201);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al crear tipo de identificación',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo crear el tipo de identificación. Por favor, intente más tarde'], 500);
         }
-
-        $type = Identification_Type::create($request->all());
-        return response()->json([
-            'message' => 'Tipo de identificación creado exitosamente',
-            'data' => $type
-        ], 201);
     }
 
     /**
@@ -42,35 +70,77 @@ class IdentificationTypeController extends Controller
      */
     public function show(Identification_Type $identification_type)
     {
-        return response()->json(['data' => $identification_type]);
+        try {
+            return response()->json(['data' => $identification_type]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener tipo de identificación',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo obtener el tipo de identificación. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
-     * Update the specified resource.
+     * Update the specified resource in storage.
      */
     public function update(Request $request, Identification_Type $identification_type)
     {
-        $validator = Validator::make($request->all(), [
-            'description' => 'required|string|max:100'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'description' => 'required|string|max:100'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $identification_type->update($request->all());
+            return response()->json([
+                'message' => 'Tipo de identificación actualizado exitosamente',
+                'data' => $identification_type
+            ]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al actualizar tipo de identificación',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo actualizar el tipo de identificación. Por favor, intente más tarde'], 500);
         }
-
-        $identification_type->update($request->all());
-        return response()->json([
-            'message' => 'Tipo de identificación actualizado exitosamente',
-            'data' => $identification_type
-        ]);
     }
 
     /**
-     * Remove the specified resource.
+     * Remove the specified resource from storage.
      */
     public function destroy(Identification_Type $identification_type)
     {
-        $identification_type->delete();
-        return response()->json(['message' => 'Tipo de identificación eliminado exitosamente']);
+        try {
+            $identification_type->delete();
+            return response()->json(['message' => 'Tipo de identificación eliminado exitosamente']);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al eliminar tipo de identificación',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo eliminar el tipo de identificación. Por favor, intente más tarde'], 500);
+        }
     }
 }

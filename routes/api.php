@@ -13,6 +13,7 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\FarmController;
 use App\Http\Controllers\SensorController;
 use App\Http\Controllers\SensorComponentController;
+use App\Http\Controllers\SampleController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -96,4 +97,13 @@ Route::prefix('sensor_component')->group(function () {
     Route::get('/show/{id}', [SensorComponentController::class, 'show']);
     Route::put('/update/{sensor_component}', [SensorComponentController::class, 'update']);
     Route::delete('/destroy/{sensor_component}', [SensorComponentController::class, 'destroy']);
+});
+
+// RUTAS_SAMPLE
+Route::prefix('sample')->group(function () {
+    Route::get('/index', [SampleController::class, 'index']);
+    Route::post('/create', [SampleController::class, 'store']);
+    Route::get('/show/{sample}', [SampleController::class, 'show']);
+    Route::put('/update/{sample}', [SampleController::class, 'update']);
+    Route::delete('/destroy/{sample}', [SampleController::class, 'destroy']);
 });

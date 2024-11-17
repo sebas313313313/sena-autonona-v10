@@ -12,8 +12,22 @@ class MunicipalityController extends Controller
      */
     public function index()
     {
-        $municipalities = Municipality::all();
-        return response()->json(['data' => $municipalities]);
+        try {
+            $municipalities = Municipality::all();
+            return response()->json(['data' => $municipalities]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener municipios',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudieron cargar los municipios. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
@@ -30,14 +44,30 @@ class MunicipalityController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string|max:100',
-            'department' => 'nullable|string|max:50'
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:100',
+                'description' => 'nullable|string|max:100',
+                'department' => 'nullable|string|max:50'
+            ]);
 
-        $municipality = Municipality::create($request->all());
-        return response()->json(['data' => $municipality, 'message' => 'Municipality created successfully'], 201);
+            $municipality = Municipality::create($request->all());
+            return response()->json(['data' => $municipality, 'message' => 'Municipio creado exitosamente'], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => 'Error de validación', 'details' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al crear municipio',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo crear el municipio. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
@@ -45,7 +75,21 @@ class MunicipalityController extends Controller
      */
     public function show(Municipality $municipality)
     {
-        return response()->json(['data' => $municipality]);
+        try {
+            return response()->json(['data' => $municipality]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener municipio',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo obtener el municipio. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
@@ -62,14 +106,30 @@ class MunicipalityController extends Controller
      */
     public function update(Request $request, Municipality $municipality)
     {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string|max:100',
-            'department' => 'nullable|string|max:50'
-        ]);
+        try {
+            $request->validate([
+                'name' => 'string|max:100',
+                'description' => 'nullable|string|max:100',
+                'department' => 'nullable|string|max:50'
+            ]);
 
-        $municipality->update($request->all());
-        return response()->json(['data' => $municipality, 'message' => 'Municipality updated successfully']);
+            $municipality->update($request->all());
+            return response()->json(['data' => $municipality, 'message' => 'Municipio actualizado exitosamente']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => 'Error de validación', 'details' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al actualizar municipio',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo actualizar el municipio. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
@@ -77,7 +137,21 @@ class MunicipalityController extends Controller
      */
     public function destroy(Municipality $municipality)
     {
-        $municipality->delete();
-        return response()->json(['message' => 'Municipality deleted successfully']);
+        try {
+            $municipality->delete();
+            return response()->json(['message' => 'Municipio eliminado exitosamente']);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al eliminar municipio',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo eliminar el municipio. Por favor, intente más tarde'], 500);
+        }
     }
 }

@@ -33,4 +33,9 @@ class Farm extends Model
     {
         return $this->belongsTo(Municipality::class);
     }
+
+    public function farmComponents()
+    {
+        return $this->hasMany(Farm_Component::class);
+    }
 }

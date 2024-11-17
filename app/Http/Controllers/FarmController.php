@@ -13,8 +13,22 @@ class FarmController extends Controller
      */
     public function index()
     {
-        $farms = Farm::with(['usersRole', 'municipality'])->get();
-        return response()->json(['data' => $farms]);
+        try {
+            $farms = Farm::with(['usersRole', 'municipality'])->get();
+            return response()->json(['data' => $farms]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener granjas',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudieron cargar las granjas. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
@@ -22,25 +36,39 @@ class FarmController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'address' => 'required|string|max:50',
-            'vereda' => 'required|string|max:50',
-            'extension' => 'required|string|max:50',
-            'users_role_id' => 'required|exists:users_roles,id',
-            'municipality_id' => 'required|exists:municipalities,id'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'address' => 'required|string|max:100',
+                'vereda' => 'required|string|max:50',
+                'extension' => 'required|string|max:50',
+                'users_role_id' => 'required|exists:users_roles,id',
+                'municipality_id' => 'required|exists:municipalities,id'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $farm = Farm::create($request->all());
+            return response()->json([
+                'message' => 'Granja creada exitosamente',
+                'data' => $farm->load(['usersRole', 'municipality'])
+            ], 201);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al crear granja',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo crear la granja. Por favor, intente más tarde'], 500);
         }
-
-        $farm = Farm::create($request->all());
-        return response()->json([
-            'message' => 'Granja creada exitosamente',
-            'data' => $farm->load(['usersRole', 'municipality'])
-        ], 201);
     }
 
     /**
@@ -48,9 +76,23 @@ class FarmController extends Controller
      */
     public function show(Farm $farm)
     {
-        return response()->json([
-            'data' => $farm->load(['usersRole', 'municipality'])
-        ]);
+        try {
+            return response()->json([
+                'data' => $farm->load(['usersRole', 'municipality'])
+            ]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al obtener granja',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo obtener la granja. Por favor, intente más tarde'], 500);
+        }
     }
 
     /**
@@ -58,25 +100,39 @@ class FarmController extends Controller
      */
     public function update(Request $request, Farm $farm)
     {
-        $validator = Validator::make($request->all(), [
-            'latitude' => 'sometimes|required|numeric',
-            'longitude' => 'sometimes|required|numeric',
-            'address' => 'sometimes|required|string|max:50',
-            'vereda' => 'sometimes|required|string|max:50',
-            'extension' => 'sometimes|required|string|max:50',
-            'users_role_id' => 'sometimes|required|exists:users_roles,id',
-            'municipality_id' => 'sometimes|required|exists:municipalities,id'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'latitude' => 'numeric',
+                'longitude' => 'numeric',
+                'address' => 'string|max:100',
+                'vereda' => 'string|max:50',
+                'extension' => 'string|max:50',
+                'users_role_id' => 'exists:users_roles,id',
+                'municipality_id' => 'exists:municipalities,id'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $farm->update($request->all());
+            return response()->json([
+                'message' => 'Granja actualizada exitosamente',
+                'data' => $farm->load(['usersRole', 'municipality'])
+            ]);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al actualizar granja',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo actualizar la granja. Por favor, intente más tarde'], 500);
         }
-
-        $farm->update($request->all());
-        return response()->json([
-            'message' => 'Granja actualizada exitosamente',
-            'data' => $farm->load(['usersRole', 'municipality'])
-        ]);
     }
 
     /**
@@ -84,9 +140,29 @@ class FarmController extends Controller
      */
     public function destroy(Farm $farm)
     {
-        $farm->delete();
-        return response()->json([
-            'message' => 'Granja eliminada exitosamente'
-        ]);
+        try {
+            // Verificar si hay componentes asociados
+            if ($farm->farmComponents()->count() > 0) {
+                return response()->json([
+                    'error' => 'No se puede eliminar la granja porque tiene componentes asociados',
+                    'components_count' => $farm->farmComponents()->count()
+                ], 422);
+            }
+
+            $farm->delete();
+            return response()->json(['message' => 'Granja eliminada exitosamente']);
+        } catch (\Exception $e) {
+            if (config('app.debug')) {
+                return response()->json([
+                    'error' => 'Error al eliminar granja',
+                    'debug' => [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ]
+                ], 500);
+            }
+            return response()->json(['error' => 'No se pudo eliminar la granja. Por favor, intente más tarde'], 500);
+        }
     }
 }
