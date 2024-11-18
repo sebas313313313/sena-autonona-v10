@@ -11,10 +11,10 @@ class IdentificationTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $types = Identification_Type::filter()->get();
+            $types = Identification_Type::filter($request->all())->get();
             return response()->json(['data' => $types]);
         } catch (\Exception $e) {
             if (config('app.debug')) {
