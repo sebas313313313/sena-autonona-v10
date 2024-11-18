@@ -14,7 +14,7 @@ class IdentificationTypeController extends Controller
     public function index()
     {
         try {
-            $types = Identification_Type::all();
+            $types = Identification_Type::filter()->get();
             return response()->json(['data' => $types]);
         } catch (\Exception $e) {
             if (config('app.debug')) {
