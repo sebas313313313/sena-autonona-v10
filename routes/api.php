@@ -112,7 +112,7 @@ Route::prefix('sensor')->group(function () {
 // RUTAS_CALIBRATION (HAIVER VELASCO)
 Route::prefix('calibration')->group(function () {
     Route::get('/index', [CalibrationController::class, 'index']);
-    Route::post('/create', [CalibrationController::class, 'store']);
+    Route::post('/create', [CalibrationController::class, 'create']);
     Route::get('/show/{id}', [CalibrationController::class, 'show']);
     Route::put('/update/{calibration}', [CalibrationController::class, 'update']);
     Route::delete('/destroy/{calibration}', [CalibrationController::class, 'destroy']);
@@ -121,7 +121,7 @@ Route::prefix('calibration')->group(function () {
 // RUTAS_COMPONENT (HAIVER VELASCO)
 Route::prefix('component')->group(function () {
     Route::get('/index', [ComponentController::class, 'index']);
-    Route::post('/create', [ComponentController::class, 'store']);
+    Route::post('/create', [ComponentController::class, 'create']);
     Route::get('/show/{id}', [ComponentController::class, 'show']);
     Route::put('/update/{component}', [ComponentController::class, 'update']);
     Route::delete('/destroy/{component}', [ComponentController::class, 'destroy']);
@@ -130,7 +130,7 @@ Route::prefix('component')->group(function () {
 // RUTAS_COMPONENT_TASK (HAIVER VELASCO)
 Route::prefix('component_task')->group(function () {
     Route::get('/index', [ComponentTaskController::class, 'index']);
-    Route::post('/create', [ComponentTaskController::class, 'store']);
+    Route::post('/create', [ComponentTaskController::class, 'create']);
     Route::get('/show/{id}', [ComponentTaskController::class, 'show']);
     Route::put('/update/{component_task}', [ComponentTaskController::class, 'update']);
     Route::delete('/destroy/{component_task}', [ComponentTaskController::class, 'destroy']);
