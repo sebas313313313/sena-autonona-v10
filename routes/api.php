@@ -33,26 +33,79 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware('api')->group(function () {
-    Route::apiResource('municipalities', MunicipalityController::class);
-    Route::apiResource('passwords', PasswordController::class);
-    Route::post('passwords/{password}/verify-answer', [PasswordController::class, 'verifyAnswer']);
-    
-    Route::apiResource('users-roles', Users_RoleController::class);
-    Route::post('users-roles/{users_role}/validate-password', [Users_RoleController::class, 'validatePassword']);
-    
-    Route::apiResource('users', UserController::class);
-    Route::apiResource('identification-types', IdentificationTypeController::class);
-    Route::apiResource('jobs', JobController::class);
-    Route::apiResource('farms', FarmController::class);
-    Route::apiResource('sensors', SensorController::class);
+// RUTAS_MUNICIPALITY (SEBAS)
+Route::prefix('municipality')->group(function () {
+    Route::get('/index', [MunicipalityController::class, 'index']);
+    Route::post('/create', [MunicipalityController::class, 'store']);
+    Route::get('/show/{municipality}', [MunicipalityController::class, 'show']);
+    Route::put('/update/{municipality}', [MunicipalityController::class, 'update']);
+    Route::delete('/destroy/{municipality}', [MunicipalityController::class, 'destroy']);
 });
 
-/*
-|   Con estas rutas manejas las distintas peticiones http que podemos hacer desde postman como update,delete o show.
-|   Ya que con dichas rutas creamos tambien un CRUD, el cual desde peticiones http mediante nuestro cliente (postman)
-|   podemos interactuar con nuestra BD.
-*/
+// RUTAS_PASSWORD (SEBAS)
+Route::prefix('password')->group(function () {
+    Route::get('/index', [PasswordController::class, 'index']);
+    Route::post('/create', [PasswordController::class, 'store']);
+    Route::get('/show/{password}', [PasswordController::class, 'show']);
+    Route::put('/update/{password}', [PasswordController::class, 'update']);
+    Route::delete('/destroy/{password}', [PasswordController::class, 'destroy']);
+    Route::post('/{password}/verify-answer', [PasswordController::class, 'verifyAnswer']);
+});
+
+// RUTAS_USERS_ROLE (SEBAS)
+Route::prefix('users_role')->group(function () {
+    Route::get('/index', [Users_RoleController::class, 'index']);
+    Route::post('/create', [Users_RoleController::class, 'store']);
+    Route::get('/show/{users_role}', [Users_RoleController::class, 'show']);
+    Route::put('/update/{users_role}', [Users_RoleController::class, 'update']);
+    Route::delete('/destroy/{users_role}', [Users_RoleController::class, 'destroy']);
+    Route::post('/{users_role}/validate-password', [Users_RoleController::class, 'validatePassword']);
+});
+
+// RUTAS_USER (SEBAS)
+Route::prefix('user')->group(function () {
+    Route::get('/index', [UserController::class, 'index']);
+    Route::post('/create', [UserController::class, 'store']);
+    Route::get('/show/{user}', [UserController::class, 'show']);
+    Route::put('/update/{user}', [UserController::class, 'update']);
+    Route::delete('/destroy/{user}', [UserController::class, 'destroy']);
+});
+
+// RUTAS_IDENTIFICATION_TYPE (SEBAS)
+Route::prefix('identification_type')->group(function () {
+    Route::get('/index', [IdentificationTypeController::class, 'index']);
+    Route::post('/create', [IdentificationTypeController::class, 'store']);
+    Route::get('/show/{identification_type}', [IdentificationTypeController::class, 'show']);
+    Route::put('/update/{identification_type}', [IdentificationTypeController::class, 'update']);
+    Route::delete('/destroy/{identification_type}', [IdentificationTypeController::class, 'destroy']);
+});
+
+// RUTAS_JOB (SEBAS)
+Route::prefix('job')->group(function () {
+    Route::get('/index', [JobController::class, 'index']);
+    Route::post('/create', [JobController::class, 'store']);
+    Route::get('/show/{job}', [JobController::class, 'show']);
+    Route::put('/update/{job}', [JobController::class, 'update']);
+    Route::delete('/destroy/{job}', [JobController::class, 'destroy']);
+});
+
+// RUTAS_FARM (SEBAS)
+Route::prefix('farm')->group(function () {
+    Route::get('/index', [FarmController::class, 'index']);
+    Route::post('/create', [FarmController::class, 'store']);
+    Route::get('/show/{farm}', [FarmController::class, 'show']);
+    Route::put('/update/{farm}', [FarmController::class, 'update']);
+    Route::delete('/destroy/{farm}', [FarmController::class, 'destroy']);
+});
+
+// RUTAS_SENSOR (SEBAS)
+Route::prefix('sensor')->group(function () {
+    Route::get('/index', [SensorController::class, 'index']);
+    Route::post('/create', [SensorController::class, 'store']);
+    Route::get('/show/{sensor}', [SensorController::class, 'show']);
+    Route::put('/update/{sensor}', [SensorController::class, 'update']);
+    Route::delete('/destroy/{sensor}', [SensorController::class, 'destroy']);
+});
 
 // RUTAS_CALIBRATION (HAIVER VELASCO)
 Route::prefix('calibration')->group(function () {
@@ -90,7 +143,7 @@ Route::prefix('farm_component')->group(function () {
     Route::delete('/destroy/{farm_component}', [FarmComponentController::class, 'destroy']);
 });
 
-// RUTAS_SENSOR_COMPONENT
+// RUTAS_SENSOR_COMPONENT (HAIVER VELASCO)
 Route::prefix('sensor_component')->group(function () {
     Route::get('/index', [SensorComponentController::class, 'index']);
     Route::post('/create', [SensorComponentController::class, 'create']);
@@ -99,7 +152,7 @@ Route::prefix('sensor_component')->group(function () {
     Route::delete('/destroy/{sensor_component}', [SensorComponentController::class, 'destroy']);
 });
 
-// RUTAS_SAMPLE
+// RUTAS_SAMPLE (HAIVER VELASCO)
 Route::prefix('sample')->group(function () {
     Route::get('/index', [SampleController::class, 'index']);
     Route::post('/create', [SampleController::class, 'store']);
