@@ -48,33 +48,42 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show($id)
     {
+        $user = User::findOrFail($id);
         return response()->json(['data' => $user]);
     }
 
     /**
      * Update the specified resource.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
+        $user = User::findOrFail($id);
+        
         $validator = Validator::make($request->all(), [
-            'name' => 'string|max:255',
-            'email' => 'string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'string|min:6'
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
+            'password' => 'sometimes|required|string|min:6'
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $updateData = $request->only(['name', 'email']);
+        if ($request->has('name')) {
+            $user->name = $request->name;
+        }
         
-        if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+        
+        if ($request->has('password')) {
+            $user->password = Hash::make($request->password);
         }
 
-        $user->update($updateData);
+        $user->save();
 
         return response()->json([
             'message' => 'Usuario actualizado exitosamente',
@@ -85,8 +94,9 @@ class UserController extends Controller
     /**
      * Remove the specified resource.
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
+        $user = User::findOrFail($id);
         $user->delete();
         return response()->json(['message' => 'Usuario eliminado exitosamente']);
     }

@@ -18,6 +18,29 @@ class SensorComponentController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'farm_component_id' => 'required|exists:farm_components,id',
+            'sensor_id' => 'required|exists:sensors,id',
+            'min' => 'required|numeric',
+            'max' => 'required|numeric|gt:min'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $sensor_component = Sensor_Component::create($request->all());
+        return response()->json([
+            'message' => 'Componente de sensor creado exitosamente',
+            'data' => $sensor_component->load(['sensor', 'farmComponent'])
+        ], 201);
+    }
+
+    /**
      * Create a new resource.
      */
     public function create(Request $request)

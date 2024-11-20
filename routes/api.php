@@ -34,21 +34,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // RUTAS_MUNICIPALITY (SEBAS)
-Route::prefix('municipality')->group(function () {
+Route::prefix('municipalities')->group(function () {
     Route::get('/index', [MunicipalityController::class, 'index']);
     Route::post('/create', [MunicipalityController::class, 'store']);
-    Route::get('/show/{municipality}', [MunicipalityController::class, 'show']);
-    Route::put('/update/{municipality}', [MunicipalityController::class, 'update']);
-    Route::delete('/destroy/{municipality}', [MunicipalityController::class, 'destroy']);
+    Route::get('/show/{id}', [MunicipalityController::class, 'show']);
+    Route::put('/update/{id}', [MunicipalityController::class, 'update']);
+    Route::delete('/destroy/{id}', [MunicipalityController::class, 'destroy']);
 });
 
 // RUTAS_PASSWORD (SEBAS)
 Route::prefix('password')->group(function () {
     Route::get('/index', [PasswordController::class, 'index']);
     Route::post('/create', [PasswordController::class, 'store']);
-    Route::get('/show/{password}', [PasswordController::class, 'show']);
-    Route::put('/update/{password}', [PasswordController::class, 'update']);
-    Route::delete('/destroy/{password}', [PasswordController::class, 'destroy']);
+    Route::get('/show/{id}', [PasswordController::class, 'show']);
+    Route::put('/update/{id}', [PasswordController::class, 'update']);
+    Route::delete('/destroy/{id}', [PasswordController::class, 'destroy']);
     Route::post('/{password}/verify-answer', [PasswordController::class, 'verifyAnswer']);
 });
 
@@ -62,13 +62,15 @@ Route::prefix('users_role')->group(function () {
     Route::post('/{users_role}/validate-password', [Users_RoleController::class, 'validatePassword']);
 });
 
-// RUTAS_USER (SEBAS)
+// RUTAS_USER
 Route::prefix('user')->group(function () {
     Route::get('/index', [UserController::class, 'index']);
     Route::post('/create', [UserController::class, 'store']);
-    Route::get('/show/{user}', [UserController::class, 'show']);
-    Route::put('/update/{user}', [UserController::class, 'update']);
-    Route::delete('/destroy/{user}', [UserController::class, 'destroy']);
+    Route::get('/show/{id}', [UserController::class, 'show']);
+    Route::put('/update/{id}', [UserController::class, 'update']);
+    Route::delete('/destroy/{id}', [UserController::class, 'destroy']);
+    // Ruta adicional para eliminar directamente con el ID
+    Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
 // RUTAS_IDENTIFICATION_TYPE (SEBAS)
@@ -102,15 +104,15 @@ Route::prefix('farm')->group(function () {
 Route::prefix('sensor')->group(function () {
     Route::get('/index', [SensorController::class, 'index']);
     Route::post('/create', [SensorController::class, 'store']);
-    Route::get('/show/{sensor}', [SensorController::class, 'show']);
-    Route::put('/update/{sensor}', [SensorController::class, 'update']);
-    Route::delete('/destroy/{sensor}', [SensorController::class, 'destroy']);
+    Route::get('/show/{id}', [SensorController::class, 'show']);
+    Route::put('/update/{id}', [SensorController::class, 'update']);
+    Route::delete('/destroy/{id}', [SensorController::class, 'destroy']);
 });
 
 // RUTAS_CALIBRATION (HAIVER VELASCO)
 Route::prefix('calibration')->group(function () {
     Route::get('/index', [CalibrationController::class, 'index']);
-    Route::post('/create', [CalibrationController::class, 'create']);
+    Route::post('/create', [CalibrationController::class, 'store']);
     Route::get('/show/{id}', [CalibrationController::class, 'show']);
     Route::put('/update/{calibration}', [CalibrationController::class, 'update']);
     Route::delete('/destroy/{calibration}', [CalibrationController::class, 'destroy']);
@@ -119,7 +121,7 @@ Route::prefix('calibration')->group(function () {
 // RUTAS_COMPONENT (HAIVER VELASCO)
 Route::prefix('component')->group(function () {
     Route::get('/index', [ComponentController::class, 'index']);
-    Route::post('/create', [ComponentController::class, 'create']);
+    Route::post('/create', [ComponentController::class, 'store']);
     Route::get('/show/{id}', [ComponentController::class, 'show']);
     Route::put('/update/{component}', [ComponentController::class, 'update']);
     Route::delete('/destroy/{component}', [ComponentController::class, 'destroy']);
@@ -128,7 +130,7 @@ Route::prefix('component')->group(function () {
 // RUTAS_COMPONENT_TASK (HAIVER VELASCO)
 Route::prefix('component_task')->group(function () {
     Route::get('/index', [ComponentTaskController::class, 'index']);
-    Route::post('/create', [ComponentTaskController::class, 'create']);
+    Route::post('/create', [ComponentTaskController::class, 'store']);
     Route::get('/show/{id}', [ComponentTaskController::class, 'show']);
     Route::put('/update/{component_task}', [ComponentTaskController::class, 'update']);
     Route::delete('/destroy/{component_task}', [ComponentTaskController::class, 'destroy']);
@@ -137,7 +139,7 @@ Route::prefix('component_task')->group(function () {
 // RUTAS_FARM_COMPONENT (HAIVER VELASCO)
 Route::prefix('farm_component')->group(function () {
     Route::get('/index', [FarmComponentController::class, 'index']);
-    Route::post('/create', [FarmComponentController::class, 'create']);
+    Route::post('/create', [FarmComponentController::class, 'store']);
     Route::get('/show/{id}', [FarmComponentController::class, 'show']);
     Route::put('/update/{farm_component}', [FarmComponentController::class, 'update']);
     Route::delete('/destroy/{farm_component}', [FarmComponentController::class, 'destroy']);
@@ -146,17 +148,17 @@ Route::prefix('farm_component')->group(function () {
 // RUTAS_SENSOR_COMPONENT (HAIVER VELASCO)
 Route::prefix('sensor_component')->group(function () {
     Route::get('/index', [SensorComponentController::class, 'index']);
-    Route::post('/create', [SensorComponentController::class, 'create']);
+    Route::post('/create', [SensorComponentController::class, 'store']);
     Route::get('/show/{id}', [SensorComponentController::class, 'show']);
-    Route::put('/update/{sensor_component}', [SensorComponentController::class, 'update']);
-    Route::delete('/destroy/{sensor_component}', [SensorComponentController::class, 'destroy']);
+    Route::put('/update/{id}', [SensorComponentController::class, 'update']);
+    Route::delete('/destroy/{id}', [SensorComponentController::class, 'destroy']);
 });
 
 // RUTAS_SAMPLE (HAIVER VELASCO)
 Route::prefix('sample')->group(function () {
     Route::get('/index', [SampleController::class, 'index']);
     Route::post('/create', [SampleController::class, 'store']);
-    Route::get('/show/{sample}', [SampleController::class, 'show']);
-    Route::put('/update/{sample}', [SampleController::class, 'update']);
-    Route::delete('/destroy/{sample}', [SampleController::class, 'destroy']);
+    Route::get('/show/{id}', [SampleController::class, 'show']);
+    Route::put('/update/{id}', [SampleController::class, 'update']);
+    Route::delete('/destroy/{id}', [SampleController::class, 'destroy']);
 });
