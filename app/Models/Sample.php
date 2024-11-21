@@ -16,6 +16,12 @@ class Sample extends Model
         'value'
     ];
 
+    protected $allowFilter = [
+        'sensor_component_id',
+        'fecha_hora',
+        'value'
+    ];
+
     protected $casts = [
         'fecha_hora' => 'datetime',
         'value' => 'integer'
@@ -24,13 +30,10 @@ class Sample extends Model
     /**
      * Obtiene el componente del sensor asociado a esta muestra.
      */
-    public function sensorComponent()
+    public function scopeFilter($query, array $filters = null)
     {
-        return $this->belongsTo(Sensor_Component::class, 'sensor_component_id');
-    }
+        $filters = $filters ?? request('filter', []);
 
-    public function scopeFilter($query, array $filters)
-    {
         $query->when($filters['fecha_inicio'] ?? false, function($query, $fecha) {
             $query->where('fecha_hora', '>=', $fecha);
         })
@@ -47,6 +50,14 @@ class Sample extends Model
             $query->whereHas('sensorComponent', function($q) use ($sensorId) {
                 $q->where('sensor_id', $sensorId);
             });
+        })
+        ->when($filters['sensor_component_id'] ?? false, function($query, $id) {
+            $query->where('sensor_component_id', $id);
         });
+    }
+
+    public function sensorComponent()
+    {
+        return $this->belongsTo(Sensor_Component::class, 'sensor_component_id');
     }
 }

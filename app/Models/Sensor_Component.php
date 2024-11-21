@@ -21,10 +21,37 @@ class Sensor_Component extends Model
         'max'
     ];
 
+    protected $allowFilter = [
+        'farm_component_id',
+        'sensor_id',
+        'min',
+        'max'
+    ];
+
     protected $casts = [
         'min' => 'float',
         'max' => 'float'
     ];
+
+    public function scopeFilter($query)
+    {
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+            if ($allowFilter->contains($filter)) {
+                if (in_array($filter, ['min', 'max'])) {
+                    $query->where($filter, $value);
+                } else {
+                    $query->where($filter, 'LIKE', '%' . $value . '%');
+                }
+            }
+        }
+    }
 
     public function calibrations()
     {

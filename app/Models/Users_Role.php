@@ -23,6 +23,16 @@ class Users_Role extends Model
         'municipality_id'
     ];
 
+    protected $allowFilter = [
+        'identification',
+        'name',
+        'Last_name',
+        'date_birth',
+        'contact',
+        'identification_type_id',
+        'municipality_id'
+    ];
+
     protected $casts = [
         'date_birth' => 'date'
     ];
@@ -33,6 +43,26 @@ class Users_Role extends Model
         (ESTO RESPECTA A LAS DEMAS FUNCIONES CON "belongsTo") 
     */
     
+    public function scopeFilter($query)
+    {
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+            if ($allowFilter->contains($filter)) {
+                if ($filter === 'date_birth') {
+                    $query->whereDate($filter, $value);
+                } else {
+                    $query->where($filter, 'LIKE', '%' . $value . '%');
+                }
+            }
+        }
+    }
+
     public function User(){
         return $this->belongsTo('App\Models\User'); 
     }
