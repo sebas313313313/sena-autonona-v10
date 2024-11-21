@@ -11,9 +11,9 @@ class ComponentTaskController extends Controller
     /**
      * Mostrar todas las tareas de componentes
      */
-    public function index()
+    public function index(Request $request)
     {
-        $component_tasks = Component_Task::with(['user', 'job', 'farmComponent'])->get();
+        $component_tasks = Component_Task::filter(($request->all()))->with(['user', 'job', 'farmComponent'])->get();
         return response()->json($component_tasks);
     }
 

@@ -11,9 +11,9 @@ class FarmComponentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $farm_components = Farm_Component::with(['farm', 'component'])->get();
+        $farm_components = Farm_Component::filter($request->all())->with(['farm', 'component'])->get();
         return response()->json(['data' => $farm_components]);
     }
 

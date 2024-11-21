@@ -11,10 +11,10 @@ class FarmController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $farms = Farm::with(['usersRole', 'municipality'])->get();
+            $farms = Farm::filter($request->all())->with(['usersRole', 'municipality'])->get();
             return response()->json(['data' => $farms]);
         } catch (\Exception $e) {
             if (config('app.debug')) {
