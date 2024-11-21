@@ -23,6 +23,32 @@ class User extends Authenticatable
         'password',
     ];
 
+    protected $allowFilter = [
+        'id',
+        'name',
+        'email'
+    ];
+
+    public function scopeFilter($query)
+    {
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+            if ($allowFilter->contains($filter)) {
+                if ($filter === 'id') {
+                    $query->where($filter, $value);
+                } else {
+                    $query->where($filter, 'LIKE', '%' . $value . '%');
+                }
+            }
+        }
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

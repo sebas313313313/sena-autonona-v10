@@ -13,6 +13,31 @@ class Sensor extends Model
         'description'
     ];
 
+    protected $allowFilter = [
+        'id',
+        'description'
+    ];
+
+    public function scopeFilter($query)
+    {
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+            if ($allowFilter->contains($filter)) {
+                if ($filter === 'id') {
+                    $query->where($filter, $value);
+                } else {
+                    $query->where($filter, 'LIKE', '%' . $value . '%');
+                }
+            }
+        }
+    }
+
     public function sensorComponents()
     {
         return $this->hasMany(Sensor_Component::class);

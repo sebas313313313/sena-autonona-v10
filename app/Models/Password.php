@@ -21,9 +21,35 @@ class Password extends Model
         'fecha'
     ];
 
+    protected $allowFilter = [
+        'users_role_id',
+        'pregunta',
+        'fecha'
+    ];
+
     protected $casts = [
         'fecha' => 'datetime'
     ];
+
+    public function scopeFilter($query)
+    {
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+            if ($allowFilter->contains($filter)) {
+                if ($filter === 'fecha') {
+                    $query->whereDate($filter, $value);
+                } else {
+                    $query->where($filter, 'LIKE', '%' . $value . '%');
+                }
+            }
+        }
+    }
 
     public function userRole()
     {
