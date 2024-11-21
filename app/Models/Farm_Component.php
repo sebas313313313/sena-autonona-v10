@@ -20,6 +20,10 @@ class Farm_Component extends Model
         'component_id'
     ];
 
+    protected $allowFilter = [
+        'description'
+    ];
+
     public function componentTasks()
     {
         return $this->hasMany(Component_Task::class);
@@ -33,5 +37,25 @@ class Farm_Component extends Model
     public function component()
     {
         return $this->belongsTo(Component::class);
+    }
+
+    public function scopeFilter($query)
+    {
+
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+
+            if ($allowFilter->contains($filter)) {
+
+
+                $query->where($filter, 'LIKE', '%' . $value . '%');
+            }
+        }
     }
 }

@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 class ComponentController extends Controller
 {
     /* En el metodo INDEX es por donde vamos a recibir todos los questions/preguntas que estan en nuestra bd. */
-    public function index()
+    public function index(Request $request)
     {
-        $component = Component::all();
+        $component = Component::filter($request->all())->get(); // Aplica filtros según el parámetro 'filter'
         return response()->json($component);
     }
     /* En el metodo CREATE es por donde vamos a ingresar nuestro nuevo questions/preguntas y guardarlo en la bd. */

@@ -11,9 +11,9 @@ class JobController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $jobs = Job::with('componentTasks')->get();
+        $jobs = Job::filter($request->all())->with('componentTasks')->get();
         return response()->json(['data' => $jobs]);
     }
 

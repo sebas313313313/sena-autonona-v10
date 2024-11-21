@@ -24,20 +24,50 @@ class Component_Task extends Model
         'user_id'
     ];
 
+    protected $allowFilter = [
+        'date',
+        'time',
+        'status',
+        'comments',
+    ];
+
     protected $casts = [
         'date' => 'date',
         'time' => 'datetime:H:i:s'
     ];
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function job() {
+    public function job()
+    {
         return $this->belongsTo(Job::class);
     }
 
-    public function farmComponent() {
+    public function farmComponent()
+    {
         return $this->belongsTo(Farm_Component::class, 'farm_component_id');
+    }
+
+    public function scopeFilter($query)
+    {
+
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+
+            if ($allowFilter->contains($filter)) {
+
+
+                $query->where($filter, 'LIKE', '%' . $value . '%');
+            }
+        }
     }
 }

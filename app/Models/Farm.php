@@ -24,6 +24,14 @@ class Farm extends Model
         'longitude' => 'float'
     ];
 
+    protected $allowFilter = [
+        'latitude',
+        'longitude',
+        'address',
+        'vereda',
+        'extension',
+    ];
+
     public function usersRole()
     {
         return $this->belongsTo(Users_Role::class, 'users_role_id');
@@ -37,5 +45,25 @@ class Farm extends Model
     public function farmComponents()
     {
         return $this->hasMany(Farm_Component::class);
+    }
+
+    public function scopeFilter($query)
+    {
+
+        if (empty($this->allowFilter) || empty(request('filter'))) {
+            return;
+        }
+
+        $filters = request('filter');
+        $allowFilter = collect($this->allowFilter);
+
+        foreach ($filters as $filter => $value) {
+
+            if ($allowFilter->contains($filter)) {
+
+
+                $query->where($filter, 'LIKE', '%' . $value . '%');
+            }
+        }
     }
 }
