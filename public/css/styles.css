@@ -1,0 +1,24 @@
+/* Estilos principales del proyecto */
+:root {
+    --primary-color: #3490dc;
+    --secondary-color: #38c172;
+    --dark-color: #2d3748;
+    --light-color: #f8fafc;
+}
+
+/* Estilos generales */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: var(--light-color);
+}
+
+/* Contenedor principal */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}

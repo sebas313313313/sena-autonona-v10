@@ -69,6 +69,11 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function userRole()
+    {
+        return $this->hasOne(UserRole::class);
+    }
+
     public function User_Roles()
     {
         return $this->hasMany('App\Models\User_Roles');

@@ -6,10 +6,15 @@ use App\Models\Sensor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Controlador para gestionar los sensores del sistema
+ * Este controlador maneja todas las operaciones CRUD relacionadas con los sensores
+ */
 class SensorController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Muestra una lista de todos los sensores
+     * @return \Illuminate\Http\JsonResponse Lista de sensores en formato JSON
      */
     public function index()
     {
@@ -18,7 +23,9 @@ class SensorController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena un nuevo sensor en la base de datos
+     * @param Request $request Datos del nuevo sensor
+     * @return \Illuminate\Http\JsonResponse Respuesta con el sensor creado
      */
     public function store(Request $request)
     {
@@ -38,7 +45,9 @@ class SensorController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de un sensor específico
+     * @param Sensor $sensor El sensor a mostrar
+     * @return \Illuminate\Http\JsonResponse Datos del sensor en formato JSON
      */
     public function show(Sensor $sensor)
     {
@@ -46,7 +55,10 @@ class SensorController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la información de un sensor existente
+     * @param Request $request Nuevos datos del sensor
+     * @param Sensor $sensor El sensor a actualizar
+     * @return \Illuminate\Http\JsonResponse Respuesta con el sensor actualizado
      */
     public function update(Request $request, Sensor $sensor)
     {
@@ -66,7 +78,9 @@ class SensorController extends Controller
     }
 
     /**
-     * Remove the specified resource.
+     * Elimina un sensor del sistema
+     * @param Sensor $sensor El sensor a eliminar
+     * @return \Illuminate\Http\JsonResponse Mensaje de confirmación
      */
     public function destroy(Sensor $sensor)
     {

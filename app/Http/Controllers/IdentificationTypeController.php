@@ -6,10 +6,17 @@ use App\Models\Identification_Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Controlador para gestionar los tipos de identificación
+ * Maneja las operaciones CRUD para los diferentes tipos de documentos de identidad
+ */
 class IdentificationTypeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene y muestra una lista de todos los tipos de identificación
+     * Incluye filtrado de resultados según los parámetros recibidos
+     * @param Request $request Parámetros de filtrado
+     * @return \Illuminate\Http\JsonResponse Lista de tipos de identificación
      */
     public function index(Request $request)
     {
@@ -32,7 +39,9 @@ class IdentificationTypeController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un nuevo tipo de identificación en el sistema
+     * @param Request $request Datos del nuevo tipo de identificación
+     * @return \Illuminate\Http\JsonResponse Respuesta con el tipo creado o errores de validación
      */
     public function store(Request $request)
     {
@@ -66,7 +75,9 @@ class IdentificationTypeController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de un tipo de identificación específico
+     * @param Identification_Type $identification_type El tipo de identificación a mostrar
+     * @return \Illuminate\Http\JsonResponse Datos del tipo de identificación
      */
     public function show(Identification_Type $identification_type)
     {
@@ -88,7 +99,10 @@ class IdentificationTypeController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la información de un tipo de identificación existente
+     * @param Request $request Nuevos datos del tipo de identificación
+     * @param Identification_Type $identification_type El tipo a actualizar
+     * @return \Illuminate\Http\JsonResponse Respuesta con el tipo actualizado o errores
      */
     public function update(Request $request, Identification_Type $identification_type)
     {

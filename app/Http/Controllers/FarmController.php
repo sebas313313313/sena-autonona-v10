@@ -6,10 +6,17 @@ use App\Models\Farm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Controlador para gestionar las granjas del sistema
+ * Maneja las operaciones CRUD para las granjas y sus relaciones con usuarios y municipios
+ */
 class FarmController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Obtiene y muestra la lista de todas las granjas
+     * Incluye información relacionada de usuarios y municipios
+     * @param Request $request Parámetros de filtrado
+     * @return \Illuminate\Http\JsonResponse Lista de granjas con sus relaciones
      */
     public function index(Request $request)
     {
@@ -32,7 +39,17 @@ class FarmController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena una nueva granja en el sistema
+     * @param Request $request Datos de la nueva granja (ubicación, extensión, etc.)
+     * @return \Illuminate\Http\JsonResponse Respuesta con la granja creada y sus relaciones
+     * 
+     * Campos requeridos:
+     * - latitude, longitude: Coordenadas de ubicación
+     * - address: Dirección física
+     * - vereda: Ubicación específica rural
+     * - extension: Tamaño de la granja
+     * - users_role_id: ID del usuario propietario
+     * - municipality_id: ID del municipio
      */
     public function store(Request $request)
     {
@@ -72,7 +89,9 @@ class FarmController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los detalles de una granja específica
+     * @param Farm $farm La granja a consultar
+     * @return \Illuminate\Http\JsonResponse Datos de la granja y sus relaciones
      */
     public function show(Farm $farm)
     {
@@ -96,7 +115,10 @@ class FarmController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza la información de una granja existente
+     * @param Request $request Nuevos datos de la granja
+     * @param Farm $farm La granja a actualizar
+     * @return \Illuminate\Http\JsonResponse Respuesta con la granja actualizada
      */
     public function update(Request $request, Farm $farm)
     {
@@ -136,7 +158,9 @@ class FarmController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina una granja existente del sistema
+     * @param Farm $farm La granja a eliminar
+     * @return \Illuminate\Http\JsonResponse Respuesta de eliminación
      */
     public function destroy(Farm $farm)
     {
