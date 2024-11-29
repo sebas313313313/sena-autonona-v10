@@ -86,7 +86,7 @@ class RegisterController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error('Error en registro: ' . $e->getMessage());
+            \Log::error("Error en registro: {$e->getMessage()}");
             return back()
                 ->withInput()
                 ->with('error', 'Error al crear el usuario. Por favor intenta nuevamente.');

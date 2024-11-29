@@ -4,27 +4,28 @@
 
 @section('content')
 <div class="register-page">
+    <img src="{{ asset('images/pez.png') }}" alt="Pez decorativo" class="decorative-image">
     <div class="register-box">
         <div class="logo-container">
-            <!-- Sol estilizado en SVG -->
-            <svg class="sun-logo" width="60" height="60" viewBox="0 0 60 60">
-                <circle cx="30" cy="30" r="15" fill="#3B82F6" />
-                @for ($i = 0; $i < 8; $i++)
-                    <line 
-                        x1="{{ 30 + cos($i * pi() / 4) * 15 }}"
-                        y1="{{ 30 + sin($i * pi() / 4) * 15 }}"
-                        x2="{{ 30 + cos($i * pi() / 4) * 25 }}"
-                        y2="{{ 30 + sin($i * pi() / 4) * 25 }}"
-                        stroke="#3B82F6"
-                        stroke-width="4"
-                        stroke-linecap="round"
-                    />
-                @endfor
-            </svg>
-            <h1 class="logo-text">AGROVIDA</h1>
+            <div class="logo-title-wrapper">
+                <svg class="sun-logo" width="60" height="60" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="15" fill="#22c55e" />
+                    @for ($i = 0; $i < 8; $i++)
+                        <line 
+                            x1="{{ 30 + cos($i * pi() / 4) * 15 }}"
+                            y1="{{ 30 + sin($i * pi() / 4) * 15 }}"
+                            x2="{{ 30 + cos($i * pi() / 4) * 25 }}"
+                            y2="{{ 30 + sin($i * pi() / 4) * 25 }}"
+                            stroke="#22c55e"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                        />
+                    @endfor
+                </svg>
+                <h1 class="logo-text">AGROVIDA</h1>
+            </div>
+            <h2 class="register-title">Registro</h2>
         </div>
-
-        <h2 class="register-title">Registro</h2>
 
         <form method="POST" action="{{ route('register.submit') }}" class="register-form">
             @csrf
@@ -177,4 +178,47 @@
         </form>
     </div>
 </div>
+<style>
+.logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.logo-text {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #000000;
+    margin: 0;
+}
+
+.register-title {
+    font-size: 1.5rem;
+    color: #000000;
+    margin: 0;
+}
+
+.sun-logo {
+    width: 60px;
+    height: 60px;
+}
+
+.decorative-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 1;
+}
+</style>
 @endsection

@@ -9,25 +9,37 @@
 }
 
 /* Estilos generales de página */
-.login-page,
+.login-page {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
 .register-page {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--white);
     padding: 20px;
+    overflow: auto;
 }
 
 /* Cajas de login y registro */
 .login-box,
 .register-box {
-    background: var(--white);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px;
     width: 100%;
     max-width: 400px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Logo y título */
@@ -59,20 +71,24 @@
 /* Formularios */
 .login-form,
 .register-form {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    align-items: center;
+    gap: 15px;
 }
 
 .form-group {
-    position: relative;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 15px;
 }
 
 .form-input {
     width: 100%;
-    padding: 12px 15px;
-    border: 2px solid var(--gray-medium);
-    border-radius: 10px;
+    padding: 10px 15px;
+    border: 1px solid var(--gray-medium);
+    border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s ease;
 }
