@@ -21,7 +21,7 @@ Route::middleware('guest')->group(function () {
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth')->group(function () {
     Route::get('/home', function () {
-        return view('home');
+        return view('dashboard');
     })->name('home');
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
