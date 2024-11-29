@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Database\Seeders\IdentificationTypeSeeder;
 use Database\Seeders\MunicipalitySeeder;
+use Database\Seeders\SensorDataSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,7 +16,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             IdentificationTypeSeeder::class,
-            MunicipalitySeeder::class
+            MunicipalitySeeder::class,
+            SensorDataSeeder::class,
         ]);
     }
 }
