@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
     /**
+     * La ruta de redirección después del login
+     * @var string
+     */
+    protected $redirectTo = '/dashboard';
+
+    /**
      * Muestra el formulario de inicio de sesión
      * @return \Illuminate\View\View Vista del formulario de login
      */
@@ -35,7 +41,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('home')
+            return redirect()->route('dashboard')
                 ->with('success', '¡Bienvenido ' . Auth::user()->name . '!');
         }
 
