@@ -17,7 +17,7 @@ Proyecto de automatización agrícola desarrollado para el SENA. Este sistema pe
 ### Backend
 - PHP 8.0+
 - Laravel Framework
-- MySQL Database
+- PostgreSQL Database
 
 ### Frontend
 - HTML5, CSS3, JavaScript
@@ -31,7 +31,7 @@ Proyecto de automatización agrícola desarrollado para el SENA. Este sistema pe
 - Composer
 - Node.js y NPM (opcional, para compilar assets)
 - XAMPP o servidor Apache similar
-- MySQL
+- PostgreSQL
 
 ## Instrucciones de Instalación
 
@@ -53,12 +53,12 @@ php artisan key:generate
 ```
 
 4. **Configurar la base de datos**
-- Crear una base de datos en MySQL
+- Crear una base de datos en PostgreSQL
 - Actualizar las credenciales de la base de datos en el archivo `.env`
 ```env
-DB_CONNECTION=mysql
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=5432
 DB_DATABASE=tu_base_de_datos
 DB_USERNAME=tu_usuario
 DB_PASSWORD=tu_contraseña
