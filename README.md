@@ -1,6 +1,30 @@
 php artisan --version
 
-# SENA Autónoma Dashboard
+# SENA Autónoma v10
+
+## Descripción del Proyecto
+Proyecto de automatización agrícola desarrollado para el SENA. Este sistema permite la gestión y monitoreo de cultivos automatizados, incluyendo un dashboard administrativo para el control y visualización de datos.
+
+## Características Principales
+- Sistema de autenticación y autorización
+- Dashboard administrativo con múltiples vistas
+- Monitoreo de cultivos en tiempo real
+- Gestión de usuarios y roles
+- Automatización de procesos agrícolas
+- Interfaz responsive y moderna
+
+## Tecnologías Utilizadas
+### Backend
+- PHP 8.0+
+- Laravel Framework
+- MySQL Database
+
+### Frontend
+- HTML5, CSS3, JavaScript
+- Bootstrap (Framework CSS)
+- Chart.js (Visualización de datos)
+- Blade Templates
+- Font Awesome (Iconos)
 
 ## Requisitos Previos
 - PHP >= 8.0
@@ -50,19 +74,85 @@ php artisan migrate
 php artisan serve
 ```
 
-## Librerías y Dependencias Incluidas
-- **Bootstrap**: Framework CSS para el diseño responsive
-- **Chart.js**: Librería para gráficos y visualización de datos
-- **Font Awesome**: Iconos y fuentes
-
 ## Estructura del Proyecto
-- `/resources/views/dashboard`: Contiene todas las vistas del dashboard
-  - `/layouts`: Layouts principales
-  - `/components`: Componentes reutilizables
-  - `/ui`: Componentes de interfaz de usuario
-  - `/forms`: Formularios
-  - `/charts`: Gráficos
-  - `/tables`: Tablas
+### Directorios Principales
+- `/app`: Lógica principal de la aplicación
+  - `/Http/Controllers`: Controladores
+  - `/Models`: Modelos de datos
+  - `/Services`: Servicios de la aplicación
+- `/config`: Archivos de configuración
+- `/database`: Migraciones y seeders
+- `/public`: Archivos públicos
+- `/resources`: Vistas y assets
+  - `/views`: Plantillas Blade
+    - `/dashboard`: Componentes del dashboard
+    - `/auth`: Vistas de autenticación
+- `/routes`: Definición de rutas
+- `/tests`: Tests automatizados
+
+### Módulos Principales
+1. **Sistema de Autenticación**
+   - Login/Registro de usuarios
+   - Recuperación de contraseña
+   - Gestión de sesiones
+
+2. **Dashboard Administrativo**
+   - Panel de control principal
+   - Widgets informativos
+   - Gráficos y estadísticas
+   - Tablas de datos
+   - Formularios
+   - Componentes UI
+
+3. **Gestión de Cultivos**
+   - Monitoreo de variables ambientales
+   - Control de riego
+   - Programación de tareas
+   - Alertas y notificaciones
+
+## Configuración Adicional
+### Permisos de Archivos
+```bash
+chmod -R 775 storage bootstrap/cache
+```
+
+### Variables de Entorno Importantes
+```env
+APP_NAME=SENA-Autonoma
+APP_ENV=local
+APP_DEBUG=true
+QUEUE_CONNECTION=database
+MAIL_MAILER=smtp
+```
+
+## Documentación Adicional
+- [Manual de Usuario](docs/manual-usuario.md)
+- [Documentación Técnica](docs/documentacion-tecnica.md)
+- [Guía de Contribución](CONTRIBUTING.md)
+
+## Equipo de Desarrollo
+- Desarrolladores principales
+- Colaboradores
+- Mentores SENA
+
+## Licencia
+Este proyecto está bajo la licencia [MIT](LICENSE).
+
+## Soporte
+Si encuentras algún problema o tienes sugerencias:
+1. Revisa la [documentación](docs/)
+2. Crea un issue en el repositorio
+3. Contacta al equipo de desarrollo
+
+## Estado del Proyecto
+- Versión actual: 1.0
+- Estado: En desarrollo activo
+- Última actualización: [Fecha]
+
+## Agradecimientos
+- SENA
+- Instructores y mentores
+- Comunidad de desarrollo
 
 ## Acceso al Dashboard
 Una vez instalado, puedes acceder al dashboard en:
@@ -74,9 +164,6 @@ http://localhost:8000/dashboard
 - Asegúrate de tener los permisos correctos en las carpetas `storage` y `bootstrap/cache`
 - Para entornos de producción, configura correctamente los valores en el archivo `.env`
 - Las librerías frontend (Bootstrap, Chart.js) se cargan desde CDN, por lo que necesitarás conexión a internet
-
-## Soporte
-Si encuentras algún problema durante la instalación, por favor crea un issue en el repositorio.
 
 ## Rama de Desarrollo: Sebas
 Esta es la rama de desarrollo para las características específicas de Sebas.
