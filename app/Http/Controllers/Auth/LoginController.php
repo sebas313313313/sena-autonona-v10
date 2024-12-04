@@ -16,7 +16,7 @@ class LoginController extends Controller
      * La ruta de redirección después del login
      * @var string
      */
-    protected $redirectTo = '/dashboard';
+    protected $redirectTo = '/';
 
     /**
      * Muestra el formulario de inicio de sesión
@@ -41,7 +41,7 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard')
+            return redirect()->route('home')
                 ->with('success', '¡Bienvenido ' . Auth::user()->name . '!');
         }
 

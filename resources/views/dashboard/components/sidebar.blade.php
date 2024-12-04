@@ -6,9 +6,9 @@
     <nav class="sidebar-nav">
         <ul>
             <li>
-                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
+                    <span>Inicio</span>
                 </a>
             </li>
             <!-- Widgets -->

@@ -6,10 +6,19 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Models\Municipality;
 use App\Models\IdentificationType;
 
-// Ruta raíz redirige a login
+// Ruta raíz
 Route::get('/', function () {
+    if (auth()->check()) {
+        $userRole = \App\Models\Users_Role::where('user_id', auth()->id())->first();
+        $farms = $userRole ? \App\Models\Farm::where('users_role_id', $userRole->id)->get() : collect();
+        
+        return view('farms.index', [
+            'farms' => $farms,
+            'municipalities' => \App\Models\Municipality::all()
+        ]);
+    }
     return redirect()->route('login');
-});
+})->name('home');
 
 // Rutas de autenticación
 Route::middleware('guest')->group(function () {
@@ -24,9 +33,14 @@ Route::middleware('guest')->group(function () {
 
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth')->group(function () {
+    // Rutas de granjas
+    Route::post('/farms', [App\Http\Controllers\FarmController::class, 'store'])->name('farms.store');
+    Route::delete('/farms/{farm}', [App\Http\Controllers\FarmController::class, 'destroy'])->name('farms.destroy');
+    
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard.index');
+    Route::get('/tablero/{farm_id}', function ($farm_id) {
+        $farm = \App\Models\Farm::findOrFail($farm_id);
+        return view('dashboard.index', compact('farm'));
     })->name('dashboard');
 
     // Widgets
