@@ -229,23 +229,27 @@
 
 @section('content')
 <div class="container py-4">
-    <!-- Mensajes de éxito y error -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-house me-2"></i>
+            Mis Granjas
+        </h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createFarmModal">
+            <i class="bi bi-plus-circle me-2"></i>
+            Nueva Granja
+        </button>
+    </div>
+
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
-            <i class="bi bi-check-circle-fill flex-shrink-0 me-2"></i>
-            <div>
-                {{ session('success') }}
-            </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
-            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
-            <div>
-                {{ session('error') }}
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -266,27 +270,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-
-    <!-- Header Section -->
-    
-            <div class="header-left">
-                <h1 class="display-5 fw-bold mb-0">Granjas</h1>
-                <p class="fs-5 mb-0">Aquí están registradas todas las granjas que tienes hasta el momento.</p>
-            </div>
-           
-        
-
-    <!-- Create Button Section -->
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-end mb-4">
-                <button type="button" class="btn btn-crear-granja" data-bs-toggle="modal" data-bs-target="#createFarmModal">
-                    <i class="bi bi-plus-lg me-2"></i>
-                    Crear Granja
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Farms Grid -->
     <div class="farms-container">
@@ -311,9 +294,6 @@
                                 </li>
                             </ul>
                         </div>
-                        <button class="btn btn-link text-danger delete-farm" style="font-size: 1.2rem;" onclick="event.stopPropagation(); confirmDelete({{ $farm->id }}, '{{ $farm->address }}')">
-                            <i class="bi bi-trash"></i>
-                        </button>
                     </div>
                 </div>
             @endforeach
@@ -338,54 +318,52 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="createFarmForm" action="{{ route('farms.store') }}" method="POST">
+                    <form action="{{ route('farms.store') }}" method="POST">
                         @csrf
-                        <div class="form-group mb-3">
-                            <label for="address" class="form-label">
-                                <i class="bi bi-house me-2"></i>
-                                Nombre de la Granja
-                            </label>
-                            <input type="text" class="form-control" id="address" name="address" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="vereda" class="form-label">
-                                <i class="bi bi-geo me-2"></i>
-                                Vereda
-                            </label>
-                            <input type="text" class="form-control" id="vereda" name="vereda" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="extension" class="form-label">
-                                <i class="bi bi-arrows-angle-expand me-2"></i>
-                                Extensión
-                            </label>
-                            <input type="number" class="form-control" id="extension" name="extension" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="municipality_id" class="form-label">
-                                <i class="bi bi-building me-2"></i>
-                                Municipio
-                            </label>
-                            <select class="form-select" id="municipality_id" name="municipality_id" required>
-                                <option value="">Seleccione un municipio</option>
-                                @foreach($municipalities as $municipality)
-                                    <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="latitude" class="form-label">
-                                <i class="bi bi-geo-alt me-2"></i>
-                                Latitud
-                            </label>
-                            <input type="number" step="any" class="form-control" id="latitude" name="latitude" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="longitude" class="form-label">
-                                <i class="bi bi-geo-alt me-2"></i>
-                                Longitud
-                            </label>
-                            <input type="number" step="any" class="form-control" id="longitude" name="longitude" required>
+                        <div class="modal-body px-0">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="address" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="address" name="address" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="vereda" class="form-label">Vereda</label>
+                                        <input type="text" class="form-control" id="vereda" name="vereda" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="extension" class="form-label">Extensión</label>
+                                        <input type="text" class="form-control" id="extension" name="extension" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="municipality_id" class="form-label">Municipio</label>
+                                        <select class="form-select" id="municipality_id" name="municipality_id" required>
+                                            <option value="">Seleccione un municipio</option>
+                                            @foreach($municipalities as $municipality)
+                                                <option value="{{ $municipality->id }}">{{ $municipality->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="latitude" class="form-label">Latitud</label>
+                                        <input type="number" step="any" class="form-control" id="latitude" name="latitude" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="longitude" class="form-label">Longitud</label>
+                                        <input type="number" step="any" class="form-control" id="longitude" name="longitude" required>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer px-0 pb-0">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -399,45 +377,18 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal de confirmación de eliminación -->
-    <div class="modal fade" id="deleteFarmModal" tabindex="-1" aria-labelledby="deleteFarmModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteFarmModalLabel">
-                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-                        Confirmar Eliminación
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>¿Estás seguro que deseas eliminar la granja "<span id="farmToDelete"></span>"?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form id="deleteFarmForm" method="POST" style="display: inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash me-2"></i>
-                            Eliminar
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    function confirmDelete(farmId, farmAddress) {
-        document.getElementById('farmToDelete').textContent = farmAddress;
-        document.getElementById('deleteFarmForm').action = `/farms/${farmId}`;
-        var deleteModal = new bootstrap.Modal(document.getElementById('deleteFarmModal'));
-        deleteModal.show();
-    }
+    $(document).ready(function() {
+        // Inicializar DataTables
+        $('#farmsTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+            }
+        });
+    });
 </script>
 @endsection

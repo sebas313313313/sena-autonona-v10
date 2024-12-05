@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Farm;
+use App\Models\Municipality;
+use App\Models\Users_Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,7 +24,13 @@ class FarmController extends Controller
     {
         try {
             $farms = Farm::filter($request->all())->with(['usersRole', 'municipality'])->get();
-            return response()->json(['data' => $farms]);
+            $municipalities = Municipality::all();
+            
+            if ($request->wantsJson()) {
+                return response()->json(['data' => $farms]);
+            }
+
+            return view('farms.index', compact('farms', 'municipalities'));
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return response()->json([
@@ -54,6 +62,12 @@ class FarmController extends Controller
     public function store(Request $request)
     {
         try {
+            $userRole = Users_Role::where('user_id', auth()->id())->first();
+            if (!$userRole) {
+                return response()->json(['error' => 'No se encontró el rol del usuario'], 422);
+            }
+            $request->merge(['users_role_id' => $userRole->id]);
+
             $validator = Validator::make($request->all(), [
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
@@ -65,14 +79,22 @@ class FarmController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
+                if ($request->wantsJson()) {
+                    return response()->json(['errors' => $validator->errors()], 422);
+                }
+                return back()->withErrors($validator)->withInput();
             }
 
             $farm = Farm::create($request->all());
-            return response()->json([
-                'message' => 'Granja creada exitosamente',
-                'data' => $farm->load(['usersRole', 'municipality'])
-            ], 201);
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Granja creada exitosamente',
+                    'data' => $farm->load(['usersRole', 'municipality'])
+                ], 201);
+            }
+
+            return redirect()->route('home')->with('success', 'Granja creada exitosamente');
         } catch (\Exception $e) {
             if (config('app.debug')) {
                 return response()->json([
@@ -165,28 +187,10 @@ class FarmController extends Controller
     public function destroy(Farm $farm)
     {
         try {
-            // Verificar si hay componentes asociados
-            if ($farm->farmComponents()->count() > 0) {
-                return response()->json([
-                    'error' => 'No se puede eliminar la granja porque tiene componentes asociados',
-                    'components_count' => $farm->farmComponents()->count()
-                ], 422);
-            }
-
             $farm->delete();
-            return response()->json(['message' => 'Granja eliminada exitosamente']);
+            return redirect()->route('farms.index')->with('success', 'Granja eliminada exitosamente');
         } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return response()->json([
-                    'error' => 'Error al eliminar granja',
-                    'debug' => [
-                        'message' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]
-                ], 500);
-            }
-            return response()->json(['error' => 'No se pudo eliminar la granja. Por favor, intente más tarde'], 500);
+            return redirect()->route('farms.index')->with('error', 'No se pudo eliminar la granja');
         }
     }
 }

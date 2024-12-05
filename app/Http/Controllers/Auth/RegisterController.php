@@ -66,16 +66,17 @@ class RegisterController extends Controller
             $user->save();
 
             // Crear el rol de usuario
-            Users_Role::create([
-                'user_id' => $user->id,
-                'identification_type_id' => $request->identification_type_id,
+            $users_role = Users_Role::create([
                 'identification' => $request->identification,
+                'identification_type_id' => $request->identification_type_id,
                 'name' => $request->name,
                 'Last_name' => $request->last_name,
                 'date_birth' => $request->birth_date,
                 'municipality_id' => $request->municipality_id,
                 'direction' => $request->direction,
-                'contact' => $request->contact_number
+                'contact' => $request->contact_number,
+                'role_id' => 1, // Asignar rol de administrador de granja
+                'user_id' => $user->id
             ]);
 
             DB::commit();

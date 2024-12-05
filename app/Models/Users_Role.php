@@ -19,6 +19,7 @@ class Users_Role extends Model
         'direction',
         'contact',
         'user_id',
+        'role_id',
         'identification_type_id',
         'municipality_id'
     ];
