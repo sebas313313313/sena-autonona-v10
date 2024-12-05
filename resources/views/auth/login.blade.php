@@ -91,8 +91,8 @@
             </div>
 
             {{-- Enlace para registrarse --}}
-            <div class="register-link">
-                ¿No tienes una cuenta? <a href="{{ route('register') }}">Regístrate</a>
+            <div class="form-group text-center">
+                <span class="register-text">¿No tienes una cuenta? <a href="{{ route('register') }}">Regístrate</a></span>
             </div>
         </form>
     </div>
@@ -198,35 +198,34 @@
 
 .login-button {
     width: 100%;
-    padding: 0.75rem;
-    background-color: #3B82F6;
+    padding: 12px;
+    background: #4CAF50;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
+    border-radius: 25px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.3s ease;
 }
 
 .login-button:hover {
-    background-color: #2563eb;
+    background: #45a049;
 }
 
-.register-link {
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-    color: #4B5563;
+.register-text {
+    color: #666;
+    font-family: 'Poppins', sans-serif;
 }
 
-.register-link a {
-    color: #3B82F6;
+.register-text a {
+    color: #4CAF50;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
 }
 
-.register-link a:hover {
-    text-decoration: underline;
+.register-text a:hover {
+    color: #45a049;
 }
 
 .alert {

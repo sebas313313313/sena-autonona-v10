@@ -55,10 +55,42 @@
 
             <div class="form-group">
                 <input type="password" 
-                       class="form-input"
+                       class="form-input @error('password_confirmation') is-invalid @enderror" 
                        name="password_confirmation" 
                        placeholder="Confirmar contraseña"
                        required>
+                @error('password_confirmation')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <!-- Pregunta y respuesta de seguridad -->
+            <div class="form-group">
+                <select class="form-select @error('security_question_id') is-invalid @enderror" 
+                        name="security_question_id" 
+                        required>
+                    <option value="">Selecciona una pregunta de seguridad</option>
+                    @foreach($securityQuestions as $question)
+                        <option value="{{ $question->id }}" {{ old('security_question_id') == $question->id ? 'selected' : '' }}>
+                            {{ $question->question }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('security_question_id')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <input type="text" 
+                       class="form-input @error('security_answer') is-invalid @enderror" 
+                       name="security_answer" 
+                       value="{{ old('security_answer') }}" 
+                       placeholder="Respuesta de seguridad"
+                       required>
+                @error('security_answer')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
             </div>
 
             <!-- Información detallada del usuario -->

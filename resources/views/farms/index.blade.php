@@ -275,11 +275,11 @@
     <div class="farms-container">
         @if($farms->count() > 0)
             @foreach($farms as $farm)
-                <div class="farm-card" onclick="window.location.href='{{ route('dashboard', ['farm_id' => $farm->id]) }}'">
+                <div class="farm-card">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div class="farm-content" style="width: 100%;">
+                        <div class="farm-content" style="cursor: pointer; width: 100%;" onclick="window.location.href='{{ route('dashboard', ['farm_id' => $farm->id]) }}'">
                             <h3 class="farm-title">{{ $farm->address }}</h3>
-                            <ul class="farm-details">
+                            <ul class="farm-details list-unstyled">
                                 <li>
                                     <i class="bi bi-arrows-angle-expand me-2"></i>
                                     Extensión: {{ $farm->extension }}
@@ -292,8 +292,19 @@
                                     <i class="bi bi-geo me-2"></i>
                                     Coordenadas: {{ number_format($farm->latitude, 6) }}, {{ number_format($farm->longitude, 6) }}
                                 </li>
+                                <li>
+                                    <i class="bi bi-pin-map me-2"></i>
+                                    Municipio: {{ $farm->municipality->name }}
+                                </li>
                             </ul>
                         </div>
+                        <form action="{{ route('farms.destroy', $farm) }}" method="POST" class="ms-2" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta granja?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             @endforeach
@@ -324,7 +335,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="address" class="form-label">Dirección</label>
+                                        <label for="address" class="form-label">Nombre de la Granja </label>
                                         <input type="text" class="form-control" id="address" name="address" required>
                                     </div>
                                 </div>

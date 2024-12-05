@@ -34,6 +34,7 @@ Route::middleware('guest')->group(function () {
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth')->group(function () {
     // Rutas de granjas
+    Route::get('/farms', [App\Http\Controllers\FarmController::class, 'index'])->name('farms.index');
     Route::post('/farms', [App\Http\Controllers\FarmController::class, 'store'])->name('farms.store');
     Route::delete('/farms/{farm}', [App\Http\Controllers\FarmController::class, 'destroy'])->name('farms.destroy');
     

@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Municipality;
 use App\Models\Identification_Type;
 use App\Models\Users_Role;
+use App\Models\Password;
+use App\Models\SecurityQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -25,8 +27,9 @@ class RegisterController extends Controller
     {
         $identificationTypes = Identification_Type::all();
         $municipalities = Municipality::all();
+        $securityQuestions = SecurityQuestion::all();
         
-        return view('auth.register', compact('identificationTypes', 'municipalities'));
+        return view('auth.register', compact('identificationTypes', 'municipalities', 'securityQuestions'));
     }
 
     /**
@@ -38,6 +41,7 @@ class RegisterController extends Controller
      * - Valida los datos del formulario
      * - Crea el usuario base en la tabla users
      * - Crea el registro detallado en users_roles
+     * - Almacena la contraseña en la tabla passwords
      * - Maneja la transacción para garantizar la integridad de los datos
      */
     public function register(Request $request)
@@ -52,7 +56,9 @@ class RegisterController extends Controller
             'birth_date' => 'required|date',
             'municipality_id' => 'required|exists:municipalities,id',
             'direction' => 'required|max:100',
-            'contact_number' => 'required|max:15'
+            'contact_number' => 'required|max:15',
+            'security_question_id' => 'required|exists:security_questions,id',
+            'security_answer' => 'required|string|max:250'
         ]);
 
         try {
@@ -75,8 +81,19 @@ class RegisterController extends Controller
                 'municipality_id' => $request->municipality_id,
                 'direction' => $request->direction,
                 'contact' => $request->contact_number,
-                'role_id' => 1, // Asignar rol de administrador de granja
                 'user_id' => $user->id
+            ]);
+
+            // Obtener la pregunta de seguridad
+            $securityQuestion = SecurityQuestion::findOrFail($request->security_question_id);
+
+            // Almacenar la contraseña en la tabla passwords
+            Password::create([
+                'users_role_id' => $users_role->id,
+                'contrasena' => Hash::make($request->password),
+                'pregunta' => $securityQuestion->question,
+                'respuesta' => Hash::make($request->security_answer),
+                'fecha' => now()
             ]);
 
             DB::commit();

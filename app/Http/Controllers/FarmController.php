@@ -180,17 +180,17 @@ class FarmController extends Controller
     }
 
     /**
-     * Elimina una granja existente del sistema
+     * Elimina una granja específica del sistema
      * @param Farm $farm La granja a eliminar
-     * @return \Illuminate\Http\JsonResponse Respuesta de eliminación
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Farm $farm)
     {
         try {
             $farm->delete();
-            return redirect()->route('farms.index')->with('success', 'Granja eliminada exitosamente');
+            return redirect()->route('home')->with('success', 'Granja eliminada exitosamente');
         } catch (\Exception $e) {
-            return redirect()->route('farms.index')->with('error', 'No se pudo eliminar la granja');
+            return redirect()->route('home')->with('error', 'No se pudo eliminar la granja');
         }
     }
 }
