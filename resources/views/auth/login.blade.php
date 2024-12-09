@@ -180,7 +180,7 @@
 
 .decorative-image {
     position: absolute;
-    max-width: 300px;
+    max-width: 1000px;
     opacity: 0.1;
     z-index: 1;
     animation: float 6s ease-in-out infinite;
@@ -215,7 +215,7 @@
     }
 
     .decorative-image {
-        max-width: 200px;
+        max-width: 600px;
     }
 }
 

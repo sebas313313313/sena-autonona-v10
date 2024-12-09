@@ -12,6 +12,7 @@ use App\Models\SecurityQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controlador para gestionar el registro de nuevos usuarios
@@ -104,7 +105,7 @@ class RegisterController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            \Log::error("Error en registro: {$e->getMessage()}");
+            Log::error("Error en registro: {$e->getMessage()}");
             return back()
                 ->withInput()
                 ->with('error', 'Error al crear el usuario. Por favor intenta nuevamente.');

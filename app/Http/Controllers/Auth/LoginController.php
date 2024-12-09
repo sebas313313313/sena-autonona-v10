@@ -111,11 +111,7 @@ class LoginController extends Controller
             'email' => 'required|email'
         ]);
 
-        $user = User::where('email', $request->email)
-                    ->join('users_roles', 'users.id', '=', 'users_roles.user_id')
-                    ->join('passwords', 'users_roles.id', '=', 'passwords.users_role_id')
-                    ->select('users.*', 'passwords.pregunta as recovery_question')
-                    ->first();
+        $user = User::where('email', $request->email)->first();
 
         if (!$user) {
             return response()->json([
@@ -137,13 +133,9 @@ class LoginController extends Controller
             'answer' => 'required'
         ]);
 
-        $user = User::where('users.email', $request->email)
-                    ->join('users_roles', 'users.id', '=', 'users_roles.user_id')
-                    ->join('passwords', 'users_roles.id', '=', 'passwords.users_role_id')
-                    ->select('users.*', 'passwords.respuesta as recovery_answer')
-                    ->first();
+        $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->answer, $user->recovery_answer)) {
+        if (!$user || $user->recovery_answer !== $request->answer) {
             return response()->json([
                 'success' => false,
                 'message' => 'La respuesta es incorrecta'
@@ -158,29 +150,19 @@ class LoginController extends Controller
         $user->password_reset_expires_at = now()->addHours(1); // El token expira en 1 hora
         $user->save();
 
-        // Enviar correo con Laravel Mail
-        try {
-            Mail::send(
-                'emails.reset-password',
-                ['token' => $token, 'name' => $user->name],
-                function($message) use ($user) {
-                    $message->to($user->email)
-                            ->subject('Recuperación de Contraseña - AGROVIDA')
-                            ->from(config('mail.from.address'), config('mail.from.name'));
-                }
-            );
+        // Enviar correo con el enlace de recuperación
+        Mail::send('emails.reset-password', [
+            'token' => $token,
+            'name' => $user->name
+        ], function($message) use ($user) {
+            $message->to($user->email)
+                    ->subject('Recuperación de Contraseña - AGROVIDA');
+        });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Se ha enviado un enlace de recuperación a tu correo electrónico'
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error enviando correo de recuperación: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Hubo un error al enviar el correo. Por favor, intenta nuevamente.'
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Se ha enviado un enlace de recuperación a tu correo electrónico'
+        ]);
     }
 
     public function showResetForm(Request $request, $token)
