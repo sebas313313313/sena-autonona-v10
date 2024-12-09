@@ -29,6 +29,13 @@ Route::middleware('guest')->group(function () {
     // Registro
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
+
+    // Recuperación de contraseña
+    Route::post('/password/recover', [LoginController::class, 'recoverPassword'])->name('password.recover');
+    Route::post('/password/check-email', [LoginController::class, 'checkEmail'])->name('password.check-email');
+    Route::post('/password/check-answer', [LoginController::class, 'checkAnswer'])->name('password.check-answer');
+    Route::get('/password/reset/{token}', [LoginController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/password/reset', [LoginController::class, 'resetPassword'])->name('password.update');
 });
 
 // Rutas protegidas (requieren autenticación)
@@ -68,6 +75,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/tables', function () {
         return view('dashboard.tables.index');
     })->name('tables');
+
+    // Ruta de prueba para verificar el envío de correos
+    Route::get('/test-mail', function () {
+        try {
+            Mail::raw('Prueba de correo desde AGROVIDA', function($message) {
+                $message->to('test@example.com')
+                        ->subject('Prueba de Correo')
+                        ->from(config('mail.from.address'), config('mail.from.name'));
+            });
+            return 'Correo enviado correctamente. Revisa tu bandeja de Mailtrap.';
+        } catch (\Exception $e) {
+            return 'Error al enviar el correo: ' . $e->getMessage();
+        }
+    });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

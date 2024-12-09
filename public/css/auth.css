@@ -9,6 +9,14 @@
 }
 
 /* Estilos generales de página */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
 .login-page {
     height: 100vh;
     display: flex;
@@ -16,6 +24,11 @@
     justify-content: center;
     padding: 20px;
     overflow: hidden;
+    position: relative;
+    background-image: url('../images/arbol.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .register-page {
@@ -25,6 +38,11 @@
     justify-content: center;
     padding: 20px;
     overflow: auto;
+    position: relative;
+    background-image: url('../images/arbol.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* Cajas de login y registro */
