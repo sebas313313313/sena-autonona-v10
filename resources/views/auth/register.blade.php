@@ -275,20 +275,30 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
     overflow: hidden;
+}
+
+.decorative-image {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    top: 0;
+    left: 0;
 }
 
 .register-box {
     width: 100%;
     max-width: 400px;
     padding: 2rem;
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 15px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     position: relative;
     z-index: 2;
     margin: 1rem;
+    backdrop-filter: blur(5px);
 }
 
 .logo-container {
@@ -438,20 +448,6 @@
     display: block;
 }
 
-.decorative-image {
-    position: absolute;
-    max-width: 300px;
-    opacity: 0.1;
-    z-index: 1;
-    animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
-}
-
 /* Responsive Design */
 @media (max-width: 640px) {
     .register-box {
@@ -465,10 +461,6 @@
 
     .register-title {
         font-size: 1.25rem;
-    }
-
-    .decorative-image {
-        max-width: 200px;
     }
 }
 </style>

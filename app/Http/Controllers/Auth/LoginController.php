@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -113,16 +114,27 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (!$user || !$user->userRole) {
             return response()->json([
                 'success' => false,
                 'message' => 'No se encontró un usuario con ese correo electrónico'
             ]);
         }
 
+        $password = Password::where('users_role_id', $user->userRole->id)
+                          ->latest('fecha')
+                          ->first();
+
+        if (!$password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay pregunta de seguridad configurada para este usuario'
+            ]);
+        }
+
         return response()->json([
             'success' => true,
-            'question' => $user->recovery_question
+            'question' => $password->pregunta
         ]);
     }
 
@@ -135,7 +147,18 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || $user->recovery_answer !== $request->answer) {
+        if (!$user || !$user->userRole) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado'
+            ]);
+        }
+
+        $password = Password::where('users_role_id', $user->userRole->id)
+                          ->latest('fecha')
+                          ->first();
+
+        if (!$password || !Hash::check($request->answer, $password->respuesta)) {
             return response()->json([
                 'success' => false,
                 'message' => 'La respuesta es incorrecta'

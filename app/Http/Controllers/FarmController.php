@@ -17,97 +17,62 @@ class FarmController extends Controller
     /**
      * Obtiene y muestra la lista de todas las granjas
      * Incluye información relacionada de usuarios y municipios
-     * @param Request $request Parámetros de filtrado
-     * @return \Illuminate\Http\JsonResponse Lista de granjas con sus relaciones
+     * @return \Illuminate\Http\View
      */
-    public function index(Request $request)
+    public function index()
     {
-        try {
-            $farms = Farm::filter($request->all())->with(['usersRole', 'municipality'])->get();
-            $municipalities = Municipality::all();
-            
-            if ($request->wantsJson()) {
-                return response()->json(['data' => $farms]);
-            }
-
-            return view('farms.index', compact('farms', 'municipalities'));
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return response()->json([
-                    'error' => 'Error al obtener granjas',
-                    'debug' => [
-                        'message' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]
-                ], 500);
-            }
-            return response()->json(['error' => 'No se pudieron cargar las granjas. Por favor, intente más tarde'], 500);
+        $userRole = auth()->user()->userRole;
+        if (!$userRole) {
+            return redirect()->route('login');
         }
+
+        $farms = Farm::where('users_role_id', $userRole->id)->get();
+        return view('farms.index', [
+            'farms' => $farms,
+            'municipalities' => Municipality::all()
+        ]);
     }
 
     /**
      * Almacena una nueva granja en el sistema
      * @param Request $request Datos de la nueva granja (ubicación, extensión, etc.)
-     * @return \Illuminate\Http\JsonResponse Respuesta con la granja creada y sus relaciones
+     * @return \Illuminate\Http\RedirectResponse
      * 
      * Campos requeridos:
-     * - latitude, longitude: Coordenadas de ubicación
      * - address: Dirección física
      * - vereda: Ubicación específica rural
      * - extension: Tamaño de la granja
-     * - users_role_id: ID del usuario propietario
      * - municipality_id: ID del municipio
+     * - latitude: Coordenada de latitud
+     * - longitude: Coordenada de longitud
      */
     public function store(Request $request)
     {
-        try {
-            $userRole = Users_Role::where('user_id', auth()->id())->first();
-            if (!$userRole) {
-                return response()->json(['error' => 'No se encontró el rol del usuario'], 422);
-            }
-            $request->merge(['users_role_id' => $userRole->id]);
-
-            $validator = Validator::make($request->all(), [
-                'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric',
-                'address' => 'required|string|max:100',
-                'vereda' => 'required|string|max:50',
-                'extension' => 'required|string|max:50',
-                'users_role_id' => 'required|exists:users_roles,id',
-                'municipality_id' => 'required|exists:municipalities,id'
-            ]);
-
-            if ($validator->fails()) {
-                if ($request->wantsJson()) {
-                    return response()->json(['errors' => $validator->errors()], 422);
-                }
-                return back()->withErrors($validator)->withInput();
-            }
-
-            $farm = Farm::create($request->all());
-            
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'message' => 'Granja creada exitosamente',
-                    'data' => $farm->load(['usersRole', 'municipality'])
-                ], 201);
-            }
-
-            return redirect()->route('home')->with('success', 'Granja creada exitosamente');
-        } catch (\Exception $e) {
-            if (config('app.debug')) {
-                return response()->json([
-                    'error' => 'Error al crear granja',
-                    'debug' => [
-                        'message' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]
-                ], 500);
-            }
-            return response()->json(['error' => 'No se pudo crear la granja. Por favor, intente más tarde'], 500);
+        $userRole = auth()->user()->userRole;
+        if (!$userRole) {
+            return back()->with('error', 'No tienes permiso para crear granjas.');
         }
+
+        $request->validate([
+            'address' => 'required|string',
+            'vereda' => 'required|string',
+            'extension' => 'required|string',
+            'municipality_id' => 'required|exists:municipalities,id',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        $farm = Farm::create([
+            'users_role_id' => $userRole->id,
+            'address' => $request->address,
+            'vereda' => $request->vereda,
+            'extension' => $request->extension,
+            'municipality_id' => $request->municipality_id,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        return back()->with('success', 'Granja creada exitosamente.');
     }
 
     /**
@@ -186,11 +151,12 @@ class FarmController extends Controller
      */
     public function destroy(Farm $farm)
     {
-        try {
-            $farm->delete();
-            return redirect()->route('home')->with('success', 'Granja eliminada exitosamente');
-        } catch (\Exception $e) {
-            return redirect()->route('home')->with('error', 'No se pudo eliminar la granja');
+        $userRole = auth()->user()->userRole;
+        if (!$userRole || $farm->users_role_id !== $userRole->id) {
+            return back()->with('error', 'No tienes permiso para eliminar esta granja.');
         }
+
+        $farm->delete();
+        return back()->with('success', 'Granja eliminada exitosamente.');
     }
 }
