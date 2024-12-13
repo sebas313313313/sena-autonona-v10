@@ -119,11 +119,17 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if ($user) {
-            return response()->json([
-                'success' => true,
-                'question' => $user->security_question
-            ]);
+        if ($user && $user->userRole) {
+            $password = Password::where('users_role_id', $user->userRole->id)
+                              ->latest('fecha')
+                              ->first();
+
+            if ($password) {
+                return response()->json([
+                    'success' => true,
+                    'question' => $password->pregunta
+                ]);
+            }
         }
 
         return response()->json([
