@@ -106,6 +106,11 @@ class LoginController extends Controller
         ]);
     }
 
+    /**
+     * Verifica si el correo electrónico existe y devuelve la pregunta de seguridad
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkEmail(Request $request)
     {
         $request->validate([
@@ -114,27 +119,16 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !$user->userRole) {
+        if ($user) {
             return response()->json([
-                'success' => false,
-                'message' => 'No se encontró un usuario con ese correo electrónico'
-            ]);
-        }
-
-        $password = Password::where('users_role_id', $user->userRole->id)
-                          ->latest('fecha')
-                          ->first();
-
-        if (!$password) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No hay pregunta de seguridad configurada para este usuario'
+                'success' => true,
+                'question' => $user->security_question
             ]);
         }
 
         return response()->json([
-            'success' => true,
-            'question' => $password->pregunta
+            'success' => false,
+            'message' => 'No se encontró ninguna cuenta con este correo electrónico.'
         ]);
     }
 
