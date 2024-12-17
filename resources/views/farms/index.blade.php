@@ -131,6 +131,12 @@
         padding-bottom: 0.5rem;
         border-bottom: 2px solid #eee;
     }
+    #map {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
 </style>
 @endsection
 
@@ -274,12 +280,16 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Ubicación en el Mapa</label>
+                        <div id="map"></div>
+                    </div>
+                    <div class="mb-3">
                         <label for="latitude" class="form-label">Latitud</label>
-                        <input type="number" step="any" class="form-control" id="latitude" name="latitude" required>
+                        <input type="number" step="any" class="form-control" id="latitude" name="latitude" required readonly>
                     </div>
                     <div class="mb-3">
                         <label for="longitude" class="form-label">Longitud</label>
-                        <input type="number" step="any" class="form-control" id="longitude" name="longitude" required>
+                        <input type="number" step="any" class="form-control" id="longitude" name="longitude" required readonly>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -293,9 +303,48 @@
 @endsection
 
 @section('scripts')
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap" async defer></script>
 <script>
+    let map;
+    let marker;
+
+    function initMap() {
+        // Coordenadas iniciales (Colombia)
+        const initialPosition = { lat: 4.570868, lng: -74.297333 };
+        
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 5,
+            center: initialPosition,
+        });
+
+        // Crear marcador inicial
+        marker = new google.maps.Marker({
+            position: initialPosition,
+            map: map,
+            draggable: true
+        });
+
+        // Actualizar coordenadas cuando se arrastra el marcador
+        google.maps.event.addListener(marker, 'dragend', function(event) {
+            document.getElementById('latitude').value = event.latLng.lat();
+            document.getElementById('longitude').value = event.latLng.lng();
+        });
+
+        // Permitir hacer clic en el mapa para mover el marcador
+        google.maps.event.addListener(map, 'click', function(event) {
+            marker.setPosition(event.latLng);
+            document.getElementById('latitude').value = event.latLng.lat();
+            document.getElementById('longitude').value = event.latLng.lng();
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Aquí puedes agregar cualquier JavaScript necesario
+        // Inicializar el modal
+        const createFarmModal = document.getElementById('createFarmModal');
+        createFarmModal.addEventListener('shown.bs.modal', function () {
+            // Recargar el mapa cuando se muestra el modal
+            google.maps.event.trigger(map, 'resize');
+        });
     });
 </script>
 @endsection
