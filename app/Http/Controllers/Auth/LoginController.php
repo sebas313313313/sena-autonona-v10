@@ -71,41 +71,6 @@ class LoginController extends Controller
             ->with('success', 'Has cerrado sesión correctamente.');
     }
 
-    public function recoverPassword(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'recovery_question' => 'required',
-            'new_password' => 'required|min:8|confirmed',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se encontró un usuario con ese correo electrónico'
-            ]);
-        }
-
-        // Verificar la pregunta de recuperación
-        if ($user->recovery_question !== $request->recovery_question) {
-            return response()->json([
-                'success' => false,
-                'message' => 'La respuesta a la pregunta de recuperación no es correcta'
-            ]);
-        }
-
-        // Actualizar la contraseña
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Contraseña actualizada correctamente'
-        ]);
-    }
-
     /**
      * Verifica si el correo electrónico existe y devuelve la pregunta de seguridad
      * @param Request $request
@@ -119,16 +84,28 @@ class LoginController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if ($user) {
+        if (!$user || !$user->userRole) {
             return response()->json([
-                'success' => true,
-                'question' => $user->security_question
+                'success' => false,
+                'message' => 'No se encontró ninguna cuenta con este correo electrónico.'
+            ]);
+        }
+
+        // Obtener la última pregunta de seguridad del usuario
+        $password = Password::where('users_role_id', $user->userRole->id)
+                          ->latest('fecha')
+                          ->first();
+
+        if (!$password || !$password->pregunta) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay una pregunta de seguridad configurada para esta cuenta.'
             ]);
         }
 
         return response()->json([
-            'success' => false,
-            'message' => 'No se encontró ninguna cuenta con este correo electrónico.'
+            'success' => true,
+            'question' => $password->pregunta
         ]);
     }
 
@@ -200,7 +177,7 @@ class LoginController extends Controller
     {
         $request->validate([
             'token' => 'required',
-            'password' => 'required|min:8|confirmed'
+            'password' => 'required|min:8|confirmed',
         ]);
 
         $user = User::where('password_reset_token', $request->token)
@@ -208,7 +185,7 @@ class LoginController extends Controller
                     ->first();
 
         if (!$user) {
-            return back()->withErrors(['error' => 'El enlace de recuperación es inválido o ha expirado']);
+            return back()->with('error', 'El token es inválido o ha expirado');
         }
 
         $user->password = Hash::make($request->password);
