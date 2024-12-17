@@ -7,6 +7,7 @@ use App\Models\Municipality;
 use App\Models\Users_Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controlador para gestionar las granjas del sistema
@@ -21,15 +22,52 @@ class FarmController extends Controller
      */
     public function index()
     {
-        $userRole = auth()->user()->userRole;
+        $user = auth()->user();
+        Log::info('Usuario accediendo a lista de granjas: ' . $user->email);
+        
+        $userRole = $user->userRole;
+        
         if (!$userRole) {
+            Log::warning('Usuario sin rol accediendo a granjas');
             return redirect()->route('login');
         }
 
-        $farms = Farm::where('users_role_id', $userRole->id)->get();
+        // Obtener las granjas propias
+        $farms = Farm::where('users_role_id', $userRole->id)
+                    ->with('municipality')
+                    ->get();
+        Log::info('Granjas propias encontradas: ' . $farms->count());
+
+        // Obtener las granjas a las que ha sido invitado
+        $invitedFarms = $user->farms()
+                            ->with('municipality')
+                            ->get();
+        Log::info('Granjas invitadas encontradas: ' . $invitedFarms->count());
+        
+        // Log de los IDs de las granjas invitadas
+        foreach ($invitedFarms as $farm) {
+            Log::info('Granja invitada: ID=' . $farm->id . ', Role=' . $farm->pivot->role);
+        }
+
+        // Depuración: Mostrar información en la vista
+        $debug = [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'invited_farms_count' => $invitedFarms->count(),
+            'invited_farms' => $invitedFarms->map(function($farm) {
+                return [
+                    'id' => $farm->id,
+                    'address' => $farm->address,
+                    'role' => $farm->pivot->role ?? 'No role'
+                ];
+            })
+        ];
+
         return view('farms.index', [
             'farms' => $farms,
-            'municipalities' => Municipality::all()
+            'invitedFarms' => $invitedFarms,
+            'municipalities' => Municipality::all(),
+            'debug' => $debug
         ]);
     }
 
@@ -50,29 +88,30 @@ class FarmController extends Controller
     {
         $userRole = auth()->user()->userRole;
         if (!$userRole) {
-            return back()->with('error', 'No tienes permiso para crear granjas.');
+            return redirect()->route('login');
         }
 
-        $request->validate([
-            'address' => 'required|string',
-            'vereda' => 'required|string',
-            'extension' => 'required|string',
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'vereda' => 'required|string|max:255',
+            'extension' => 'required|numeric',
             'municipality_id' => 'required|exists:municipalities,id',
             'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'longitude' => 'required|numeric'
         ]);
 
-        $farm = Farm::create([
-            'users_role_id' => $userRole->id,
-            'address' => $request->address,
-            'vereda' => $request->vereda,
-            'extension' => $request->extension,
-            'municipality_id' => $request->municipality_id,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-        ]);
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        return back()->with('success', 'Granja creada exitosamente.');
+        $farm = new Farm($request->all());
+        $farm->users_role_id = $userRole->id;
+        $farm->save();
+
+        return redirect()->back()->with('success', 'Granja creada exitosamente.');
     }
 
     /**
@@ -151,12 +190,11 @@ class FarmController extends Controller
      */
     public function destroy(Farm $farm)
     {
-        $userRole = auth()->user()->userRole;
-        if (!$userRole || $farm->users_role_id !== $userRole->id) {
-            return back()->with('error', 'No tienes permiso para eliminar esta granja.');
+        if ($farm->users_role_id !== auth()->user()->userRole->id) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar esta granja.');
         }
 
         $farm->delete();
-        return back()->with('success', 'Granja eliminada exitosamente.');
+        return redirect()->back()->with('success', 'Granja eliminada exitosamente.');
     }
 }

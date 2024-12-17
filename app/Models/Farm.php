@@ -47,6 +47,13 @@ class Farm extends Model
         return $this->hasMany(Farm_Component::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'farm_user')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
+
     public function scopeFilter($query)
     {
 

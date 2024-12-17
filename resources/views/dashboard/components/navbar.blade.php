@@ -26,26 +26,11 @@
             </div>
 
             <!-- Perfil de usuario -->
-            <div class="dropdown">
-                <button class="btn dropdown-toggle" type="button">
-                    <img src="{{ asset('dashboard-assets/img/avatar.jpg') }}" alt="User" class="rounded-circle" width="32">
-                    <span class="d-none d-md-inline-block ml-2">{{ Auth::user()->name }}</span>
+            <div class="dropdown granjas-btn">
+                <button class="btn" type="button" onclick="window.location.href='{{ url('/') }}'">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Granjas</span>
                 </button>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">
-                        <i class="fas fa-user"></i> Mi Perfil
-                    </a>
-                    <a class="dropdown-item" href="#">
-                        <i class="fas fa-cog"></i> Configuración
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="dropdown-item text-danger">
-                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
@@ -56,6 +41,7 @@
     padding: 1rem;
     background: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
 }
 
 .navbar-toggler {
@@ -92,9 +78,22 @@
     gap: 1rem;
 }
 
-.navbar-right .btn {
-    position: relative;
-    padding: 0.5rem;
+.granjas-btn {
+    position: absolute;
+    right: 1rem;
+}
+
+.dropdown .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.dropdown .btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .navbar-right .badge {
