@@ -16,12 +16,20 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
+            'Last_name' => 'Sistema',
+            'identification' => '1234567890',
+            'identification_type_id' => 1, // Asumiendo que existe este ID
+            'municipality_id' => 1, // Asumiendo que existe este ID
+            'date_birth' => '1990-01-01',
+            'direction' => 'Dirección Administrativa',
+            'contact' => '3001234567'
         ]);
 
         // Crear rol de administrador
         Users_Role::create([
             'user_id' => $user->id,
             'role' => 'admin',
+            'name' => 'Administrador',
         ]);
     }
 }

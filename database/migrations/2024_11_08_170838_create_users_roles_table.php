@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('users_roles', function (Blueprint $table) {
             $table->id();
-            $table->string('identification', 15)->null;
-            $table->string('name', 50)->null;
-            $table->string('Last_name', 50)->null;
-            $table->date('date_birth')->null;
-            $table->text('direction', 50)->null;
-            $table->string('contact', 10)->null;
+            $table->string('identification', 15)->nullable();
+            $table->string('name', 50)->nullable();
+            $table->string('Last_name', 50)->nullable();
+            $table->date('date_birth')->nullable();
+            $table->text('direction')->nullable();
+            $table->string('contact', 10)->nullable();
+            $table->string('role')->default('user');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('identification_type_id')->references('id')->on('identification_types')->onDelete('cascade');
             $table->foreignId('municipality_id')->references('id')->on('municipalities')->onDelete('cascade');
