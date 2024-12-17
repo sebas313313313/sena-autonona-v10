@@ -82,4 +82,11 @@ class User extends Authenticatable
     public function Component_Task() {
         return $this->belongsTo('App\Models\Component_Task');
     }
+
+    public function farms()
+    {
+        return $this->belongsToMany('App\Models\Farm', 'farm_user')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
 }

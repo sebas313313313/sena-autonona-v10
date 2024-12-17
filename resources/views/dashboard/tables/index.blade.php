@@ -2,191 +2,101 @@
 
 @section('content')
 <div class="container-fluid">
-    <h2 class="mb-4">Tables</h2>
+    <h2 class="mb-4">Usuarios</h2>
 
-    <!-- Basic Table -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <!-- Tabla de Usuarios -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="card-title mb-0">Tabla Básica</h5>
+            <h5 class="card-title mb-0">Todos los usuarios</h5>
         </div>
         <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Nombre</th>
-                        <th scope="col">Apellido</th>
-                        <th scope="col">Usuario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td>Larry</td>
-                        <td>Bird</td>
-                        <td>@twitter</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Striped Table -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Tabla con Rayas</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">Producto</th>
-                        <th scope="col">Categoría</th>
-                        <th scope="col">Precio</th>
-                        <th scope="col">Stock</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Laptop HP</td>
-                        <td>Electrónicos</td>
-                        <td>$999.99</td>
-                        <td>15</td>
-                    </tr>
-                    <tr>
-                        <td>Mouse Logitech</td>
-                        <td>Accesorios</td>
-                        <td>$29.99</td>
-                        <td>50</td>
-                    </tr>
-                    <tr>
-                        <td>Monitor Dell</td>
-                        <td>Electrónicos</td>
-                        <td>$299.99</td>
-                        <td>8</td>
-                    </tr>
-                    <tr>
-                        <td>Teclado Mecánico</td>
-                        <td>Accesorios</td>
-                        <td>$89.99</td>
-                        <td>25</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Bordered Table -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Tabla con Bordes</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th scope="col">Empresa</th>
-                        <th scope="col">Contacto</th>
-                        <th scope="col">País</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Alfreds Futterkiste</td>
-                        <td>Maria Anders</td>
-                        <td>Germany</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary">Editar</button>
-                            <button class="btn btn-sm btn-danger">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Centro comercial Moctezuma</td>
-                        <td>Francisco Chang</td>
-                        <td>Mexico</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary">Editar</button>
-                            <button class="btn btn-sm btn-danger">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Ernst Handel</td>
-                        <td>Roland Mendel</td>
-                        <td>Austria</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary">Editar</button>
-                            <button class="btn btn-sm btn-danger">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Responsive Table -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Tabla Responsiva</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
+            @if(count($users ?? []) > 0)
+                <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Encabezado 1</th>
-                            <th scope="col">Encabezado 2</th>
-                            <th scope="col">Encabezado 3</th>
-                            <th scope="col">Encabezado 4</th>
-                            <th scope="col">Encabezado 5</th>
-                            <th scope="col">Encabezado 6</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Rol</th>
+                            <th scope="col">Correo</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach($users ?? [] as $user)
                         <tr>
-                            <th scope="row">1</th>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
+                            <th scope="row">{{ $loop->iteration }}</th>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->role }}</td>
+                            <td>{{ $user->email }}</td>
                         </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                            <td>Celda</td>
-                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
-            </div>
+            @else
+                <div class="alert alert-info" role="alert">
+                    No hay usuarios invitados registrados en el sistema.
+                </div>
+            @endif
         </div>
     </div>
+
+    <!-- Formulario de Invitación -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Enviar Invitación</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('invitation.send') }}?farm_id={{ request()->query('farm_id') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <input type="email" class="form-control" id="email" name="email" required 
+                           placeholder="Ingrese el correo electrónico">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="role" class="form-label">Rol</label>
+                    <select class="form-select" id="role" name="role" required>
+                        <option value="" selected disabled>Seleccione un rol</option>
+                        <option value="admin">Administrador</option>
+                        <option value="operario">Operario</option>
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Invitación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
 </div>
 @endsection
+
+@push('scripts')
+@endpush

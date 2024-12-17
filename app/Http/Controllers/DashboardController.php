@@ -2,31 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Farm;
 use Illuminate\Http\Request;
+use App\Models\Farm;
 
 class DashboardController extends Controller
 {
     public function index($farm_id)
     {
-        try {
-            // Obtener la granja con sus relaciones
-            $farm = Farm::with(['municipality'])->findOrFail($farm_id);
-            
-            // Obtener estadísticas
-            $stats = [
-                'total_users' => \App\Models\User::count(),
-                'total_sensors' => \App\Models\Sensor::where('farm_id', $farm_id)->count(),
-                'total_components' => \App\Models\Component::where('farm_id', $farm_id)->count(),
-                'growth_rate' => 15 // Valor por defecto, ajustar según tus necesidades
-            ];
-
-            // Pasar los datos a la vista
-            return view('dashboard.index', compact('farm', 'stats'));
-        } catch (\Exception $e) {
-            \Log::error('Error en dashboard: ' . $e->getMessage());
-            return redirect()->route('farms.index')
-                ->with('error', 'No se pudo cargar el dashboard de la granja');
+        $user = auth()->user();
+        $farm = $user->farms()->findOrFail($farm_id);
+        
+        // Guardar el ID de la granja actual en la sesión
+        session(['current_farm_id' => $farm_id]);
+        session(['farm_role' => $farm->pivot->role]);
+        
+        // Si es operario, solo mostrar datos y tareas
+        if ($farm->pivot->role === 'operario') {
+            return view('dashboard.operario.index', [
+                'farm' => $farm,
+                'tasks' => $farm->tasks()->where('status', 'pendiente')->get()
+            ]);
         }
+        
+        // Para administradores y otros roles, mostrar todo
+        return view('dashboard.index', [
+            'farm' => $farm,
+            'tasks' => $farm->tasks,
+            'users' => $farm->users,
+            'statistics' => $this->getStatistics($farm)
+        ]);
+    }
+    
+    private function getStatistics($farm)
+    {
+        return [
+            'completed_tasks' => $farm->tasks()->where('status', 'completada')->count(),
+            'pending_tasks' => $farm->tasks()->where('status', 'pendiente')->count(),
+            'total_users' => $farm->users()->count(),
+            'recent_activities' => $farm->activities()->latest()->take(5)->get()
+        ];
     }
 }
