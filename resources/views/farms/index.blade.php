@@ -255,11 +255,19 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="name" class="form-label">Direccion</label>
+                        <label for="name" class="form-label">Nombre de la Granja</label>
                         <input type="text" class="form-control" id="name" name="name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="address" class="form-label">Nombre de la Granja</label>
+                        <label for="farm_type" class="form-label">Tipo de Granja</label>
+                        <select class="form-select" id="farm_type" name="farm_type" required>
+                            <option value="">Seleccione el tipo de granja</option>
+                            <option value="acuaponica">Acuapónica</option>
+                            <option value="hidroponica">Hidropónica</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Dirección</label>
                         <input type="text" class="form-control" id="address" name="address" required>
                     </div>
                     <div class="mb-3">
@@ -290,6 +298,13 @@
                     <div class="mb-3">
                         <label for="longitude" class="form-label">Longitud</label>
                         <input type="number" step="any" class="form-control" id="longitude" name="longitude" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sensors" class="form-label">Sensores</label>
+                        <select class="form-select" id="sensors" name="sensors[]" multiple size="4">
+                            <!-- Los sensores se cargarán dinámicamente según el tipo de granja -->
+                        </select>
+                        <div class="form-text">Mantenga presionada la tecla Ctrl para seleccionar múltiples sensores</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -344,6 +359,46 @@
         createFarmModal.addEventListener('shown.bs.modal', function () {
             // Recargar el mapa cuando se muestra el modal
             google.maps.event.trigger(map, 'resize');
+        });
+
+        // Manejo de sensores según el tipo de granja
+        const farmTypeSelect = document.getElementById('farm_type');
+        const sensorsSelect = document.getElementById('sensors');
+
+        // Función para cargar los sensores desde el servidor
+        async function cargarSensores(tipo) {
+            try {
+                console.log('Cargando sensores para tipo:', tipo);
+                const response = await fetch(`/api/sensor/index?type=${tipo}`);
+                const data = await response.json();
+                console.log('Respuesta del servidor:', data);
+                
+                sensorsSelect.innerHTML = '';
+                
+                if (data.data && data.data.length > 0) {
+                    console.log('Sensores encontrados:', data.data.length);
+                    data.data.forEach(sensor => {
+                        const option = new Option(sensor.description, sensor.id);
+                        sensorsSelect.add(option);
+                    });
+                    // Ajustar el tamaño del select según la cantidad de sensores
+                    sensorsSelect.size = Math.min(8, data.data.length);
+                } else {
+                    console.log('No se encontraron sensores para el tipo:', tipo);
+                }
+            } catch (error) {
+                console.error('Error al cargar los sensores:', error);
+            }
+        }
+
+        farmTypeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            console.log('Tipo de granja seleccionado:', selectedType);
+            if (selectedType) {
+                cargarSensores(selectedType);
+            } else {
+                sensorsSelect.innerHTML = '';
+            }
         });
     });
 </script>

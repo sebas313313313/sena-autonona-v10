@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('farms', function (Blueprint $table) {
             $table->id(); // Equivalente a 'id_granja serial'
+            $table->string('name', 100); // Nombre de la granja
+            $table->string('farm_type', 20); // Tipo de granja: acuaponica o hidroponica
             $table->double('latitude', 15, 8); // Equivalente a 'coordenadas_latitud double precision'
             $table->double('longitude', 15, 8); // Equivalente a 'coordenadas_longitud double precision'
             $table->string('address', 50); // Equivalente a 'direccion character varying(50)'

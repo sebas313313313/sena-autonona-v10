@@ -10,12 +10,14 @@ class Sensor extends Model
     use HasFactory;
 
     protected $fillable = [
-        'description'
+        'description',
+        'farm_type'
     ];
 
     protected $allowFilter = [
         'id',
-        'description'
+        'description',
+        'farm_type'
     ];
 
     public function scopeFilter($query)

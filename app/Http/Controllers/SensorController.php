@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sensor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controlador para gestionar los sensores del sistema
@@ -14,11 +15,25 @@ class SensorController extends Controller
 {
     /**
      * Muestra una lista de todos los sensores
+     * @param Request $request Parámetros de búsqueda
      * @return \Illuminate\Http\JsonResponse Lista de sensores en formato JSON
      */
-    public function index()
+    public function index(Request $request)
     {
-        $sensors = Sensor::all();
+        Log::info('Request type:', ['type' => $request->type]);
+        
+        $query = Sensor::query();
+
+        // Filtrar por tipo si se especifica
+        if ($request->has('type')) {
+            $type = $request->type;
+            Log::info('Filtering by type:', ['type' => $type]);
+            $query->where('farm_type', $type);
+        }
+
+        $sensors = $query->get();
+        Log::info('Sensors found:', ['count' => $sensors->count(), 'sensors' => $sensors->toArray()]);
+        
         return response()->json(['data' => $sensors]);
     }
 
