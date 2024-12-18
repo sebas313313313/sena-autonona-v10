@@ -10,6 +10,8 @@ class Farm extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
+        'farm_type',
         'latitude',
         'longitude',
         'address',

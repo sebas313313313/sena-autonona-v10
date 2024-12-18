@@ -93,6 +93,7 @@ class FarmController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'farm_type' => 'required|string|in:acuaponica,hidroponica',
             'address' => 'required|string|max:255',
             'vereda' => 'required|string|max:255',
             'extension' => 'required|numeric',

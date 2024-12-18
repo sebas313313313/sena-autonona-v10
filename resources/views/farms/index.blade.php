@@ -3,141 +3,212 @@
 @section('title', 'Granjas - AGROVIDA')
 
 @section('styles')
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
-    body {
-        background-color: #f5faff;
-        font-family: 'Roboto', sans-serif;
-    }
-    .header-container {
-        background: white;
-        padding: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,.05);
-        margin-bottom: 2rem;
-    }
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 1rem;
-    }
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .user-name {
-        font-weight: 500;
-        color: #2c3e50;
-    }
-    .btn-logout {
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    .btn-logout:hover {
-        background-color: #c82333;
-        color: white;
-        text-decoration: none;
-    }
-    .farms-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        padding: 20px 0;
-    }
-    .farm-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,.05);
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border: 1px solid rgba(0,0,0,.05);
-        width: 100%;
-        max-width: 350px;
-        padding: 20px;
-    }
-    .farm-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,.1);
-    }
-    .farm-title {
-        text-align: center;
-        font-weight: 600;
-        font-size: 1.25rem;
-        margin-bottom: 1.5rem;
-        color: #2c3e50;
-        padding: 0.5rem 0;
-        border-bottom: 2px solid #f8f9fa;
-    }
-    .farm-details {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .farm-details li {
-        padding: 8px 0;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid rgba(0,0,0,.05);
-        font-size: 0.95rem;
-    }
-    .farm-details li:last-child {
-        border-bottom: none;
-    }
-    .btn-crear-granja {
-        background-color: #198754;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-    .btn-crear-granja:hover {
-        background-color: #157347;
-        color: white;
-    }
-    .section-title {
-        color: #2c3e50;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e9ecef;
-    }
-    .section-container {
-        margin-bottom: 3rem;
-    }
-    .farm-card {
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .farm-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .farm-title {
-        color: #2c3e50;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #eee;
-    }
-    #map {
-        height: 400px;
-        width: 100%;
-        margin-bottom: 20px;
-        border-radius: 8px;
-    }
-</style>
+        body {
+            background-color: #f5faff;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .header-container {
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,.05);
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .btn-logout {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background-color: #c82333;
+            color: white;
+            text-decoration: none;
+        }
+
+        .section-container {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .farms-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .farm-card {
+            background: #ffffff;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 1.5rem;
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .farm-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .farm-title {
+            color: #2c3e50;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .farm-type {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .farm-details {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .farm-details li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,.05);
+            font-size: 0.95rem;
+            color: #4a5568;
+        }
+
+        .farm-details li:last-child {
+            border-bottom: none;
+        }
+
+        .farm-details i {
+            color: #3498db;
+            width: 20px;
+            margin-right: 8px;
+        }
+
+        .sensor-count {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .btn-custom {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-view {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background-color: #2980b9;
+            color: white;
+        }
+
+        #map { 
+            height: 400px; 
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background-color: #f8f9fa;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .form-label {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-crear-granja {
+            background-color: #198754;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-crear-granja:hover {
+            background-color: #157347;
+            color: white;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -156,21 +227,25 @@
         <div class="farms-container">
             @forelse($farms as $farm)
                 <div class="farm-card">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="farm-content" style="cursor: pointer; width: 100%;" onclick="window.location.href='{{ route('tablero', ['farm_id' => $farm->id]) }}'">
-                            <h3 class="farm-title">{{ $farm->address }}</h3>
+                            <h3 class="farm-title mb-3">{{ $farm->name }}</h3>
                             <ul class="farm-details list-unstyled">
                                 <li>
-                                    <i class="bi bi-arrows-angle-expand me-2"></i>
-                                    Extensión: {{ $farm->extension }}
+                                    <i class="bi bi-tag me-2"></i>
+                                    Tipo: {{ ucfirst($farm->farm_type) }}
                                 </li>
                                 <li>
                                     <i class="bi bi-geo-alt me-2"></i>
-                                    Vereda: {{ $farm->vereda }}
+                                    Dirección: {{ $farm->address }}
+                                </li>
+                                <li>
+                                    <i class="bi bi-arrows-angle-expand me-2"></i>
+                                    Extensión: {{ $farm->extension }} hectáreas
                                 </li>
                                 <li>
                                     <i class="bi bi-geo me-2"></i>
-                                    Coordenadas: {{ number_format($farm->latitude, 6) }}, {{ number_format($farm->longitude, 6) }}
+                                    Vereda: {{ $farm->vereda }}
                                 </li>
                                 <li>
                                     <i class="bi bi-pin-map me-2"></i>
@@ -256,15 +331,29 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="name" class="form-label">Nombre de la Granja</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                               id="name" name="name" required 
+                               value="{{ old('name') }}"
+                               placeholder="Ingrese el nombre de la granja">
+                        @error('name')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="farm_type" class="form-label">Tipo de Granja</label>
-                        <select class="form-select" id="farm_type" name="farm_type" required>
+                        <select class="form-select @error('farm_type') is-invalid @enderror" 
+                                id="farm_type" name="farm_type" required>
                             <option value="">Seleccione el tipo de granja</option>
-                            <option value="acuaponica">Acuapónica</option>
-                            <option value="hidroponica">Hidropónica</option>
+                            <option value="acuaponica" {{ old('farm_type') == 'acuaponica' ? 'selected' : '' }}>Acuapónica</option>
+                            <option value="hidroponica" {{ old('farm_type') == 'hidroponica' ? 'selected' : '' }}>Hidropónica</option>
                         </select>
+                        @error('farm_type')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="address" class="form-label">Dirección</label>
@@ -318,88 +407,98 @@
 @endsection
 
 @section('scripts')
-<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&callback=initMap" async defer></script>
-<script>
-    let map;
-    let marker;
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+    <script>
+        let map;
+        let marker;
 
-    function initMap() {
-        // Coordenadas iniciales (Colombia)
-        const initialPosition = { lat: 4.570868, lng: -74.297333 };
-        
-        map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 5,
-            center: initialPosition,
-        });
+        function initMap() {
+            // Coordenadas iniciales (Colombia)
+            const initialPosition = [4.570868, -74.297333];
+            
+            // Inicializar el mapa
+            map = L.map('map').setView(initialPosition, 5);
+            
+            // Añadir capa de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
 
-        // Crear marcador inicial
-        marker = new google.maps.Marker({
-            position: initialPosition,
-            map: map,
-            draggable: true
-        });
+            // Crear marcador inicial
+            marker = L.marker(initialPosition, {
+                draggable: true
+            }).addTo(map);
 
-        // Actualizar coordenadas cuando se arrastra el marcador
-        google.maps.event.addListener(marker, 'dragend', function(event) {
-            document.getElementById('latitude').value = event.latLng.lat();
-            document.getElementById('longitude').value = event.latLng.lng();
-        });
+            // Actualizar coordenadas cuando se arrastra el marcador
+            marker.on('dragend', function(event) {
+                const position = marker.getLatLng();
+                document.getElementById('latitude').value = position.lat;
+                document.getElementById('longitude').value = position.lng;
+            });
 
-        // Permitir hacer clic en el mapa para mover el marcador
-        google.maps.event.addListener(map, 'click', function(event) {
-            marker.setPosition(event.latLng);
-            document.getElementById('latitude').value = event.latLng.lat();
-            document.getElementById('longitude').value = event.latLng.lng();
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar el modal
-        const createFarmModal = document.getElementById('createFarmModal');
-        createFarmModal.addEventListener('shown.bs.modal', function () {
-            // Recargar el mapa cuando se muestra el modal
-            google.maps.event.trigger(map, 'resize');
-        });
-
-        // Manejo de sensores según el tipo de granja
-        const farmTypeSelect = document.getElementById('farm_type');
-        const sensorsSelect = document.getElementById('sensors');
-
-        // Función para cargar los sensores desde el servidor
-        async function cargarSensores(tipo) {
-            try {
-                console.log('Cargando sensores para tipo:', tipo);
-                const response = await fetch(`/api/sensor/index?type=${tipo}`);
-                const data = await response.json();
-                console.log('Respuesta del servidor:', data);
-                
-                sensorsSelect.innerHTML = '';
-                
-                if (data.data && data.data.length > 0) {
-                    console.log('Sensores encontrados:', data.data.length);
-                    data.data.forEach(sensor => {
-                        const option = new Option(sensor.description, sensor.id);
-                        sensorsSelect.add(option);
-                    });
-                    // Ajustar el tamaño del select según la cantidad de sensores
-                    sensorsSelect.size = Math.min(8, data.data.length);
-                } else {
-                    console.log('No se encontraron sensores para el tipo:', tipo);
-                }
-            } catch (error) {
-                console.error('Error al cargar los sensores:', error);
-            }
+            // Permitir hacer clic en el mapa para mover el marcador
+            map.on('click', function(event) {
+                const position = event.latlng;
+                marker.setLatLng(position);
+                document.getElementById('latitude').value = position.lat;
+                document.getElementById('longitude').value = position.lng;
+            });
         }
 
-        farmTypeSelect.addEventListener('change', function() {
-            const selectedType = this.value;
-            console.log('Tipo de granja seleccionado:', selectedType);
-            if (selectedType) {
-                cargarSensores(selectedType);
-            } else {
-                sensorsSelect.innerHTML = '';
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar el modal y el mapa
+            const createFarmModal = document.getElementById('createFarmModal');
+            createFarmModal.addEventListener('shown.bs.modal', function () {
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 10);
+            });
+
+            initMap();
+
+            // Manejo de sensores según el tipo de granja
+            const farmTypeSelect = document.getElementById('farm_type');
+            const sensorsSelect = document.getElementById('sensors');
+
+            // Función para cargar los sensores desde el servidor
+            async function cargarSensores(tipo) {
+                try {
+                    console.log('Cargando sensores para tipo:', tipo);
+                    const response = await fetch(`/api/sensor/index?type=${tipo}`);
+                    const data = await response.json();
+                    console.log('Respuesta del servidor:', data);
+                    
+                    sensorsSelect.innerHTML = '';
+                    
+                    if (data.data && data.data.length > 0) {
+                        console.log('Sensores encontrados:', data.data.length);
+                        data.data.forEach(sensor => {
+                            const option = new Option(sensor.description, sensor.id);
+                            sensorsSelect.add(option);
+                        });
+                        // Ajustar el tamaño del select según la cantidad de sensores
+                        sensorsSelect.size = Math.min(8, data.data.length);
+                    } else {
+                        console.log('No se encontraron sensores para el tipo:', tipo);
+                    }
+                } catch (error) {
+                    console.error('Error al cargar los sensores:', error);
+                }
             }
+
+            farmTypeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                console.log('Tipo de granja seleccionado:', selectedType);
+                if (selectedType) {
+                    cargarSensores(selectedType);
+                } else {
+                    sensorsSelect.innerHTML = '';
+                }
+            });
         });
-    });
-</script>
+    </script>
 @endsection
