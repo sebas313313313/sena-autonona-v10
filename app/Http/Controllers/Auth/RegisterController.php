@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Controlador para gestionar el registro de nuevos usuarios
@@ -98,6 +99,13 @@ class RegisterController extends Controller
             ]);
 
             DB::commit();
+
+            // Asegurarse de que el usuario no esté autenticado
+            if (Auth::check()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
 
             // Redireccionar al login con mensaje de éxito
             return redirect()->route('login')
