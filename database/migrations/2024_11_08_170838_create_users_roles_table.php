@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('date_birth')->nullable();
             $table->text('direction')->nullable();
             $table->string('contact', 10)->nullable();
-            $table->string('role')->default('user');
+            $table->string('role')->default('administrador');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('identification_type_id')->references('id')->on('identification_types')->onDelete('cascade');
             $table->foreignId('municipality_id')->references('id')->on('municipalities')->onDelete('cascade');

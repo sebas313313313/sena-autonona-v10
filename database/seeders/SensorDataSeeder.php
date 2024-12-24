@@ -21,6 +21,8 @@ class SensorDataSeeder extends Seeder
     {
         // Crear una granja de prueba
         $farm = Farm::create([
+            'name' => 'Granja de Prueba',
+            'farm_type' => 'hidroponica',
             'latitude' => 4.570868,
             'longitude' => -74.297333,
             'address' => 'Carrera 123 #45-67',
@@ -88,7 +90,8 @@ class SensorDataSeeder extends Seeder
 
         foreach ($sensorTypes as $sensorType) {
             $sensor = Sensor::create([
-                'description' => $sensorType['description']
+                'description' => $sensorType['description'],
+                'farm_type' => 'hidroponica'
             ]);
 
             // Crear componentes para cada sensor

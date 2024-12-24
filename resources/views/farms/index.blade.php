@@ -42,6 +42,15 @@
             color: #2c3e50;
         }
 
+        .user-role {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
         .btn-logout {
             background-color: #dc3545;
             color: white;
@@ -228,7 +237,7 @@
             @forelse($farms as $farm)
                 <div class="farm-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="farm-content" style="cursor: pointer; width: 100%;" onclick="window.location.href='{{ route('tablero', ['farm_id' => $farm->id]) }}'">
+                        <div class="farm-content" style="cursor: pointer; width: 100%;" onclick="window.location.href='{{ route('dashboard', ['farm_id' => $farm->id]) }}'">
                             <h3 class="farm-title mb-3">{{ $farm->name }}</h3>
                             <ul class="farm-details list-unstyled">
                                 <li>
@@ -287,7 +296,7 @@
 
         <div class="farms-container">
             @forelse($invitedFarms ?? [] as $farm)
-                <div class="farm-card" onclick="window.location.href='{{ route('tablero', ['farm_id' => $farm->id]) }}'">
+                <div class="farm-card" onclick="window.location.href='{{ route('dashboard', ['farm_id' => $farm->id]) }}'">
                     <h3 class="farm-title">{{ $farm->address }}</h3>
                     <ul class="farm-details">
                         <li>

@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Job;
+use App\Models\Component_Task;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class JobController extends Controller
 {
@@ -13,8 +12,18 @@ class JobController extends Controller
      */
     public function index(Request $request)
     {
-        $jobs = Job::filter($request->all())->with('componentTasks')->get();
-        return response()->json(['data' => $jobs]);
+        // Obtener el ID de la granja de la sesión
+        $farm_id = session('current_farm_id');
+        if (!$farm_id) {
+            return redirect()->back()->with('error', 'No se pudo identificar la granja actual');
+        }
+
+        // Obtener las tareas de la granja actual
+        $tasks = Component_Task::whereHas('farmComponent', function($query) use ($farm_id) {
+            $query->where('farm_id', $farm_id);
+        })->with(['user', 'farmComponent'])->get();
+
+        return view('dashboard.tasks.index', compact('tasks'));
     }
 
     /**

@@ -21,7 +21,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect('/dashboard');
+                // Si el usuario ya está autenticado y trata de acceder a login o register,
+                // redirigir a la página de granjas
+                if ($request->routeIs('login') || $request->routeIs('register')) {
+                    return redirect()->route('home');
+                }
             }
         }
 

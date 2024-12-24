@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Models\Job;
 use App\Models\Farm_Component;
 
 class Component_Task extends Model
@@ -19,7 +18,6 @@ class Component_Task extends Model
         'time',
         'status',
         'comments',
-        'job_id',
         'farm_component_id',
         'user_id'
     ];
@@ -33,17 +31,13 @@ class Component_Task extends Model
 
     protected $casts = [
         'date' => 'date',
-        'time' => 'datetime:H:i:s'
+        'time' => 'datetime:H:i:s',
+        'status' => 'boolean'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function job()
-    {
-        return $this->belongsTo(Job::class);
     }
 
     public function farmComponent()
@@ -53,7 +47,6 @@ class Component_Task extends Model
 
     public function scopeFilter($query)
     {
-
         if (empty($this->allowFilter) || empty(request('filter'))) {
             return;
         }
@@ -62,10 +55,7 @@ class Component_Task extends Model
         $allowFilter = collect($this->allowFilter);
 
         foreach ($filters as $filter => $value) {
-
             if ($allowFilter->contains($filter)) {
-
-
                 $query->where($filter, 'LIKE', '%' . $value . '%');
             }
         }

@@ -83,7 +83,8 @@ class RegisterController extends Controller
                 'municipality_id' => $request->municipality_id,
                 'direction' => $request->direction,
                 'contact' => $request->contact_number,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'role' => 'administrador' // Establecer rol como administrador
             ]);
 
             // Obtener la pregunta de seguridad

@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Models\Municipality;
 use App\Models\IdentificationType;
+use Illuminate\Http\Request;
 
 /**
  * Archivo de Rutas Web
@@ -19,23 +20,31 @@ use App\Models\IdentificationType;
  * Si no está autenticado, redirige al login
  */
 Route::get('/', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
-        $userRole = \App\Models\Users_Role::where('user_id', $user->id)->first();
-        
-        // Obtener las granjas propias
-        $farms = $userRole ? \App\Models\Farm::where('users_role_id', $userRole->id)->get() : collect();
-        
-        // Obtener las granjas invitadas
-        $invitedFarms = $user->farms()->with('municipality')->get();
-        
-        return view('farms.index', [
-            'farms' => $farms,
-            'invitedFarms' => $invitedFarms,
-            'municipalities' => \App\Models\Municipality::all()
-        ]);
+    // Si no hay usuarios registrados, redirigir al registro
+    if (\App\Models\User::count() === 0) {
+        return redirect()->route('register');
     }
-    return redirect()->route('login');
+    
+    // Si no está autenticado, redirigir al login
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+    
+    // Si está autenticado, mostrar sus granjas
+    $user = auth()->user();
+    $userRole = \App\Models\Users_Role::where('user_id', $user->id)->first();
+    
+    // Obtener las granjas propias
+    $farms = $userRole ? \App\Models\Farm::where('users_role_id', $userRole->id)->get() : collect();
+    
+    // Obtener las granjas invitadas
+    $invitedFarms = $user->farms()->with('municipality')->get();
+    
+    return view('farms.index', [
+        'farms' => $farms,
+        'invitedFarms' => $invitedFarms,
+        'municipalities' => \App\Models\Municipality::all()
+    ]);
 })->name('home');
 
 /**
@@ -60,56 +69,84 @@ Route::middleware('guest')->group(function () {
 });
 
 /**
- * Grupo de rutas protegidas
- * Requieren autenticación y acceso a granja
- * Incluye gestión de granjas, dashboard y funcionalidades principales
+ * Grupo de rutas para usuarios autenticados
  */
-Route::middleware(['auth', 'farm.access'])->group(function () {
+Route::middleware('auth')->group(function () {
+    // Cerrar sesión
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
     // Rutas de granjas
     Route::get('/farms', [App\Http\Controllers\FarmController::class, 'index'])->name('farms.index');
     Route::post('/farms', [App\Http\Controllers\FarmController::class, 'store'])->name('farms.store');
     Route::delete('/farms/{farm}', [App\Http\Controllers\FarmController::class, 'destroy'])->name('farms.destroy');
     
-    // Dashboard y tablero
-    Route::get('/dashboard', function () {
-        return view('dashboard.index');
-    })->name('dashboard.home');
+    /**
+     * Grupo de rutas protegidas
+     * Requieren acceso a granja
+     * Incluye gestión de granjas, dashboard y funcionalidades principales
+     */
+    Route::middleware('farm.access')->group(function () {
+        // Dashboard y tablero
+        Route::get('/dashboard', function () {
+            return view('dashboard.index');
+        })->name('dashboard.home');
 
-    Route::get('/tablero', function () {
-        return view('dashboard.tables.index');
-    })->name('tablero');
+        Route::get('/tablero', function () {
+            return view('dashboard.tables.index');
+        })->name('tablero');
 
-    Route::get('/tablero/{farm_id}', function ($farm_id) {
-        $farm = \App\Models\Farm::findOrFail($farm_id);
-        return view('dashboard.index', compact('farm'));
-    })->name('dashboard');
+        Route::get('/tablero/{farm_id}', function ($farm_id) {
+            $farm = \App\Models\Farm::findOrFail($farm_id);
+            session(['current_farm_id' => $farm_id]); // Guardamos el ID en la sesión
+            session(['farm_role' => $farm->usersRole->role]); // Guardamos el rol en la sesión
+            return view('dashboard.index', compact('farm'));
+        })->name('dashboard');
 
-    // Secciones del dashboard
-    Route::get('/widgets', function () {
-        return view('dashboard.widgets.index');
-    })->name('widgets');
+        // Rutas para invitar/remover usuarios
+        Route::post('/invitation/send', [App\Http\Controllers\InvitationController::class, 'send'])->name('invitation.sendByEmail');
+        Route::get('/invitation/accept/{token}', [App\Http\Controllers\InvitationController::class, 'accept'])->name('invitation.accept');
+        Route::delete('/farm/{farm}/users/{user}', [App\Http\Controllers\FarmUserController::class, 'remove'])->name('farm.users.remove');
 
-    Route::get('/ui', function () {
-        return view('dashboard.ui.index');
-    })->name('ui');
+        // Rutas de tareas
+        Route::get('/tasks', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');
+        Route::post('/tasks', [App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
+        Route::put('/tasks/{task}', [App\Http\Controllers\TaskController::class, 'update'])->name('tasks.update');
+        Route::delete('/tasks/{task}', [App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy');
 
-    Route::get('/forms', function () {
-        return view('dashboard.forms.index');
-    })->name('forms');
+        // Secciones del dashboard
+        Route::get('/widgets', function () {
+            return view('dashboard.widgets.index');
+        })->name('widgets');
 
-    Route::get('/charts', function () {
-        return view('dashboard.charts.index');
-    })->name('charts');
+        Route::get('/ui', function () {
+            return view('dashboard.ui.index');
+        })->name('ui');
 
-    Route::get('/tables', function () {
-        $users = \App\Models\User::all();
-        return view('dashboard.tables.index', compact('users'));
-    })->name('tables');
+        Route::get('/forms', function () {
+            return view('dashboard.forms.index');
+        })->name('forms');
 
-    // Sistema de invitaciones
-    Route::post('/invitation/send', [App\Http\Controllers\InvitationController::class, 'send'])->name('invitation.send');
-    Route::get('/invitation/accept/{token}', [App\Http\Controllers\InvitationController::class, 'accept'])->name('invitation.accept');
+        Route::get('/charts', function () {
+            return view('dashboard.charts.index');
+        })->name('charts');
 
-    // Cierre de sesión
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+        Route::get('/tables', function () {
+            // Obtener el ID de la granja actual desde la sesión
+            $farm_id = session('current_farm_id');
+            
+            // Obtener la granja
+            $farm = \App\Models\Farm::findOrFail($farm_id);
+            
+            // Obtener el dueño de la granja
+            $owner = $farm->usersRole->user;
+            
+            // Obtener los usuarios invitados
+            $invitedUsers = $farm->users()->get();
+            
+            // Combinar el dueño con los usuarios invitados
+            $users = collect([$owner])->concat($invitedUsers)->unique('id');
+            
+            return view('dashboard.tables.index', compact('users', 'owner'));
+        })->name('tables');
+    });
 });

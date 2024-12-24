@@ -15,16 +15,14 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->time('time');
-            $table->string('status', 50);
+            $table->boolean('status')->default(false);
             $table->text('comments')->nullable();
-            $table->foreignId('job_id')->constrained()->onDelete('cascade');
-            $table->foreignId('farm_component_id')->constrained()->onDelete('cascade');
+            $table->foreignId('farm_component_id')->constrained('farm_components')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
 
             // Índices
             $table->index('date');
-            $table->index('status');
         });
     }
 

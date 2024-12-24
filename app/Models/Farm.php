@@ -49,6 +49,18 @@ class Farm extends Model
         return $this->hasMany(Farm_Component::class);
     }
 
+    public function tasks()
+    {
+        return $this->hasManyThrough(
+            ComponentTask::class,
+            Farm_Component::class,
+            'farm_id', // Clave foránea en farm_components
+            'farm_component_id', // Clave foránea en component_tasks
+            'id', // Clave local en farms
+            'id' // Clave local en farm_components
+        );
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'farm_user')

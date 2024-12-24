@@ -41,12 +41,14 @@
             </li>
             @endif
             
-            <li>
-                <a href="{{ route('ui') }}" class="{{ request()->routeIs('ui') ? 'active' : '' }}">
-                    <i class="fas fa-tasks"></i>
-                    <span>Tareas</span>
-                </a>
-            </li>
+            @if(session('current_farm_id'))
+                <li>
+                    <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'active' : '' }}">
+                        <i class="fas fa-tasks"></i>
+                        <span>Tareas</span>
+                    </a>
+                </li>
+            @endif
             
             @if(session('farm_role') != 'operario')
             <li>
@@ -117,5 +119,35 @@
 @keyframes rotate-spiral {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Estilos para el sidebar responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1050;
+        background: white;
+        width: 250px;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    body.sidebar-open::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+    }
 }
 </style>

@@ -25,7 +25,7 @@
     <!-- Tabla de Usuarios -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="card-title mb-0">Todos los usuarios</h5>
+            <h5 class="card-title mb-0">Usuarios de la Granja</h5>
         </div>
         <div class="card-body">
             @if(count($users ?? []) > 0)
@@ -34,8 +34,8 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Nombre</th>
-                            <th scope="col">Rol</th>
                             <th scope="col">Correo</th>
+                            <th scope="col">Rol en la Granja</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,15 +43,21 @@
                         <tr>
                             <th scope="row">{{ $loop->iteration }}</th>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user->role }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>
+                                @if($user->id === $owner->id)
+                                    <span class="badge bg-primary">Propietario</span>
+                                @else
+                                    <span class="badge bg-info">{{ ucfirst($user->pivot->role ?? 'Invitado') }}</span>
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             @else
                 <div class="alert alert-info" role="alert">
-                    No hay usuarios invitados registrados en el sistema.
+                    No hay usuarios registrados en esta granja.
                 </div>
             @endif
         </div>
@@ -63,7 +69,7 @@
             <h5 class="card-title mb-0">Enviar Invitación</h5>
         </div>
         <div class="card-body">
-            <form action="{{ route('invitation.send') }}?farm_id={{ request()->query('farm_id') }}" method="POST">
+            <form action="{{ route('invitation.sendByEmail') }}" method="POST">
                 @csrf
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo Electrónico</label>

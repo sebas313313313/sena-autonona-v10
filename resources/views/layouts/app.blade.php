@@ -60,6 +60,15 @@
             font-size: 1.1rem;
             vertical-align: middle;
         }
+        .user-role {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-right: 1rem;
+        }
         .btn-outline-danger {
             padding: 0.25rem 0.75rem;
             font-size: 0.9rem;
@@ -94,6 +103,17 @@
                     <i class="bi bi-person-circle me-1"></i>
                     {{ auth()->user()->name }}
                 </span>
+                @if(auth()->user()->users_role && auth()->user()->users_role->role)
+                    <span class="user-role">{{ auth()->user()->users_role->role }}</span>
+                    <script>
+                        console.log('Rol del usuario:', @json(auth()->user()->users_role->role));
+                    </script>
+                @else
+                    <script>
+                        console.log('No hay rol definido');
+                        console.log('users_role:', @json(auth()->user()->users_role));
+                    </script>
+                @endif
                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger">

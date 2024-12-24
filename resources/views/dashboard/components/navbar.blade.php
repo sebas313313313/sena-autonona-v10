@@ -1,7 +1,7 @@
 <nav class="navbar">
     <div class="d-flex justify-content-between align-items-center">
         <!-- Botón de menú para móvil -->
-        <button class="navbar-toggler d-lg-none">
+        <button class="navbar-toggler d-lg-none" type="button" id="sidebarToggle">
             <i class="fas fa-bars"></i>
         </button>
 
@@ -17,14 +17,6 @@
 
         <!-- Menú derecho -->
         <div class="navbar-right">
-            <!-- Notificaciones -->
-            <div class="dropdown">
-                <button class="btn" type="button">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge bg-danger">3</span>
-                </button>
-            </div>
-
             <!-- Perfil de usuario -->
             <div class="dropdown granjas-btn">
                 <button class="btn" type="button" onclick="window.location.href='{{ url('/') }}'">
@@ -126,3 +118,27 @@
     margin: 0.5rem 0;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('show');
+            document.body.classList.toggle('sidebar-open');
+        });
+    }
+    
+    // Cerrar sidebar al hacer clic fuera en dispositivos móviles
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                sidebar.classList.remove('show');
+                document.body.classList.remove('sidebar-open');
+            }
+        }
+    });
+});
+</script>

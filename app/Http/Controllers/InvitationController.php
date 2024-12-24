@@ -24,7 +24,7 @@ class InvitationController extends Controller
     /**
      * Envía una invitación por correo electrónico
      * 
-     * @param Request $request Contiene: email, farm_id, role
+     * @param Request $request Contiene: email, role
      * @return \Illuminate\Http\JsonResponse
      */
     public function send(Request $request)
@@ -35,44 +35,44 @@ class InvitationController extends Controller
         ]);
 
         try {
-            // Obtener el ID de la granja de la URL
-            $farm_id = $request->query('farm_id');
+            // Obtener el ID de la granja de la sesión
+            $farm_id = session('current_farm_id');
             if (!$farm_id) {
-                \Log::error('Farm ID no encontrado en la URL');
+                \Log::error('Farm ID no encontrado en la sesión');
                 return redirect()->back()->with('error', 'Error: No se pudo identificar la granja actual');
             }
 
-            // Verificar que la granja pertenece al usuario actual
+            // Verificar que la granja existe
             $farm = Farm::findOrFail($farm_id);
-            if ($farm->users_role_id !== auth()->user()->userRole->id) {
-                return redirect()->back()->with('error', 'No tienes permiso para invitar usuarios a esta granja');
+
+            // Verificar si el usuario ya está invitado
+            $existingInvitation = Invitation::where('email', $request->email)
+                ->where('farm_id', $farm_id)
+                ->where('accepted', false)
+                ->where('expires_at', '>', now())
+                ->first();
+
+            if ($existingInvitation) {
+                return redirect()->back()->with('error', 'Ya existe una invitación pendiente para este usuario');
             }
 
             // Crear la invitación
             $invitation = Invitation::create([
                 'email' => $request->email,
-                'role' => $request->role,
                 'farm_id' => $farm_id,
-                'token' => Invitation::generateToken(),
-                'expires_at' => Carbon::now()->addHours(24)
+                'role' => $request->role,
+                'token' => \Str::random(32),
+                'expires_at' => now()->addDays(7),
+                'accepted' => false
             ]);
 
-            // Enviar el correo con manejo de errores detallado
-            try {
-                \Log::info('Intentando enviar correo a: ' . $request->email);
-                Mail::to($request->email)->send(new InvitationMail($invitation));
-                \Log::info('Invitación enviada exitosamente');
-                
-                return redirect()->back()->with('success', 'Invitación enviada al correo ' . $request->email);
-            } catch (\Exception $e) {
-                \Log::error('Error detallado al enviar el correo: ' . $e->getMessage());
-                \Log::error('Trace: ' . $e->getTraceAsString());
-                return redirect()->back()->with('error', 'Error al enviar el correo: ' . $e->getMessage());
-            }
+            // Enviar el correo
+            Mail::to($request->email)->send(new InvitationMail($invitation));
 
+            return redirect()->back()->with('success', 'Invitación enviada exitosamente');
         } catch (\Exception $e) {
-            \Log::error('Error en el proceso de invitación: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al procesar la invitación: ' . $e->getMessage());
+            \Log::error('Error al enviar invitación: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al enviar la invitación: ' . $e->getMessage());
         }
     }
 

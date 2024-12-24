@@ -60,6 +60,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the user's role information
+     */
+    public function users_role()
+    {
+        return $this->hasOne(Users_Role::class);
+    }
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
