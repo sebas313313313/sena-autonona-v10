@@ -35,6 +35,17 @@
                                 </select>
                             </div>
 
+                            <!-- Select de Componente -->
+                            <div class="col-md-4 mb-3">
+                                <label for="farm_component_id" class="form-label">Componente:</label>
+                                <select class="form-select" name="farm_component_id" id="farm_component_id" required>
+                                    <option value="">Seleccionar componente...</option>
+                                    @foreach($components as $component)
+                                        <option value="{{ $component->id }}">{{ $component->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <!-- Fecha y Hora -->
                             <div class="col-md-4 mb-3">
                                 <label for="date" class="form-label">Fecha:</label>
@@ -94,6 +105,8 @@
                                     <small class="text-muted">
                                         Fecha: {{ \Carbon\Carbon::parse($task->date)->format('d/m/Y') }} 
                                         Hora: {{ \Carbon\Carbon::parse($task->time)->format('H:i') }}
+                                        <br>
+                                        Componente: {{ $task->farmComponent->name }}
                                     </small>
                                 </div>
                                 <div>
@@ -126,6 +139,8 @@
                                     <small class="text-muted">
                                         Fecha: {{ \Carbon\Carbon::parse($task->date)->format('d/m/Y') }} 
                                         Hora: {{ \Carbon\Carbon::parse($task->time)->format('H:i') }}
+                                        <br>
+                                        Componente: {{ $task->farmComponent->name }}
                                     </small>
                                 </div>
                                 <div class="d-flex align-items-center">
