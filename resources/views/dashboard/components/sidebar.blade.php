@@ -4,7 +4,6 @@
             <div class="logo-title-wrapper">
                 <div class="spiral-sun-logo">
                     <svg viewBox="0 0 60 60" class="spiral-svg">
-                        <!-- Espiral central -->
                         <path class="spiral-path" d="
                             M 30 15
                             A 15 15 0 0 1 45 30
@@ -25,6 +24,7 @@
     
     <nav class="sidebar-nav">
         <ul>
+            {{-- Datos siempre visible para todos --}}
             <li>
                 <a href="{{ route('dashboard.home') }}" class="{{ request()->routeIs('dashboard.home') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
@@ -32,15 +32,7 @@
                 </a>
             </li>
             
-            @if(session('farm_role') != 'operario')
-            <li>
-                <a href="{{ route('widgets') }}" class="{{ request()->routeIs('widgets') ? 'active' : '' }}">
-                    <i class="fas fa-th"></i>
-                    <span>Granjas</span>
-                </a>
-            </li>
-            @endif
-            
+            {{-- Tareas visible para todos dentro de una granja --}}
             @if(session('current_farm_id'))
                 <li>
                     <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'active' : '' }}">
@@ -50,20 +42,30 @@
                 </li>
             @endif
             
-            @if(session('farm_role') != 'operario')
-            <li>
-                <a href="{{ route('forms') }}" class="{{ request()->routeIs('forms') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i>
-                    <span>Usuarios</span>
-                </a>
-            </li>
-            
-            <li>
-                <a href="{{ route('tables') }}" class="{{ request()->routeIs('tables') ? 'active' : '' }}">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Estadísticas</span>
-                </a>
-            </li>
+            {{-- Las siguientes opciones solo son visibles para administradores --}}
+            @if(session('farm_role') === 'admin')
+                {{-- Granjas siempre visible para administradores --}}
+                <li>
+                    <a href="{{ route('widgets') }}" class="{{ request()->routeIs('widgets') ? 'active' : '' }}">
+                        <i class="fas fa-th"></i>
+                        <span>Granjas</span>
+                    </a>
+                </li>
+                
+                {{-- Usuarios y Estadísticas --}}
+                <li>
+                    <a href="{{ route('forms') }}" class="{{ request()->routeIs('forms') ? 'active' : '' }}">
+                        <i class="fas fa-users"></i>
+                        <span>Usuarios</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="{{ route('tables') }}" class="{{ request()->routeIs('tables') ? 'active' : '' }}">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Estadísticas</span>
+                    </a>
+                </li>
             @endif
         </ul>
     </nav>
@@ -94,60 +96,62 @@
     height: 100%;
 }
 
+.spiral-path {
+    fill: none;
+    stroke: #22c55e;
+    stroke-width: 1.5;
+}
+
 .sidebar-title {
     font-size: 1.2rem;
     margin: 0;
     color: #22c55e;
 }
 
-.spiral-path {
-    fill: none;
-    stroke: #22c55e;
-    stroke-width: 2;
-    animation: draw-spiral 3s linear forwards, rotate-spiral 20s linear infinite;
-    stroke-dasharray: 400;
-    stroke-dashoffset: 400;
-    transform-origin: 30px 30px;
+.sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    padding: 1rem;
 }
 
-@keyframes draw-spiral {
-    to {
-        stroke-dashoffset: 0;
-    }
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-@keyframes rotate-spiral {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.sidebar-nav li {
+    margin-bottom: 0.5rem;
 }
 
-/* Estilos para el sidebar responsive */
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease-in-out;
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        z-index: 1050;
-        background: white;
-        width: 250px;
-    }
-    
-    .sidebar.show {
-        transform: translateX(0);
-    }
-    
-    body.sidebar-open::after {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1040;
-    }
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #4b5563;
+    text-decoration: none;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+}
+
+.sidebar-nav a:hover {
+    background-color: #f3f4f6;
+    color: #22c55e;
+}
+
+.sidebar-nav a.active {
+    background-color: #22c55e;
+    color: #ffffff;
+}
+
+.sidebar-nav i {
+    width: 20px;
+    margin-right: 0.75rem;
 }
 </style>

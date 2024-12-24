@@ -97,8 +97,21 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/tablero/{farm_id}', function ($farm_id) {
             $farm = \App\Models\Farm::findOrFail($farm_id);
-            session(['current_farm_id' => $farm_id]); // Guardamos el ID en la sesión
-            session(['farm_role' => $farm->usersRole->role]); // Guardamos el rol en la sesión
+            $user = auth()->user();
+            
+            session(['current_farm_id' => $farm_id]);
+            
+            // Si el usuario es el dueño de la granja
+            if ($farm->users_role_id === $user->userRole->id) {
+                session(['farm_role' => 'admin']);
+            } else {
+                // Si el usuario es invitado, obtener su rol de la relación
+                $farmUser = $farm->users()->where('users.id', $user->id)->first();
+                if ($farmUser) {
+                    session(['farm_role' => $farmUser->pivot->role]);
+                }
+            }
+            
             return view('dashboard.index', compact('farm'));
         })->name('dashboard');
 
