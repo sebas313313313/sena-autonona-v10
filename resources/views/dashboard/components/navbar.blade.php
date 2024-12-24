@@ -1,7 +1,7 @@
 <nav class="navbar">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center w-100">
         <!-- Botón de menú para móvil -->
-        <button class="navbar-toggler d-lg-none" type="button" id="sidebarToggle">
+        <button class="navbar-toggler" type="button" id="sidebarToggle" aria-label="Toggle navigation">
             <i class="fas fa-bars"></i>
         </button>
 

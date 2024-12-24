@@ -39,6 +39,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Scripts -->
     <script src="{{ asset('dashboard-assets/js/app.js') }}"></script>
+    <script src="{{ asset('dashboard-assets/js/dashboard.js') }}"></script>
     
     <script>
         // Configuración global de AJAX para CSRF
