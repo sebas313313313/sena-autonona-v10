@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Component_Task;
 use App\Models\Farm;
+use App\Models\Farm_Component;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -20,6 +21,9 @@ class TaskController extends Controller
         $farm = Farm::with(['users' => function($query) {
             $query->wherePivot('role', 'operario');
         }])->findOrFail($farm_id);
+
+        // Obtener los componentes de la granja para el formulario
+        $components = Farm_Component::where('farm_id', $farm_id)->get();
         
         // Si es operario, solo mostrar sus tareas
         if (session('farm_role') === 'operario') {
@@ -33,6 +37,7 @@ class TaskController extends Controller
             return view('dashboard.tasks.index', [
                 'tasks' => $tasks,
                 'farm' => $farm,
+                'components' => $components,
                 'isOperario' => true
             ]);
         }
@@ -42,6 +47,7 @@ class TaskController extends Controller
         
         return view('dashboard.tasks.index', [
             'farm' => $farm,
+            'components' => $components,
             'isOperario' => false
         ]);
     }
@@ -65,13 +71,19 @@ class TaskController extends Controller
             'date' => 'required|date',
             'time' => 'required',
             'comments' => 'required|string',
-            'status' => 'required|boolean'
+            'status' => 'required|boolean',
+            'farm_component_id' => 'required|exists:farm_components,id'
         ]);
 
         // Verificar que el usuario es operario de esta granja
         $user = $farm->users()->wherePivot('role', 'operario')
                      ->where('users.id', $request->user_id)
                      ->firstOrFail();
+
+        // Verificar que el componente pertenece a esta granja
+        $component = Farm_Component::where('farm_id', $farm_id)
+                                 ->where('id', $request->farm_component_id)
+                                 ->firstOrFail();
 
         $task = Component_Task::create([
             'user_id' => $request->user_id,
