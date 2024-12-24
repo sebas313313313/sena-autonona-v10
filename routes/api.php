@@ -109,6 +109,8 @@ Route::prefix('sensor')->group(function () {
     Route::delete('/destroy/{id}', [SensorController::class, 'destroy']);
 });
 
+Route::get('/sensor/index', [SensorController::class, 'index']);
+
 // RUTAS_CALIBRATION (HAIVER VELASCO)
 Route::prefix('calibration')->group(function () {
     Route::get('/index', [CalibrationController::class, 'index']);

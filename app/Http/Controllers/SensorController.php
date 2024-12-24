@@ -20,19 +20,19 @@ class SensorController extends Controller
      */
     public function index(Request $request)
     {
-        Log::info('Request type:', ['type' => $request->type]);
+        \Log::info('Request type:', ['type' => $request->type]);
         
         $query = Sensor::query();
 
         // Filtrar por tipo si se especifica
         if ($request->has('type')) {
             $type = $request->type;
-            Log::info('Filtering by type:', ['type' => $type]);
+            \Log::info('Filtering by type:', ['type' => $type]);
             $query->where('farm_type', $type);
         }
 
         $sensors = $query->get();
-        Log::info('Sensors found:', ['count' => $sensors->count(), 'sensors' => $sensors->toArray()]);
+        \Log::info('Sensors found:', ['count' => $sensors->count(), 'sensors' => $sensors->toArray()]);
         
         return response()->json(['data' => $sensors]);
     }

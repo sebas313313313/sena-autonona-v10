@@ -8,6 +8,8 @@ use App\Models\Users_Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use App\Models\Component;
+use App\Models\Farm_Component;
 
 /**
  * Controlador para gestionar las granjas del sistema
@@ -44,30 +46,31 @@ class FarmController extends Controller
                             ->get();
         Log::info('Granjas invitadas encontradas: ' . $invitedFarms->count());
         
+        // Obtener todos los componentes disponibles
+        $components = \App\Models\Component::all();
+
         // Log de los IDs de las granjas invitadas
         foreach ($invitedFarms as $farm) {
             Log::info('Granja invitada: ID=' . $farm->id . ', Role=' . $farm->pivot->role);
         }
 
-        // Depuración: Mostrar información en la vista
-        $debug = [
-            'user_id' => $user->id,
-            'user_email' => $user->email,
-            'invited_farms_count' => $invitedFarms->count(),
-            'invited_farms' => $invitedFarms->map(function($farm) {
-                return [
-                    'id' => $farm->id,
-                    'address' => $farm->address,
-                    'role' => $farm->pivot->role ?? 'No role'
-                ];
-            })
-        ];
-
         return view('farms.index', [
             'farms' => $farms,
             'invitedFarms' => $invitedFarms,
             'municipalities' => Municipality::all(),
-            'debug' => $debug
+            'components' => $components,
+            'debug' => [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'invited_farms_count' => $invitedFarms->count(),
+                'invited_farms' => $invitedFarms->map(function($farm) {
+                    return [
+                        'id' => $farm->id,
+                        'address' => $farm->address,
+                        'role' => $farm->pivot->role ?? 'No role'
+                    ];
+                })
+            ]
         ]);
     }
 
@@ -86,33 +89,104 @@ class FarmController extends Controller
      */
     public function store(Request $request)
     {
-        $userRole = auth()->user()->userRole;
-        if (!$userRole) {
-            return redirect()->route('login');
-        }
+        try {
+            $userRole = auth()->user()->userRole;
+            if (!$userRole) {
+                return redirect()->route('login');
+            }
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'farm_type' => 'required|string|in:acuaponica,hidroponica',
-            'address' => 'required|string|max:255',
-            'vereda' => 'required|string|max:255',
-            'extension' => 'required|numeric',
-            'municipality_id' => 'required|exists:municipalities,id',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric'
-        ]);
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'farm_type' => 'required|string|in:acuaponica,hidroponica,vigilancia,riego',
+                'address' => 'required|string|max:255',
+                'vereda' => 'required|string|max:255',
+                'extension' => 'required|numeric',
+                'municipality_id' => 'required|exists:municipalities,id',
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'sensors' => 'array',
+                'sensors.*' => 'exists:sensors,id'
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Iniciar transacción
+            \DB::beginTransaction();
+
+            try {
+                // Crear la granja
+                $farm = new Farm();
+                $farm->name = $request->name;
+                $farm->farm_type = $request->farm_type;
+                $farm->address = $request->address;
+                $farm->vereda = $request->vereda;
+                $farm->extension = $request->extension;
+                $farm->municipality_id = $request->municipality_id;
+                $farm->latitude = $request->latitude;
+                $farm->longitude = $request->longitude;
+                $farm->users_role_id = $userRole->id;
+                $farm->save();
+
+                // Obtener el componente basado en el tipo de granja
+                $componentName = match ($request->farm_type) {
+                    'acuaponica' => 'Acuaponia',
+                    'hidroponica' => 'Hidroponia',
+                    'vigilancia' => 'Sistema de Vigilancia',
+                    'riego' => 'Sistema de Riego',
+                };
+                
+                $component = Component::where('description', $componentName)->first();
+
+                if (!$component) {
+                    throw new \Exception('Componente no encontrado para el tipo: ' . $request->farm_type);
+                }
+
+                // Crear la relación en farm_components
+                $farmComponent = Farm_Component::create([
+                    'farm_id' => $farm->id,
+                    'component_id' => $component->id,
+                    'description' => 'Componente principal de ' . $farm->name
+                ]);
+
+                // Asociar los sensores seleccionados
+                if ($request->has('sensors')) {
+                    foreach ($request->sensors as $sensorId) {
+                        \DB::table('sensor_components')->insert([
+                            'sensor_id' => $sensorId,
+                            'farm_component_id' => $farmComponent->id,
+                            'min' => 0,
+                            'max' => 100,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
+                }
+
+                // Confirmar transacción
+                \DB::commit();
+
+                return redirect()->route('farms.index')->with('success', 'Granja creada exitosamente.');
+
+            } catch (\Exception $e) {
+                // Revertir transacción en caso de error
+                \DB::rollback();
+                \Log::error('Error al crear granja: ' . $e->getMessage());
+                return redirect()->back()
+                    ->with('error', 'Error al crear la granja: ' . $e->getMessage())
+                    ->withInput();
+            }
+        } catch (\Exception $e) {
+            // Revertir transacción en caso de error
+            \DB::rollback();
+            \Log::error('Error al crear granja: ' . $e->getMessage());
             return redirect()->back()
-                ->withErrors($validator)
+                ->with('error', 'Error al crear la granja. Por favor, intente nuevamente.')
                 ->withInput();
         }
-
-        $farm = new Farm($request->all());
-        $farm->users_role_id = $userRole->id;
-        $farm->save();
-
-        return redirect()->back()->with('success', 'Granja creada exitosamente.');
     }
 
     /**

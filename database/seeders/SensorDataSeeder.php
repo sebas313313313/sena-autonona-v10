@@ -32,21 +32,11 @@ class SensorDataSeeder extends Seeder
             'municipality_id' => 1 // Asegúrate de que este ID existe
         ]);
 
-        // Crear componentes base
-        $components = [
-            'Invernadero principal',
-            'Invernadero secundario',
-            'Sistema de riego automatizado',
-            'Sistema de control ambiental',
-            'Área de almacenamiento'
-        ];
-
+        // Usar los componentes existentes
+        $components = Component::all();
+        
         $farmComponentIds = [];
-        foreach ($components as $componentDescription) {
-            $component = Component::create([
-                'description' => $componentDescription
-            ]);
-
+        foreach ($components as $component) {
             $farmComponent = Farm_Component::create([
                 'farm_id' => $farm->id,
                 'component_id' => $component->id,

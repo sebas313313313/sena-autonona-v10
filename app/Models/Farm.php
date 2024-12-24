@@ -12,11 +12,11 @@ class Farm extends Model
     protected $fillable = [
         'name',
         'farm_type',
-        'latitude',
-        'longitude',
         'address',
         'vereda',
         'extension',
+        'latitude',
+        'longitude',
         'users_role_id',
         'municipality_id'
     ];

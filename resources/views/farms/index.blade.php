@@ -355,8 +355,10 @@
                         <select class="form-select @error('farm_type') is-invalid @enderror" 
                                 id="farm_type" name="farm_type" required>
                             <option value="">Seleccione el tipo de granja</option>
-                            <option value="acuaponica" {{ old('farm_type') == 'acuaponica' ? 'selected' : '' }}>Acuapónica</option>
-                            <option value="hidroponica" {{ old('farm_type') == 'hidroponica' ? 'selected' : '' }}>Hidropónica</option>
+                            <option value="acuaponica">Acuaponia</option>
+                            <option value="hidroponica">Hidroponia</option>
+                            <option value="vigilancia">Sistema de Vigilancia</option>
+                            <option value="riego">Sistema de Riego</option>
                         </select>
                         @error('farm_type')
                             <div class="invalid-feedback">
@@ -477,7 +479,17 @@
             async function cargarSensores(tipo) {
                 try {
                     console.log('Cargando sensores para tipo:', tipo);
-                    const response = await fetch(`/api/sensor/index?type=${tipo}`);
+                    const response = await fetch(`/api/sensor/index?type=${tipo}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
                     const data = await response.json();
                     console.log('Respuesta del servidor:', data);
                     
@@ -491,23 +503,43 @@
                         });
                         // Ajustar el tamaño del select según la cantidad de sensores
                         sensorsSelect.size = Math.min(8, data.data.length);
+                        sensorsSelect.disabled = false;
                     } else {
                         console.log('No se encontraron sensores para el tipo:', tipo);
+                        const option = new Option('No hay sensores disponibles', '');
+                        sensorsSelect.add(option);
+                        sensorsSelect.disabled = true;
                     }
                 } catch (error) {
-                    console.error('Error al cargar los sensores:', error);
+                    console.error('Error al cargar sensores:', error);
+                    sensorsSelect.innerHTML = '';
+                    const option = new Option('Error al cargar sensores', '');
+                    sensorsSelect.add(option);
+                    sensorsSelect.disabled = true;
                 }
             }
 
+            // Escuchar cambios en el tipo de granja
             farmTypeSelect.addEventListener('change', function() {
                 const selectedType = this.value;
-                console.log('Tipo de granja seleccionado:', selectedType);
                 if (selectedType) {
                     cargarSensores(selectedType);
                 } else {
                     sensorsSelect.innerHTML = '';
+                    const option = new Option('Primero seleccione un tipo de granja', '');
+                    sensorsSelect.add(option);
+                    sensorsSelect.disabled = true;
                 }
             });
+
+            // Cargar sensores iniciales si hay un tipo seleccionado
+            if (farmTypeSelect.value) {
+                cargarSensores(farmTypeSelect.value);
+            } else {
+                const option = new Option('Primero seleccione un tipo de granja', '');
+                sensorsSelect.add(option);
+                sensorsSelect.disabled = true;
+            }
         });
     </script>
 @endsection

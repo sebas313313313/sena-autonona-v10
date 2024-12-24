@@ -9,6 +9,8 @@ use Database\Seeders\SensorDataSeeder;
 use Database\Seeders\SensorSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\SecurityQuestionsSeeder;
+use Database\Seeders\ComponentSeeder;
+use Database\Seeders\UsersRoleSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,12 +20,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SecurityQuestionsSeeder::class,    // Preguntas de seguridad
+            SecurityQuestionsSeeder::class,
             IdentificationTypeSeeder::class,
             MunicipalitySeeder::class,
+            UsersRoleSeeder::class,        // Primero roles de usuario
+            ComponentSeeder::class,
             SensorSeeder::class,
-            UserSeeder::class,         // Primero crear usuario y rol
-            SensorDataSeeder::class,   // Luego crear datos de sensores y granjas
+            UserSeeder::class,
+            SensorDataSeeder::class,
         ]);
     }
 }

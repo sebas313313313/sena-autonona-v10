@@ -172,4 +172,41 @@
         document.getElementById('date')?.setAttribute('min', today);
     });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener el formulario de asignación de tareas
+    const taskForm = document.querySelector('form[action="{{ route('tasks.store') }}"]');
+    
+    if (taskForm) {
+        taskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Mostrar confirmación antes de enviar
+            Swal.fire({
+                title: '¿Confirmar asignación?',
+                text: '¿Estás seguro de que deseas asignar esta tarea?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, asignar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Mostrar indicador de carga
+                    Swal.fire({
+                        title: 'Asignando tarea...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Enviar el formulario
+                    taskForm.submit();
+                }
+            });
+        });
+    }
+});
+</script>
 @endpush

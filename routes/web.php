@@ -43,7 +43,8 @@ Route::get('/', function () {
     return view('farms.index', [
         'farms' => $farms,
         'invitedFarms' => $invitedFarms,
-        'municipalities' => \App\Models\Municipality::all()
+        'municipalities' => \App\Models\Municipality::all(),
+        'components' => \App\Models\Component::all()
     ]);
 })->name('home');
 
@@ -125,6 +126,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/tasks', [App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
         Route::put('/tasks/{task}', [App\Http\Controllers\TaskController::class, 'update'])->name('tasks.update');
         Route::delete('/tasks/{task}', [App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy');
+
+        // Rutas de componentes y sensores
+        Route::get('/components/{component}/sensors', [App\Http\Controllers\SensorComponentController::class, 'getSensorsByComponent'])->name('components.sensors');
 
         // Secciones del dashboard
         Route::get('/widgets', function () {

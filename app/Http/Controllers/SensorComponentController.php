@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Component;
 use App\Models\Sensor_Component;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -104,5 +105,25 @@ class SensorComponentController extends Controller
         return response()->json([
             'message' => 'Componente de sensor eliminado exitosamente'
         ]);
+    }
+
+    /**
+     * Get sensors for a specific component
+     */
+    public function getSensorsByComponent(Component $component)
+    {
+        $sensors = Sensor_Component::where('farm_component_id', $component->id)
+            ->with('sensor')
+            ->get()
+            ->map(function($sensor_component) {
+                return [
+                    'id' => $sensor_component->sensor->id,
+                    'description' => $sensor_component->sensor->description,
+                    'min' => $sensor_component->min,
+                    'max' => $sensor_component->max
+                ];
+            });
+
+        return response()->json(['data' => $sensors]);
     }
 }

@@ -54,47 +54,59 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        // Solo los administradores pueden crear tareas
-        if (session('farm_role') !== 'admin') {
-            abort(403, 'No tienes permiso para crear tareas.');
+        try {
+            // Solo los administradores pueden crear tareas
+            if (session('farm_role') !== 'admin') {
+                return redirect()->back()->with('error', 'No tienes permiso para crear tareas.');
+            }
+
+            $farm_id = session('current_farm_id');
+            if (!$farm_id) {
+                return redirect()->back()->with('error', 'Por favor, selecciona una granja primero.');
+            }
+            
+            $farm = Farm::findOrFail($farm_id);
+            
+            // Obtener el farm_component_id de la granja actual
+            $farmComponent = Farm_Component::where('farm_id', $farm_id)->first();
+            
+            if (!$farmComponent) {
+                return redirect()->back()->with('error', 'Esta granja no tiene un tipo asignado.');
+            }
+            
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'date' => 'required|date',
+                'time' => 'required',
+                'comments' => 'required|string',
+                'status' => 'required|boolean'
+            ], [
+                'user_id.required' => 'Por favor, selecciona un operario.',
+                'date.required' => 'La fecha es requerida.',
+                'time.required' => 'La hora es requerida.',
+                'comments.required' => 'La descripción de la tarea es requerida.'
+            ]);
+
+            // Verificar que el usuario es operario de esta granja
+            $user = $farm->users()->wherePivot('role', 'operario')
+                         ->where('users.id', $request->user_id)
+                         ->firstOrFail();
+
+            $task = Component_Task::create([
+                'user_id' => $request->user_id,
+                'date' => $request->date,
+                'time' => $request->time,
+                'comments' => $request->comments,
+                'status' => $request->status,
+                'farm_component_id' => $farmComponent->id // Usar el componente de la granja actual
+            ]);
+
+            return redirect()->back()->with('success', '¡Tarea asignada exitosamente al operario!');
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al crear tarea: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Hubo un error al asignar la tarea. Por favor, inténtalo de nuevo.');
         }
-
-        $farm_id = session('current_farm_id');
-        if (!$farm_id) {
-            return redirect()->back()->with('error', 'Por favor, selecciona una granja primero.');
-        }
-        
-        $farm = Farm::findOrFail($farm_id);
-        
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'date' => 'required|date',
-            'time' => 'required',
-            'comments' => 'required|string',
-            'status' => 'required|boolean',
-            'farm_component_id' => 'required|exists:farm_components,id'
-        ]);
-
-        // Verificar que el usuario es operario de esta granja
-        $user = $farm->users()->wherePivot('role', 'operario')
-                     ->where('users.id', $request->user_id)
-                     ->firstOrFail();
-
-        // Verificar que el componente pertenece a esta granja
-        $component = Farm_Component::where('farm_id', $farm_id)
-                                 ->where('id', $request->farm_component_id)
-                                 ->firstOrFail();
-
-        $task = Component_Task::create([
-            'user_id' => $request->user_id,
-            'date' => $request->date,
-            'time' => $request->time,
-            'comments' => $request->comments,
-            'status' => $request->status,
-            'farm_component_id' => $request->farm_component_id
-        ]);
-
-        return redirect()->back()->with('success', 'Tarea creada exitosamente');
     }
 
     public function update(Request $request, Component_Task $task)
