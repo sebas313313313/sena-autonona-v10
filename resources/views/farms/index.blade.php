@@ -237,7 +237,7 @@
             @forelse($farms as $farm)
                 <div class="farm-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="farm-content" style="cursor: pointer; width: 100%;" onclick="window.location.href='{{ route('dashboard', ['farm_id' => $farm->id]) }}'">
+                        <div class="farm-content" style="cursor: pointer; width: 100%;" onclick="window.location.href='{{ route('dashboard.home', ['farm_id' => $farm->id]) }}'">
                             <h3 class="farm-title mb-3">{{ $farm->name }}</h3>
                             <ul class="farm-details list-unstyled">
                                 <li>
@@ -287,16 +287,9 @@
             Granjas Invitadas
         </h2>
 
-        @if(config('app.debug') && isset($debug))
-        <div class="alert alert-info">
-            <h4>Información de Depuración:</h4>
-            <pre>{{ json_encode($debug, JSON_PRETTY_PRINT) }}</pre>
-        </div>
-        @endif
-
         <div class="farms-container">
             @forelse($invitedFarms ?? [] as $farm)
-                <div class="farm-card" onclick="window.location.href='{{ route('dashboard', ['farm_id' => $farm->id]) }}'">
+                <div class="farm-card" onclick="window.location.href='{{ route('dashboard.home', ['farm_id' => $farm->id]) }}'">
                     <h3 class="farm-title">{{ $farm->address }}</h3>
                     <ul class="farm-details">
                         <li>
@@ -387,6 +380,14 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Sensores</label>
+                        <div id="sensorList" class="list-group">
+                            <!-- Los sensores se cargarán dinámicamente según el tipo de granja -->
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Ubicación en el Mapa</label>
                         <div id="map"></div>
@@ -398,13 +399,6 @@
                     <div class="mb-3">
                         <label for="longitude" class="form-label">Longitud</label>
                         <input type="number" step="any" class="form-control" id="longitude" name="longitude" required readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="sensors" class="form-label">Sensores</label>
-                        <select class="form-select" id="sensors" name="sensors[]" multiple size="4">
-                            <!-- Los sensores se cargarán dinámicamente según el tipo de granja -->
-                        </select>
-                        <div class="form-text">Mantenga presionada la tecla Ctrl para seleccionar múltiples sensores</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -425,6 +419,131 @@
     <script>
         let map;
         let marker;
+
+        // Definir los sensores por tipo de granja
+        const sensorsByType = {
+            'acuaponica': {
+                'esenciales': [
+                    'Sensor de Humedad en Tierra',
+                    'Sensor Nivel de Líquidos',
+                    'Sensor de Temperatura y Humedad',
+                    'Sensor Fotorresistor',
+                    'Sensor de pH',
+                    'Sensor Temperatura Ambiente Alta Resolución',
+                    'Sensor de Oxígeno Disuelto',
+                    'Sensor de Amonio/Nitrito/Nitrato'
+                ],
+                'utiles': [
+                    'Display OLED',
+                    'Joystick',
+                    'Sensor Ultrasónico',
+                    'LED RGB',
+                    'Servo Motor'
+                ]
+            },
+            'hidroponica': {
+                'esenciales': [
+                    'Sensor de Humedad en Tierra',
+                    'Sensor Nivel de Líquidos',
+                    'Sensor de Temperatura y Humedad',
+                    'Sensor Fotorresistor',
+                    'Sensor de pH',
+                    'Sensor Temperatura Ambiente Alta Resolución',
+                    'Sensor de Conductividad Eléctrica/CE'
+                ],
+                'utiles': [
+                    'Display OLED',
+                    'Joystick',
+                    'Sensor Ultrasónico',
+                    'LED RGB',
+                    'Servo Motor'
+                ]
+            },
+            'vigilancia': {
+                'esenciales': [
+                    'Sensor de Movimiento PIR',
+                    'Sensor de Presencia',
+                    'Cámara con Visión Nocturna',
+                    'Sensor Magnético de Puerta/Ventana',
+                    'Sensor de Rotura de Cristal'
+                ],
+                'utiles': [
+                    'Sensor de Humo',
+                    'Sensor de Gas',
+                    'Sensor de Inundación',
+                    'Sensor de Vibración',
+                    'Micrófono'
+                ]
+            },
+            'riego': {
+                'esenciales': [
+                    'Sensor de Humedad del Suelo',
+                    'Sensor de Lluvia',
+                    'Sensor de Nivel de Agua'
+                ],
+                'utiles': [
+                    'Sensor de Flujo de Agua',
+                    'Sensor de Presión de Agua',
+                    'Sensor de Temperatura del Suelo',
+                    'Evaporímetro',
+                    'Sensor de Radiación Solar'
+                ]
+            }
+        };
+
+        // Función para actualizar la lista de sensores
+        function updateSensorList() {
+            const farmType = document.getElementById('farm_type').value;
+            const sensorList = document.getElementById('sensorList');
+            sensorList.innerHTML = '';
+
+            if (farmType && sensorsByType[farmType]) {
+                // Agregar sensores esenciales
+                if (sensorsByType[farmType].esenciales) {
+                    const esencialesTitle = document.createElement('div');
+                    esencialesTitle.className = 'fw-bold mb-2 mt-3';
+                    esencialesTitle.textContent = 'Sensores Esenciales';
+                    sensorList.appendChild(esencialesTitle);
+
+                    sensorsByType[farmType].esenciales.forEach(sensor => {
+                        const div = document.createElement('div');
+                        div.className = 'form-check';
+                        div.innerHTML = `
+                            <input class="form-check-input" type="checkbox" name="sensors[]" 
+                                   value="${sensor}" id="sensor_${sensor.replace(/\s+/g, '_')}">
+                            <label class="form-check-label" for="sensor_${sensor.replace(/\s+/g, '_')}">
+                                ${sensor}
+                            </label>
+                        `;
+                        sensorList.appendChild(div);
+                    });
+                }
+
+                // Agregar sensores útiles
+                if (sensorsByType[farmType].utiles) {
+                    const utilesTitle = document.createElement('div');
+                    utilesTitle.className = 'fw-bold mb-2 mt-3';
+                    utilesTitle.textContent = 'Sensores Útiles';
+                    sensorList.appendChild(utilesTitle);
+
+                    sensorsByType[farmType].utiles.forEach(sensor => {
+                        const div = document.createElement('div');
+                        div.className = 'form-check';
+                        div.innerHTML = `
+                            <input class="form-check-input" type="checkbox" name="sensors[]" 
+                                   value="${sensor}" id="sensor_${sensor.replace(/\s+/g, '_')}">
+                            <label class="form-check-label" for="sensor_${sensor.replace(/\s+/g, '_')}">
+                                ${sensor}
+                            </label>
+                        `;
+                        sensorList.appendChild(div);
+                    });
+                }
+            }
+        }
+
+        // Agregar el evento change al select de tipo de granja
+        document.getElementById('farm_type').addEventListener('change', updateSensorList);
 
         function initMap() {
             // Coordenadas iniciales (Colombia)
@@ -471,74 +590,9 @@
 
             initMap();
 
-            // Manejo de sensores según el tipo de granja
-            const farmTypeSelect = document.getElementById('farm_type');
-            const sensorsSelect = document.getElementById('sensors');
-
-            // Función para cargar los sensores desde el servidor
-            async function cargarSensores(tipo) {
-                try {
-                    console.log('Cargando sensores para tipo:', tipo);
-                    const response = await fetch(`/api/sensor/index?type=${tipo}`, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log('Respuesta del servidor:', data);
-                    
-                    sensorsSelect.innerHTML = '';
-                    
-                    if (data.data && data.data.length > 0) {
-                        console.log('Sensores encontrados:', data.data.length);
-                        data.data.forEach(sensor => {
-                            const option = new Option(sensor.description, sensor.id);
-                            sensorsSelect.add(option);
-                        });
-                        // Ajustar el tamaño del select según la cantidad de sensores
-                        sensorsSelect.size = Math.min(8, data.data.length);
-                        sensorsSelect.disabled = false;
-                    } else {
-                        console.log('No se encontraron sensores para el tipo:', tipo);
-                        const option = new Option('No hay sensores disponibles', '');
-                        sensorsSelect.add(option);
-                        sensorsSelect.disabled = true;
-                    }
-                } catch (error) {
-                    console.error('Error al cargar sensores:', error);
-                    sensorsSelect.innerHTML = '';
-                    const option = new Option('Error al cargar sensores', '');
-                    sensorsSelect.add(option);
-                    sensorsSelect.disabled = true;
-                }
-            }
-
-            // Escuchar cambios en el tipo de granja
-            farmTypeSelect.addEventListener('change', function() {
-                const selectedType = this.value;
-                if (selectedType) {
-                    cargarSensores(selectedType);
-                } else {
-                    sensorsSelect.innerHTML = '';
-                    const option = new Option('Primero seleccione un tipo de granja', '');
-                    sensorsSelect.add(option);
-                    sensorsSelect.disabled = true;
-                }
-            });
-
             // Cargar sensores iniciales si hay un tipo seleccionado
-            if (farmTypeSelect.value) {
-                cargarSensores(farmTypeSelect.value);
-            } else {
-                const option = new Option('Primero seleccione un tipo de granja', '');
-                sensorsSelect.add(option);
-                sensorsSelect.disabled = true;
+            if (document.getElementById('farm_type').value) {
+                updateSensorList();
             }
         });
     </script>

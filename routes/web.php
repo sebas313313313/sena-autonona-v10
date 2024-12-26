@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DashboardController;
 use App\Models\Municipality;
 use App\Models\IdentificationType;
 use Illuminate\Http\Request;
@@ -88,9 +89,7 @@ Route::middleware('auth')->group(function () {
      */
     Route::middleware('farm.access')->group(function () {
         // Dashboard y tablero
-        Route::get('/dashboard', function () {
-            return view('dashboard.index');
-        })->name('dashboard.home');
+        Route::get('/dashboard/{farm_id}', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard.home');
 
         Route::get('/tablero', function () {
             return view('dashboard.tables.index');

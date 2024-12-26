@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Component_Task;
 use App\Models\Farm;
 use App\Models\Component;
+use App\Models\Sensor_Component;
 
 class Farm_Component extends Model
 {
@@ -39,9 +40,13 @@ class Farm_Component extends Model
         return $this->belongsTo(Component::class);
     }
 
+    public function sensorComponents()
+    {
+        return $this->hasMany(Sensor_Component::class, 'farm_component_id');
+    }
+
     public function scopeFilter($query)
     {
-
         if (empty($this->allowFilter) || empty(request('filter'))) {
             return;
         }
@@ -50,11 +55,8 @@ class Farm_Component extends Model
         $allowFilter = collect($this->allowFilter);
 
         foreach ($filters as $filter => $value) {
-
             if ($allowFilter->contains($filter)) {
-
-
-                $query->where($filter, 'LIKE', '%' . $value . '%');
+                $query->where($filter, 'LIKE', "%$value%");
             }
         }
     }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Calibration;
 use App\Models\Farm_Component;
 use App\Models\Sensor;
+use App\Models\Sample;
 
 class Sensor_Component extends Model
 {
@@ -33,6 +34,21 @@ class Sensor_Component extends Model
         'max' => 'float'
     ];
 
+    public function farmComponent()
+    {
+        return $this->belongsTo(Farm_Component::class);
+    }
+
+    public function sensor()
+    {
+        return $this->belongsTo(Sensor::class);
+    }
+
+    public function samples()
+    {
+        return $this->hasMany(Sample::class, 'sensor_component_id');
+    }
+
     public function scopeFilter($query)
     {
         if (empty($this->allowFilter) || empty(request('filter'))) {
@@ -56,15 +72,5 @@ class Sensor_Component extends Model
     public function calibrations()
     {
         return $this->hasMany(Calibration::class);
-    }
-
-    public function farmComponent()
-    {
-        return $this->belongsTo(Farm_Component::class, 'farm_component_id');
-    }
-
-    public function sensor()
-    {
-        return $this->belongsTo(Sensor::class);
     }
 }

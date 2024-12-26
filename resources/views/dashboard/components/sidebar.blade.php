@@ -26,7 +26,7 @@
         <ul>
             {{-- Datos siempre visible para todos --}}
             <li>
-                <a href="{{ route('dashboard.home') }}" class="{{ request()->routeIs('dashboard.home') ? 'active' : '' }}">
+                <a href="{{ route('dashboard.home', ['farm_id' => session('current_farm_id')]) }}" class="{{ request()->routeIs('dashboard.home') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
                     <span>Datos</span>
                 </a>

@@ -30,6 +30,11 @@ class Sample extends Model
     /**
      * Obtiene el componente del sensor asociado a esta muestra.
      */
+    public function sensorComponent()
+    {
+        return $this->belongsTo(Sensor_Component::class);
+    }
+
     public function scopeFilter($query, array $filters = null)
     {
         $filters = $filters ?? request('filter', []);
@@ -54,10 +59,5 @@ class Sample extends Model
         ->when($filters['sensor_component_id'] ?? false, function($query, $id) {
             $query->where('sensor_component_id', $id);
         });
-    }
-
-    public function sensorComponent()
-    {
-        return $this->belongsTo(Sensor_Component::class, 'sensor_component_id');
     }
 }

@@ -30,6 +30,45 @@
             </div>
         </div>
     </div>
+
+    <!-- Tasks Row -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tareas Pendientes</h5>
+                    @if($tasks->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tarea</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($tasks as $task)
+                                        <tr>
+                                            <td>{{ $task->description }}</td>
+                                            <td>{{ $task->date }}</td>
+                                            <td>
+                                                <span class="badge badge-warning">Pendiente</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-info">
+                            No hay tareas pendientes.
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
