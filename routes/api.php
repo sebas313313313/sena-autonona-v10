@@ -42,16 +42,6 @@ Route::prefix('municipalities')->group(function () {
     Route::delete('/destroy/{id}', [MunicipalityController::class, 'destroy']);
 });
 
-// RUTAS_PASSWORD (SEBAS)
-Route::prefix('password')->group(function () {
-    Route::get('/index', [PasswordController::class, 'index']);
-    Route::post('/create', [PasswordController::class, 'store']);
-    Route::get('/show/{id}', [PasswordController::class, 'show']);
-    Route::put('/update/{id}', [PasswordController::class, 'update']);
-    Route::delete('/destroy/{id}', [PasswordController::class, 'destroy']);
-    Route::post('/{password}/verify-answer', [PasswordController::class, 'verifyAnswer']);
-});
-
 // RUTAS_USERS_ROLE (SEBAS)
 Route::prefix('users_role')->group(function () {
     Route::get('/index', [Users_RoleController::class, 'index']);
@@ -80,15 +70,6 @@ Route::prefix('identification_type')->group(function () {
     Route::get('/show/{identification_type}', [IdentificationTypeController::class, 'show']);
     Route::put('/update/{identification_type}', [IdentificationTypeController::class, 'update']);
     Route::delete('/destroy/{identification_type}', [IdentificationTypeController::class, 'destroy']);
-});
-
-// RUTAS_JOB (SEBAS)
-Route::prefix('job')->group(function () {
-    Route::get('/index', [JobController::class, 'index']);
-    Route::post('/create', [JobController::class, 'store']);
-    Route::get('/show/{job}', [JobController::class, 'show']);
-    Route::put('/update/{job}', [JobController::class, 'update']);
-    Route::delete('/destroy/{job}', [JobController::class, 'destroy']);
 });
 
 // RUTAS_FARM (SEBAS)
