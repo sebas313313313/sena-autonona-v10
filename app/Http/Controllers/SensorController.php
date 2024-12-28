@@ -7,6 +7,7 @@ use App\Models\SensorData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Controlador para gestionar los sensores del sistema
@@ -114,24 +115,92 @@ class SensorController extends Controller
      */
     public function updateEstado(Request $request, $id)
     {
-        $request->validate([
-            'estado' => 'required|in:0,1,2'
-        ]);
+        try {
+            \Log::info('Actualizando estado de sensor:', [
+                'sensor_id' => $id,
+                'nuevo_estado' => $request->estado,
+                'request_data' => $request->all(),
+                'request_content' => $request->getContent()
+            ]);
 
-        $sensor = Sensor::findOrFail($id);
-        $sensor->estado = $request->estado;
-        $sensor->save();
+            $validator = Validator::make($request->all(), [
+                'estado' => 'required|in:activo,inactivo,mantenimiento'
+            ]);
 
-        $estados = [
-            '0' => 'Inactivo',
-            '1' => 'Activo',
-            '2' => 'En Mantenimiento'
-        ];
+            if ($validator->fails()) {
+                \Log::warning('Validación fallida:', [
+                    'errors' => $validator->errors()->toArray(),
+                    'input' => $request->all()
+                ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Estado del sensor actualizado a ' . $estados[$request->estado]
-        ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $sensor = Sensor::findOrFail($id);
+            $sensor->estado = $request->estado;
+            $sensor->save();
+
+            \Log::info('Estado de sensor actualizado:', [
+                'sensor_id' => $sensor->id,
+                'estado' => $sensor->estado
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado del sensor actualizado a ' . $request->estado,
+                'data' => $sensor
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar estado del sensor:', [
+                'sensor_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado del sensor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualiza el estado de un sensor
+     */
+    public function updateStatus($sensor_id, Request $request)
+    {
+        try {
+            $request->validate([
+                'estado' => 'required|in:0,1,2'
+            ]);
+
+            $sensorComponent = Sensor_Component::findOrFail($sensor_id);
+            $sensor = $sensorComponent->sensor;
+            
+            $estados = [
+                0 => 'inactivo',
+                1 => 'activo',
+                2 => 'en mantenimiento'
+            ];
+
+            $sensor->estado = $request->estado;
+            $sensor->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado del sensor actualizado a ' . $estados[$request->estado]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar estado del sensor: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado del sensor: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

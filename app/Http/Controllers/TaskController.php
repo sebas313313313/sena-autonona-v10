@@ -101,7 +101,7 @@ class TaskController extends Controller
         }
     }
 
-    public function update(Request $request, Component_Task $task)
+    public function update(Request $request, $farm_id, Component_Task $task)
     {
         // Verificar que el usuario tenga permiso para actualizar esta tarea
         if (session('farm_role') !== 'admin' && $task->user_id !== auth()->id()) {

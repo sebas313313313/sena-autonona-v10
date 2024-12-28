@@ -8,16 +8,88 @@ use App\Models\Sample;
 use App\Models\Sensor_Component;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
 
 class DashboardController extends Controller
 {
     public function index($farm_id)
     {
         try {
+            DB::enableQueryLog();
+            $debugLogs = [];
             $user = auth()->user();
-            $farm = Farm::with(['farmComponents.sensorComponents.sensor', 'farmComponents.sensorComponents.samples'])
-                        ->findOrFail($farm_id);
             
+            // Cargar la granja con todas sus relaciones
+            $farm = Farm::with([
+                'farmComponents',
+                'farmComponents.sensorComponents',
+                'farmComponents.sensorComponents.sensor',
+                'farmComponents.sensorComponents.samples'
+            ])->findOrFail($farm_id);
+
+            // Obtener todos los sensores de la granja
+            $allSensors = \App\Models\Sensor::where('farm_type', $farm->farm_type)->get();
+            
+            // Expandir los sensor_components para ver sus detalles
+            $data = [
+                'farm_id' => $farm_id,
+                'farm_type' => $farm->farm_type,
+                'components_count' => $farm->farmComponents->count(),
+                'all_available_sensors' => $allSensors->map(function($s) {
+                    return [
+                        'id' => $s->id,
+                        'description' => $s->description,
+                        'farm_type' => $s->farm_type
+                    ];
+                })->toArray(),
+                'components' => $farm->farmComponents->map(function($fc) {
+                    return [
+                        'id' => $fc->id,
+                        'description' => $fc->description,
+                        'sensor_components' => $fc->sensorComponents->map(function($sc) {
+                            return [
+                                'id' => $sc->id,
+                                'farm_component_id' => $sc->farm_component_id,
+                                'sensor_id' => $sc->sensor_id,
+                                'min' => $sc->min,
+                                'max' => $sc->max,
+                                'sensor' => $sc->sensor ? [
+                                    'id' => $sc->sensor->id,
+                                    'description' => $sc->sensor->description,
+                                    'estado' => $sc->sensor->estado,
+                                    'farm_type' => $sc->sensor->farm_type
+                                ] : null
+                            ];
+                        })->toArray()
+                    ];
+                })->toArray()
+            ];
+
+            \Log::info('Datos de la granja:', $data);
+
+            // Log de los componentes de la granja
+            $debugLogs[] = [
+                'title' => 'Farm Components encontrados',
+                'data' => [
+                    'farm_id' => $farm_id,
+                    'components_count' => $farm->farmComponents->count(),
+                    'components' => $farm->farmComponents->map(function($fc) {
+                        return [
+                            'id' => $fc->id,
+                            'description' => $fc->description,
+                            'sensor_components' => $fc->sensorComponents->map(function($sc) {
+                                return [
+                                    'id' => $sc->id,
+                                    'sensor_id' => $sc->sensor_id,
+                                    'sensor_description' => $sc->sensor->description,
+                                    'sensor_estado' => $sc->sensor->estado
+                                ];
+                            })->toArray()
+                        ];
+                    })->toArray()
+                ]
+            ];
+
             // Obtener el rol del usuario en esta granja
             $farmUser = $farm->users()->where('user_id', $user->id)->first();
             
@@ -31,25 +103,52 @@ class DashboardController extends Controller
             session(['current_farm_id' => $farm_id]);
             session(['farm_role' => $role]);
 
-            \Log::info('Rol del usuario en la granja:', [
-                'user_id' => $user->id,
-                'farm_id' => $farm_id,
-                'role' => $role,
-                'session_role' => session('farm_role')
-            ]);
-            
             // Obtener los sensores y sus datos
             $sensorData = [];
+            
+            \Log::info('Procesando farm components:', [
+                'total_components' => $farm->farmComponents->count(),
+                'components' => $farm->farmComponents->map(function($fc) {
+                    return [
+                        'id' => $fc->id,
+                        'description' => $fc->description,
+                        'sensor_components_count' => $fc->sensorComponents->count()
+                    ];
+                })->toArray()
+            ]);
+
             foreach ($farm->farmComponents as $farmComponent) {
+                \Log::info('Procesando farm component:', [
+                    'id' => $farmComponent->id,
+                    'description' => $farmComponent->description,
+                    'sensor_components' => $farmComponent->sensorComponents->map(function($sc) {
+                        return [
+                            'id' => $sc->id,
+                            'sensor_id' => $sc->sensor_id,
+                            'sensor_description' => $sc->sensor ? $sc->sensor->description : 'NO SENSOR'
+                        ];
+                    })->toArray()
+                ]);
+
                 foreach ($farmComponent->sensorComponents as $sensorComponent) {
+                    // Verificar que el sensor existe
+                    if (!$sensorComponent->sensor) {
+                        \Log::warning('Sensor no encontrado para component:', [
+                            'sensor_component_id' => $sensorComponent->id,
+                            'sensor_id' => $sensorComponent->sensor_id,
+                            'farm_component_id' => $sensorComponent->farm_component_id
+                        ]);
+                        continue;
+                    }
+
                     // Obtener las últimas 24 horas de datos
                     $samples = $sensorComponent->samples()
                         ->where('fecha_hora', '>=', Carbon::now()->subHours(24))
                         ->orderBy('fecha_hora', 'asc')
                         ->get();
 
-                    // Agregar datos de prueba si no hay muestras
-                    if ($samples->isEmpty()) {
+                    // Generar datos de prueba si el sensor está activo
+                    if ($sensorComponent->sensor->estado === 'activo') {
                         $now = Carbon::now();
                         $testData = [];
                         for ($i = 24; $i >= 0; $i--) {
@@ -59,45 +158,52 @@ class DashboardController extends Controller
                             ];
                         }
                         $samples = collect($testData);
-                    } else {
-                        $samples = $samples->map(function ($sample) {
-                            return [
-                                'fecha' => $sample->fecha_hora->format('Y-m-d H:i'),
-                                'valor' => $sample->value
-                            ];
-                        });
                     }
 
                     $sensorData[] = [
-                        'id' => $sensorComponent->id,
+                        'id' => $sensorComponent->sensor->id,
                         'nombre' => $sensorComponent->sensor->description,
+                        'estado' => $sensorComponent->sensor->estado,
                         'muestras' => $samples
                     ];
+
+                    \Log::info('Agregando sensor a sensorData:', [
+                        'sensor_component_id' => $sensorComponent->id,
+                        'sensor_id' => $sensorComponent->sensor->id,
+                        'nombre' => $sensorComponent->sensor->description,
+                        'estado' => $sensorComponent->sensor->estado,
+                        'muestras_count' => count($samples)
+                    ]);
                 }
             }
 
-            // Datos comunes para ambas vistas
-            $viewData = [
+            // Log final de sensores
+            \Log::info('Total sensores procesados:', [
+                'count' => count($sensorData),
+                'sensores' => collect($sensorData)->map(function($s) {
+                    return [
+                        'id' => $s['id'],
+                        'nombre' => $s['nombre'],
+                        'estado' => $s['estado'],
+                        'muestras' => count($s['muestras'])
+                    ];
+                })->toArray()
+            ]);
+
+            return view('dashboard.index', [
                 'farm' => $farm,
                 'sensorData' => $sensorData,
-                'role' => $role
-            ];
+                'debugLogs' => $debugLogs,
+                'user' => $user
+            ]);
 
-            // Si es operario, solo mostrar datos y tareas pendientes
-            if ($role === 'operario') {
-                $viewData['tasks'] = $farm->tasks()->where('status', false)->get();
-                return view('dashboard.operario.index', $viewData);
-            }
-            
-            // Para administradores y propietarios, mostrar todo
-            $viewData['tasks'] = $farm->tasks;
-            $viewData['users'] = $farm->users;
-            $viewData['statistics'] = $this->getStatistics($farm);
-            
-            return view('dashboard.index', $viewData);
         } catch (\Exception $e) {
-            \Log::error('Error en dashboard index: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al cargar el dashboard: ' . $e->getMessage());
+            \Log::error('Error en dashboard: ' . $e->getMessage(), [
+                'farm_id' => $farm_id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->with('error', 'Error al cargar el dashboard: ' . $e->getMessage());
         }
     }
     

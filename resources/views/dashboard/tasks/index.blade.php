@@ -97,7 +97,7 @@
                                     </small>
                                 </div>
                                 <div>
-                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PUT')
                                         <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
@@ -129,7 +129,7 @@
                                     </small>
                                 </div>
                                 <div class="d-flex align-items-center">
-                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="me-2">
+                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="me-2">
                                         @csrf
                                         @method('PUT')
                                         <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">

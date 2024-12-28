@@ -422,73 +422,57 @@
 
         // Definir los sensores por tipo de granja
         const sensorsByType = {
-            'acuaponica': {
-                'esenciales': [
-                    'Sensor de Humedad en Tierra',
-                    'Sensor Nivel de Líquidos',
-                    'Sensor de Temperatura y Humedad',
-                    'Sensor Fotorresistor',
-                    'Sensor de pH',
-                    'Sensor Temperatura Ambiente Alta Resolución',
-                    'Sensor de Oxígeno Disuelto',
-                    'Sensor de Amonio/Nitrito/Nitrato'
-                ],
-                'utiles': [
-                    'Display OLED',
-                    'Joystick',
-                    'Sensor Ultrasónico',
-                    'LED RGB',
-                    'Servo Motor'
-                ]
-            },
-            'hidroponica': {
-                'esenciales': [
-                    'Sensor de Humedad en Tierra',
-                    'Sensor Nivel de Líquidos',
-                    'Sensor de Temperatura y Humedad',
-                    'Sensor Fotorresistor',
-                    'Sensor de pH',
-                    'Sensor Temperatura Ambiente Alta Resolución',
-                    'Sensor de Conductividad Eléctrica/CE'
-                ],
-                'utiles': [
-                    'Display OLED',
-                    'Joystick',
-                    'Sensor Ultrasónico',
-                    'LED RGB',
-                    'Servo Motor'
-                ]
-            },
-            'vigilancia': {
-                'esenciales': [
-                    'Sensor de Movimiento PIR',
-                    'Sensor de Presencia',
-                    'Cámara con Visión Nocturna',
-                    'Sensor Magnético de Puerta/Ventana',
-                    'Sensor de Rotura de Cristal'
-                ],
-                'utiles': [
-                    'Sensor de Humo',
-                    'Sensor de Gas',
-                    'Sensor de Inundación',
-                    'Sensor de Vibración',
-                    'Micrófono'
-                ]
-            },
-            'riego': {
-                'esenciales': [
-                    'Sensor de Humedad del Suelo',
-                    'Sensor de Lluvia',
-                    'Sensor de Nivel de Agua'
-                ],
-                'utiles': [
-                    'Sensor de Flujo de Agua',
-                    'Sensor de Presión de Agua',
-                    'Sensor de Temperatura del Suelo',
-                    'Evaporímetro',
-                    'Sensor de Radiación Solar'
-                ]
-            }
+            'acuaponica': [
+                'Sensor de Humedad en Tierra',
+                'Sensor Nivel de Líquidos',
+                'Sensor de Temperatura y Humedad',
+                'Sensor Fotorresistor',
+                'Sensor de pH',
+                'Sensor Temperatura Ambiente Alta Resolución',
+                'Sensor de Oxígeno Disuelto',
+                'Sensor de Amonio/Nitrito/Nitrato',
+                'Display OLED',
+                'Joystick',
+                'Sensor Ultrasónico',
+                'LED RGB',
+                'Servo Motor'
+            ],
+            'hidroponica': [
+                'Sensor de Humedad en Tierra',
+                'Sensor Nivel de Líquidos',
+                'Sensor de Temperatura y Humedad',
+                'Sensor Fotorresistor',
+                'Sensor de pH',
+                'Sensor Temperatura Ambiente Alta Resolución',
+                'Sensor de Conductividad Eléctrica/CE',
+                'Display OLED',
+                'Joystick',
+                'Sensor Ultrasónico',
+                'LED RGB',
+                'Servo Motor'
+            ],
+            'vigilancia': [
+                'Sensor de Movimiento PIR',
+                'Sensor de Presencia',
+                'Cámara con Visión Nocturna',
+                'Sensor Magnético de Puerta/Ventana',
+                'Sensor de Rotura de Cristal',
+                'Sensor de Humo',
+                'Sensor de Gas',
+                'Sensor de Inundación',
+                'Sensor de Vibración',
+                'Micrófono'
+            ],
+            'riego': [
+                'Sensor de Humedad del Suelo',
+                'Sensor de Lluvia',
+                'Sensor de Nivel de Agua',
+                'Sensor de Flujo de Agua',
+                'Sensor de Presión de Agua',
+                'Sensor de Temperatura del Suelo',
+                'Evaporímetro',
+                'Sensor de Radiación Solar'
+            ]
         };
 
         // Función para actualizar la lista de sensores
@@ -497,53 +481,38 @@
             const sensorList = document.getElementById('sensorList');
             sensorList.innerHTML = '';
 
+            console.log('Tipo de granja:', farmType);
+            console.log('Sensores disponibles:', sensorsByType[farmType]);
+
             if (farmType && sensorsByType[farmType]) {
-                // Agregar sensores esenciales
-                if (sensorsByType[farmType].esenciales) {
-                    const esencialesTitle = document.createElement('div');
-                    esencialesTitle.className = 'fw-bold mb-2 mt-3';
-                    esencialesTitle.textContent = 'Sensores Esenciales';
-                    sensorList.appendChild(esencialesTitle);
+                const title = document.createElement('div');
+                title.className = 'fw-bold mb-2 mt-3';
+                title.textContent = 'Sensores Disponibles';
+                sensorList.appendChild(title);
 
-                    sensorsByType[farmType].esenciales.forEach(sensor => {
-                        const div = document.createElement('div');
-                        div.className = 'form-check';
-                        div.innerHTML = `
-                            <input class="form-check-input" type="checkbox" name="sensors[]" 
-                                   value="${sensor}" id="sensor_${sensor.replace(/\s+/g, '_')}">
-                            <label class="form-check-label" for="sensor_${sensor.replace(/\s+/g, '_')}">
-                                ${sensor}
-                            </label>
-                        `;
-                        sensorList.appendChild(div);
-                    });
-                }
-
-                // Agregar sensores útiles
-                if (sensorsByType[farmType].utiles) {
-                    const utilesTitle = document.createElement('div');
-                    utilesTitle.className = 'fw-bold mb-2 mt-3';
-                    utilesTitle.textContent = 'Sensores Útiles';
-                    sensorList.appendChild(utilesTitle);
-
-                    sensorsByType[farmType].utiles.forEach(sensor => {
-                        const div = document.createElement('div');
-                        div.className = 'form-check';
-                        div.innerHTML = `
-                            <input class="form-check-input" type="checkbox" name="sensors[]" 
-                                   value="${sensor}" id="sensor_${sensor.replace(/\s+/g, '_')}">
-                            <label class="form-check-label" for="sensor_${sensor.replace(/\s+/g, '_')}">
-                                ${sensor}
-                            </label>
-                        `;
-                        sensorList.appendChild(div);
-                    });
-                }
+                sensorsByType[farmType].forEach(sensor => {
+                    const div = document.createElement('div');
+                    div.className = 'form-check';
+                    div.innerHTML = `
+                        <input class="form-check-input" type="checkbox" name="sensors[]" 
+                               value="${sensor}" id="sensor_${sensor.replace(/\s+/g, '_')}">
+                        <label class="form-check-label" for="sensor_${sensor.replace(/\s+/g, '_')}">
+                            ${sensor}
+                        </label>
+                    `;
+                    sensorList.appendChild(div);
+                });
             }
         }
 
         // Agregar el evento change al select de tipo de granja
         document.getElementById('farm_type').addEventListener('change', updateSensorList);
+
+        // Agregar evento al formulario para mostrar sensores seleccionados
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const selectedSensors = Array.from(document.querySelectorAll('input[name="sensors[]"]:checked')).map(cb => cb.value);
+            console.log('Sensores seleccionados:', selectedSensors);
+        });
 
         function initMap() {
             // Coordenadas iniciales (Colombia)

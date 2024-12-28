@@ -92,6 +92,10 @@ Route::middleware('auth')->group(function () {
     // Ruta para actualizar el nombre de usuario
     Route::post('/user/update-name', [App\Http\Controllers\UserController::class, 'updateName'])->name('user.update.name');
 
+    // Actualización de estado de sensores (fuera del middleware farm.access)
+    Route::post('/sensores/{id}/estado', [App\Http\Controllers\SensorController::class, 'updateEstado'])
+        ->name('sensores.updateEstado');
+
     /**
      * Grupo de rutas protegidas
      * Requieren acceso a granja
@@ -124,10 +128,6 @@ Route::middleware('auth')->group(function () {
                 'sensors' => $sensors
             ]);
         })->name('sensores.index');
-
-        // Ruta para actualizar estado del sensor
-        Route::post('/sensores/{id}/estado', [\App\Http\Controllers\SensorController::class, 'updateEstado'])
-            ->name('sensores.update-estado');
 
         // Rutas de tareas
         Route::get('/tasks/{farm_id}', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');
