@@ -99,21 +99,11 @@
             </a>
             @auth
             <div class="ms-auto d-flex align-items-center">
-                <span class="me-3 text-dark user-name">
+                <span class="user-name me-3" style="cursor: pointer;" onclick="openEditNameModal()">
                     <i class="bi bi-person-circle me-1"></i>
                     {{ auth()->user()->name }}
                 </span>
-                @if(auth()->user()->users_role && auth()->user()->users_role->role)
-                    <span class="user-role">{{ auth()->user()->users_role->role }}</span>
-                    <script>
-                        console.log('Rol del usuario:', @json(auth()->user()->users_role->role));
-                    </script>
-                @else
-                    <script>
-                        console.log('No hay rol definido');
-                        console.log('users_role:', @json(auth()->user()->users_role));
-                    </script>
-                @endif
+                <span class="user-role">{{ ucfirst(auth()->user()->userRole->role ?? 'Usuario') }}</span>
                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger">
@@ -127,11 +117,106 @@
 
     @yield('content')
 
+    <!-- Modal para editar nombre -->
+    <div class="modal fade" id="editNameModal" tabindex="-1" aria-labelledby="editNameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editNameModalLabel">Editar Nombre</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editNameForm" onsubmit="updateName(event)">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ auth()->user()->name ?? '' }}" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let editNameModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            editNameModal = new bootstrap.Modal(document.getElementById('editNameModal'));
+        });
+
+        function openEditNameModal() {
+            editNameModal.show();
+        }
+
+        function updateName(event) {
+            event.preventDefault(); // Prevenir el envío normal del formulario
+            
+            const formData = new FormData(document.getElementById('editNameForm'));
+            console.log('FormData:', Object.fromEntries(formData));
+            
+            // Mostrar spinner
+            Swal.fire({
+                title: 'Actualizando...',
+                html: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('{{ route('user.update.name') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    // Actualizar el nombre en la interfaz
+                    document.querySelector('.user-name').innerHTML = 
+                        `<i class="bi bi-person-circle me-1"></i>${data.name}`;
+                    
+                    // Cerrar el modal
+                    editNameModal.hide();
+                    
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error completo:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al actualizar el nombre'
+                });
+            });
+        }
+    </script>
     @yield('scripts')
 </body>
 </html>

@@ -133,4 +133,36 @@ class SensorController extends Controller
             'message' => 'Estado del sensor actualizado a ' . $estados[$request->estado]
         ]);
     }
+
+    /**
+     * Muestra los sensores de una granja específica
+     */
+    public function farmSensors($farm_id)
+    {
+        try {
+            $farm = \App\Models\Farm::with(['farmComponents.sensorComponents.sensor'])->findOrFail($farm_id);
+            
+            $sensors = collect();
+            foreach ($farm->farmComponents as $farmComponent) {
+                foreach ($farmComponent->sensorComponents as $sensorComponent) {
+                    $sensors->push([
+                        'id' => $sensorComponent->id,
+                        'nombre' => $sensorComponent->sensor->description,
+                        'estado' => $sensorComponent->sensor->estado,
+                        'min' => $sensorComponent->min,
+                        'max' => $sensorComponent->max,
+                        'last_reading' => $sensorComponent->samples()->latest('fecha_hora')->first()?->value
+                    ]);
+                }
+            }
+
+            return view('dashboard.sensores.index', [
+                'sensors' => $sensors,
+                'farm' => $farm
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al obtener sensores de la granja: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al cargar los sensores: ' . $e->getMessage());
+        }
+    }
 }

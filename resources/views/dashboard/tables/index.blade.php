@@ -43,6 +43,7 @@
                             <th scope="col">Nombre</th>
                             <th scope="col">Correo</th>
                             <th scope="col">Rol</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,7 +53,20 @@
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>
-                                <span class="badge bg-info">{{ ucfirst($user->pivot->role ?? 'Usuario') }}</span>
+                                @if($user->is_owner)
+                                    <span class="badge bg-primary">Propietario</span>
+                                @else
+                                    <span class="badge bg-{{ $user->pivot->role == 'admin' ? 'info' : 'secondary' }}">
+                                        {{ ucfirst($user->pivot->role) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                @if(!$user->is_owner)
+                                    <button class="btn btn-danger btn-sm" onclick="unlinkUser({{ $farm->id }}, {{ $user->id }})">
+                                        Desvincular
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -72,7 +86,7 @@
             <h5 class="card-title mb-0">Invitar Usuario</h5>
         </div>
         <div class="card-body">
-            <form action="{{ route('invitations.send') }}" method="POST">
+            <form id="inviteForm" onsubmit="sendInvitation(event)">
                 @csrf
                 <input type="hidden" name="farm_id" value="{{ $farm->id }}">
                 <input type="hidden" name="return_to" value="{{ route('dashboard.users', ['farm_id' => $farm->id]) }}">
@@ -102,3 +116,112 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function sendInvitation(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+
+    // Mostrar alerta de carga
+    Swal.fire({
+        title: 'Enviando invitación...',
+        html: 'Por favor espere mientras se procesa la invitación',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Enviar petición
+    fetch('{{ route('invitations.send') }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(Object.fromEntries(formData))
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Invitación enviada!',
+                text: data.message,
+                showConfirmButton: true
+            }).then(() => {
+                // Limpiar el formulario
+                form.reset();
+                // Recargar la página para mostrar los cambios
+                window.location.reload();
+            });
+        } else {
+            throw new Error(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Hubo un error al enviar la invitación. Por favor, intente nuevamente.'
+        });
+    });
+}
+
+function unlinkUser(farmId, userId) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¿Deseas desvincular esta persona de la granja?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, desvincular',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/dashboard/farm/${farmId}/unlink/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        '¡Desvinculado!',
+                        'El usuario ha sido desvinculado exitosamente.',
+                        'success'
+                    ).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Error',
+                        data.message,
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error',
+                    'Hubo un error al desvincular el usuario',
+                    'error'
+                );
+            });
+        }
+    });
+}
+</script>
+@endpush

@@ -89,6 +89,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/invitations/send', [App\Http\Controllers\InvitationController::class, 'send'])->name('invitations.send');
     Route::get('/invitations/accept/{token}', [App\Http\Controllers\InvitationController::class, 'accept'])->name('invitations.accept');
 
+    // Ruta para actualizar el nombre de usuario
+    Route::post('/user/update-name', [App\Http\Controllers\UserController::class, 'updateName'])->name('user.update.name');
+
     /**
      * Grupo de rutas protegidas
      * Requieren acceso a granja
@@ -98,8 +101,12 @@ Route::middleware('auth')->group(function () {
         // Dashboard y tablero
         Route::get('/dashboard/{farm_id}', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard.home');
         
+        // Sensores
+        Route::get('/sensores/{farm_id}', [App\Http\Controllers\SensorController::class, 'farmSensors'])->name('sensores.index');
+        
         // Usuarios
-        Route::get('/dashboard/{farm_id}/users', [App\Http\Controllers\DashboardController::class, 'users'])->name('dashboard.users');
+        Route::get('/dashboard/farm/{farm_id}/users', [DashboardController::class, 'users'])->name('dashboard.users');
+        Route::delete('/dashboard/farm/{farm_id}/unlink/{user_id}', [DashboardController::class, 'unlinkUser'])->name('dashboard.unlink.user');
 
         // Ruta de sensores
         Route::get('/sensores/{farm_id}', function ($farm_id) {
