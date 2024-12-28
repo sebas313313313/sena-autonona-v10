@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Farm;
 use App\Models\Sample;
 use App\Models\Sensor_Component;
+use App\Models\User;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -16,8 +17,13 @@ class DashboardController extends Controller
         $farm = Farm::with(['farmComponents.sensorComponents.sensor', 'farmComponents.sensorComponents.samples'])
                     ->findOrFail($farm_id);
         
-        // Guardar el ID de la granja actual en la sesión
+        // Obtener el rol del usuario en esta granja
+        $farmUser = $farm->users()->where('user_id', $user->id)->first();
+        $role = $farmUser ? $farmUser->pivot->role : null;
+        
+        // Guardar el ID de la granja y el rol en la sesión
         session(['current_farm_id' => $farm_id]);
+        session(['farm_role' => $role]);
         
         // Obtener los sensores y sus datos
         $sensorData = [];
@@ -61,6 +67,29 @@ class DashboardController extends Controller
         $viewData['statistics'] = $this->getStatistics($farm);
         
         return view('dashboard.index', $viewData);
+    }
+    
+    public function users($farm_id)
+    {
+        try {
+            // Obtener la granja
+            $farm = Farm::findOrFail($farm_id);
+            
+            // Guardar el ID de la granja en la sesión
+            session(['current_farm_id' => $farm_id]);
+
+            // Obtener todos los usuarios de la granja
+            $users = $farm->users;
+
+            return view('dashboard.tables.index', [
+                'farm' => $farm,
+                'users' => $users
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error en users(): ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al cargar la página de usuarios: ' . $e->getMessage());
+        }
     }
     
     private function getStatistics($farm)

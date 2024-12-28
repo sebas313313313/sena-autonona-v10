@@ -24,11 +24,15 @@ class InvitationController extends Controller
     /**
      * Envía una invitación por correo electrónico
      * 
-     * @param Request $request Contiene: email, role
+     * @param Request $request Contiene: email, role, farm_id
      * @return \Illuminate\Http\JsonResponse
      */
     public function send(Request $request)
     {
+        // Log de los datos recibidos
+        \Log::info('Datos de invitación recibidos:', $request->all());
+        \Log::info('Session farm_id:', ['farm_id' => session('current_farm_id')]);
+
         $request->validate([
             'email' => 'required|email',
             'role' => 'required|in:admin,operario'
@@ -39,11 +43,20 @@ class InvitationController extends Controller
             $farm_id = session('current_farm_id');
             if (!$farm_id) {
                 \Log::error('Farm ID no encontrado en la sesión');
-                return redirect()->back()->with('error', 'Error: No se pudo identificar la granja actual');
+                return redirect()->route('farms.index')
+                    ->with('error', 'Error: No se pudo identificar la granja actual');
             }
 
             // Verificar que la granja existe
             $farm = Farm::findOrFail($farm_id);
+            \Log::info('Granja encontrada:', ['farm' => $farm->toArray()]);
+
+            // Verificar si el usuario ya está en la granja
+            $user = User::where('email', $request->email)->first();
+            if ($user && $user->farms()->where('farm_id', $farm_id)->exists()) {
+                return redirect()->route('dashboard.users', ['farm_id' => $farm_id])
+                    ->with('error', 'Este usuario ya es miembro de la granja');
+            }
 
             // Verificar si el usuario ya está invitado
             $existingInvitation = Invitation::where('email', $request->email)
@@ -53,7 +66,8 @@ class InvitationController extends Controller
                 ->first();
 
             if ($existingInvitation) {
-                return redirect()->back()->with('error', 'Ya existe una invitación pendiente para este usuario');
+                return redirect()->route('dashboard.users', ['farm_id' => $farm_id])
+                    ->with('error', 'Ya existe una invitación pendiente para este usuario');
             }
 
             // Crear la invitación
@@ -66,13 +80,28 @@ class InvitationController extends Controller
                 'accepted' => false
             ]);
 
-            // Enviar el correo
-            Mail::to($request->email)->send(new InvitationMail($invitation));
+            \Log::info('Invitación creada:', ['invitation' => $invitation->toArray()]);
 
-            return redirect()->back()->with('success', 'Invitación enviada exitosamente');
+            try {
+                // Enviar el correo
+                Mail::to($request->email)->send(new InvitationMail($invitation));
+                \Log::info('Correo enviado exitosamente');
+                
+                // Redirigir a la página de usuarios
+                return redirect()->route('dashboard.users', ['farm_id' => $farm_id])
+                    ->with('success', 'Invitación enviada exitosamente');
+            } catch (\Exception $e) {
+                // Si falla el envío del correo, eliminar la invitación
+                $invitation->delete();
+                \Log::error('Error al enviar correo: ' . $e->getMessage());
+                return redirect()->route('dashboard.users', ['farm_id' => $farm_id])
+                    ->with('error', 'Error al enviar el correo de invitación. Por favor verifica la configuración de correo.');
+            }
         } catch (\Exception $e) {
             \Log::error('Error al enviar invitación: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al enviar la invitación: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return redirect()->back()
+                ->with('error', 'Error al enviar la invitación: ' . $e->getMessage());
         }
     }
 

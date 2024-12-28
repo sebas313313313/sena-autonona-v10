@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sensor;
+use App\Models\SensorData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -102,6 +103,34 @@ class SensorController extends Controller
         $sensor->delete();
         return response()->json([
             'message' => 'Sensor eliminado exitosamente'
+        ]);
+    }
+
+    /**
+     * Actualiza el estado de un sensor
+     * @param Request $request Datos del nuevo estado
+     * @param int $id ID del sensor a actualizar
+     * @return \Illuminate\Http\JsonResponse Respuesta con el resultado de la actualización
+     */
+    public function updateEstado(Request $request, $id)
+    {
+        $request->validate([
+            'estado' => 'required|in:0,1,2'
+        ]);
+
+        $sensor = Sensor::findOrFail($id);
+        $sensor->estado = $request->estado;
+        $sensor->save();
+
+        $estados = [
+            '0' => 'Inactivo',
+            '1' => 'Activo',
+            '2' => 'En Mantenimiento'
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Estado del sensor actualizado a ' . $estados[$request->estado]
         ]);
     }
 }

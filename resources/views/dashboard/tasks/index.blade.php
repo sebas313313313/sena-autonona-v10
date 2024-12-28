@@ -19,7 +19,7 @@
                         No hay operarios disponibles en esta granja. Invita operarios desde la sección de usuarios para poder asignar tareas.
                     </div>
                 @else
-                    <form action="{{ route('tasks.store') }}" method="POST">
+                    <form action="{{ route('tasks.store', ['farm_id' => $farm->id]) }}" method="POST">
                         @csrf
                         <input type="hidden" name="farm_id" value="{{ $farm->id }}">
                         
@@ -97,7 +97,7 @@
                                     </small>
                                 </div>
                                 <div>
-                                    <form action="{{ route('tasks.update', $task) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PUT')
                                         <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
@@ -129,7 +129,7 @@
                                     </small>
                                 </div>
                                 <div class="d-flex align-items-center">
-                                    <form action="{{ route('tasks.update', $task) }}" method="POST" class="me-2">
+                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="me-2">
                                         @csrf
                                         @method('PUT')
                                         <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
@@ -140,7 +140,7 @@
                                         </button>
                                     </form>
                                     
-                                    <form action="{{ route('tasks.destroy', $task) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('tasks.destroy', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger" 
@@ -176,7 +176,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Obtener el formulario de asignación de tareas
-    const taskForm = document.querySelector('form[action="{{ route('tasks.store') }}"]');
+    const taskForm = document.querySelector('form[action="{{ route('tasks.store', ['farm_id' => $farm->id]) }}"]');
     
     if (taskForm) {
         taskForm.addEventListener('submit', function(e) {

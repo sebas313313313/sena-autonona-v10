@@ -38,8 +38,11 @@ Route::get('/', function () {
     // Obtener las granjas propias
     $farms = $userRole ? \App\Models\Farm::where('users_role_id', $userRole->id)->get() : collect();
     
-    // Obtener las granjas invitadas
-    $invitedFarms = $user->farms()->with('municipality')->get();
+    // Obtener las granjas invitadas (excluyendo las propias)
+    $invitedFarms = $user->farms()
+        ->whereNotIn('farms.id', $farms->pluck('id'))
+        ->with('municipality')
+        ->get();
     
     return view('farms.index', [
         'farms' => $farms,
@@ -81,7 +84,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/farms', [App\Http\Controllers\FarmController::class, 'index'])->name('farms.index');
     Route::post('/farms', [App\Http\Controllers\FarmController::class, 'store'])->name('farms.store');
     Route::delete('/farms/{farm}', [App\Http\Controllers\FarmController::class, 'destroy'])->name('farms.destroy');
-    
+
+    // Invitaciones (fuera del middleware farm.access)
+    Route::post('/invitations/send', [App\Http\Controllers\InvitationController::class, 'send'])->name('invitations.send');
+    Route::get('/invitations/accept/{token}', [App\Http\Controllers\InvitationController::class, 'accept'])->name('invitations.accept');
+
     /**
      * Grupo de rutas protegidas
      * Requieren acceso a granja
@@ -90,6 +97,56 @@ Route::middleware('auth')->group(function () {
     Route::middleware('farm.access')->group(function () {
         // Dashboard y tablero
         Route::get('/dashboard/{farm_id}', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard.home');
+        
+        // Usuarios
+        Route::get('/dashboard/{farm_id}/users', [App\Http\Controllers\DashboardController::class, 'users'])->name('dashboard.users');
+
+        // Ruta de sensores
+        Route::get('/sensores/{farm_id}', function ($farm_id) {
+            $farm = \App\Models\Farm::findOrFail($farm_id);
+            
+            // Obtener los sensores a través de las relaciones
+            $sensors = \App\Models\Sensor::whereHas('sensorComponents', function($query) use ($farm_id) {
+                $query->whereHas('farmComponent', function($q) use ($farm_id) {
+                    $q->where('farm_id', $farm_id);
+                });
+            })->select('id', 'description as nombre', 'estado')->get();
+            
+            return view('dashboard.sensores.index', [
+                'farm' => $farm,
+                'sensors' => $sensors
+            ]);
+        })->name('sensores.index');
+
+        // Ruta para actualizar estado del sensor
+        Route::post('/sensores/{id}/estado', [\App\Http\Controllers\SensorController::class, 'updateEstado'])
+            ->name('sensores.update-estado');
+
+        // Rutas de tareas
+        Route::get('/tasks/{farm_id}', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');
+        Route::post('/tasks/{farm_id}', [App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
+        Route::put('/tasks/{farm_id}/{task}', [App\Http\Controllers\TaskController::class, 'update'])->name('tasks.update');
+        Route::delete('/tasks/{farm_id}/{task}', [App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy');
+
+        // Rutas de usuarios
+        Route::get('/users/{farm_id}', function ($farm_id) {
+            $farm = \App\Models\Farm::findOrFail($farm_id);
+            
+            // Obtener el dueño de la granja
+            $owner = $farm->usersRole->user;
+            
+            // Obtener los usuarios invitados
+            $users = $farm->users()->get();
+            
+            // Agregar el dueño a la lista de usuarios
+            $users->prepend($owner);
+            
+            return view('dashboard.tables.index', [
+                'farm' => $farm,
+                'owner' => $owner,
+                'users' => $users
+            ]);
+        })->name('users.index');
 
         Route::get('/tablero', function () {
             return view('dashboard.tables.index');
@@ -119,12 +176,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/invitation/send', [App\Http\Controllers\InvitationController::class, 'send'])->name('invitation.sendByEmail');
         Route::get('/invitation/accept/{token}', [App\Http\Controllers\InvitationController::class, 'accept'])->name('invitation.accept');
         Route::delete('/farm/{farm}/users/{user}', [App\Http\Controllers\FarmUserController::class, 'remove'])->name('farm.users.remove');
-
-        // Rutas de tareas
-        Route::get('/tasks', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');
-        Route::post('/tasks', [App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
-        Route::put('/tasks/{task}', [App\Http\Controllers\TaskController::class, 'update'])->name('tasks.update');
-        Route::delete('/tasks/{task}', [App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy');
 
         // Rutas de componentes y sensores
         Route::get('/components/{component}/sensors', [App\Http\Controllers\SensorComponentController::class, 'getSensorsByComponent'])->name('components.sensors');

@@ -11,13 +11,15 @@ class Sensor extends Model
 
     protected $fillable = [
         'description',
-        'farm_type'
+        'farm_type',
+        'estado'
     ];
 
     protected $allowFilter = [
         'id',
         'description',
-        'farm_type'
+        'farm_type',
+        'estado'
     ];
 
     public function scopeFilter($query)
@@ -42,6 +44,17 @@ class Sensor extends Model
 
     public function sensorComponents()
     {
-        return $this->hasMany(Sensor_Component::class);
+        return $this->hasMany(\App\Models\Sensor_Component::class);
+    }
+
+    public function farmComponents()
+    {
+        return $this->belongsToMany(\App\Models\Farm_Component::class, 'sensor_components');
+    }
+
+    public function farms()
+    {
+        return $this->belongsToMany(\App\Models\Farm::class, 'farm_components')
+            ->through('farmComponents');
     }
 }

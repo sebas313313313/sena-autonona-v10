@@ -9,18 +9,15 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index($farm_id)
     {
-        // Obtener el ID de la granja de la sesión
-        $farm_id = session('current_farm_id');
-        if (!$farm_id) {
-            return redirect()->back()->with('error', 'No se pudo identificar la granja actual');
-        }
-
         // Obtener la granja
         $farm = Farm::with(['users' => function($query) {
             $query->wherePivot('role', 'operario');
         }])->findOrFail($farm_id);
+
+        // Guardar el farm_id en la sesión
+        session(['current_farm_id' => $farm_id]);
 
         // Obtener los componentes de la granja para el formulario
         $components = Farm_Component::where('farm_id', $farm_id)->get();
@@ -52,7 +49,7 @@ class TaskController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $farm_id)
     {
         try {
             // Solo los administradores pueden crear tareas
@@ -60,11 +57,6 @@ class TaskController extends Controller
                 return redirect()->back()->with('error', 'No tienes permiso para crear tareas.');
             }
 
-            $farm_id = session('current_farm_id');
-            if (!$farm_id) {
-                return redirect()->back()->with('error', 'Por favor, selecciona una granja primero.');
-            }
-            
             $farm = Farm::findOrFail($farm_id);
             
             // Obtener el farm_component_id de la granja actual

@@ -42,8 +42,9 @@ class FarmController extends Controller
                     ->get();
         Log::info('Granjas propias encontradas: ' . $farms->count());
 
-        // Obtener las granjas a las que ha sido invitado
+        // Obtener las granjas invitadas (excluyendo las propias)
         $invitedFarms = $user->farms()
+                            ->whereNotIn('farms.id', $farms->pluck('id'))
                             ->with('municipality')
                             ->get();
         Log::info('Granjas invitadas encontradas: ' . $invitedFarms->count());
@@ -51,28 +52,11 @@ class FarmController extends Controller
         // Obtener todos los componentes disponibles
         $components = \App\Models\Component::all();
 
-        // Log de los IDs de las granjas invitadas
-        foreach ($invitedFarms as $farm) {
-            Log::info('Granja invitada: ID=' . $farm->id . ', Role=' . $farm->pivot->role);
-        }
-
         return view('farms.index', [
             'farms' => $farms,
             'invitedFarms' => $invitedFarms,
             'municipalities' => Municipality::all(),
-            'components' => $components,
-            'debug' => [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'invited_farms_count' => $invitedFarms->count(),
-                'invited_farms' => $invitedFarms->map(function($farm) {
-                    return [
-                        'id' => $farm->id,
-                        'address' => $farm->address,
-                        'role' => $farm->pivot->role ?? 'No role'
-                    ];
-                })
-            ]
+            'components' => $components
         ]);
     }
 
@@ -118,6 +102,10 @@ class FarmController extends Controller
             'longitude' => $request->longitude,
             'users_role_id' => $userRoleId
         ]);
+
+        // Agregar relación en la tabla pivot con rol de administrador
+        $user = auth()->user();
+        $farm->users()->attach($user->id, ['role' => 'admin']);
 
         // Crear sensores seleccionados
         $sensorSeeder = new SensorSeeder();
@@ -213,5 +201,11 @@ class FarmController extends Controller
 
         $farm->delete();
         return redirect()->back()->with('success', 'Granja eliminada exitosamente.');
+    }
+
+    private function createFarmComponents(Farm $farm)
+    {
+        // Crear los componentes según el tipo de granja
+        // Este método debe ser implementado según las necesidades específicas
     }
 }

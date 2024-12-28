@@ -18,7 +18,8 @@ class Farm extends Model
         'latitude',
         'longitude',
         'users_role_id',
-        'municipality_id'
+        'municipality_id',
+        'owner_id'
     ];
 
     protected $casts = [
@@ -64,6 +65,11 @@ class Farm extends Model
         return $this->belongsToMany(User::class, 'farm_user')
                     ->withPivot('role')
                     ->withTimestamps();
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function scopeFilter($query)

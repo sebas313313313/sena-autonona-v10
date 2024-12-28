@@ -42,20 +42,17 @@ class SensorSeeder extends Seeder
 
         // Crear sensores solo para los sensores seleccionados
         foreach ($selectedSensors as $sensorName) {
-            $sensor = Sensor::firstOrCreate(
-                ['description' => $sensorName],
-                [
-                    'description' => $sensorName,
-                    'unit' => $this->getSensorUnit($sensorName),
-                    'type' => $farm->farm_type
-                ]
-            );
+            $sensor = Sensor::create([
+                'description' => $sensorName,
+                'farm_type' => $farm->farm_type,
+                'estado' => 'activo'
+            ]);
 
-            // Asociar el sensor con el farm_component
+            // Crear la relación sensor_component
             Sensor_Component::firstOrCreate(
                 [
                     'sensor_id' => $sensor->id,
-                    'farm_component_id' => $farmComponent->id,
+                    'farm_component_id' => $farmComponent->id
                 ],
                 [
                     'min' => $this->getMinValue($sensorName),
@@ -63,6 +60,38 @@ class SensorSeeder extends Seeder
                 ]
             );
         }
+    }
+
+    private function getMinValue($sensorName)
+    {
+        return match($sensorName) {
+            'Sensor de Temperatura y Humedad' => 0,
+            'Sensor de pH' => 0,
+            'Sensor de Conductividad Eléctrica/CE' => 0,
+            'Sensor de Oxígeno Disuelto' => 0,
+            'Sensor de Nivel de Agua' => 0,
+            'Sensor de Movimiento PIR' => 0,
+            'Cámara con Visión Nocturna' => 0,
+            'Sensor de Flujo de Agua' => 0,
+            'Sensor de Presión de Agua' => 0,
+            default => 0,
+        };
+    }
+
+    private function getMaxValue($sensorName)
+    {
+        return match($sensorName) {
+            'Sensor de Temperatura y Humedad' => 100,
+            'Sensor de pH' => 14,
+            'Sensor de Conductividad Eléctrica/CE' => 5000,
+            'Sensor de Oxígeno Disuelto' => 20,
+            'Sensor de Nivel de Agua' => 100,
+            'Sensor de Movimiento PIR' => 1,
+            'Cámara con Visión Nocturna' => 1,
+            'Sensor de Flujo de Agua' => 100,
+            'Sensor de Presión de Agua' => 100,
+            default => 100,
+        };
     }
 
     private function getSensorUnit($sensorName)
@@ -102,66 +131,6 @@ class SensorSeeder extends Seeder
             'Sensor de Vibración' => 'intensidad',
             
             default => 'unidad'
-        };
-    }
-
-    private function getMinValue($sensorName)
-    {
-        return match ($sensorName) {
-            'Sensor de Temperatura y Humedad', 
-            'Sensor Temperatura Ambiente Alta Resolución' => 18,
-            'Sensor de Temperatura del Suelo' => 15,
-            
-            'Sensor de Humedad en Tierra',
-            'Sensor de Humedad del Suelo' => 30,
-            'Sensor de Lluvia' => 0,
-            
-            'Sensor de pH' => 55, // 5.5
-            'Sensor de Conductividad Eléctrica/CE' => 5, // 0.5
-            'Sensor Nivel de Líquidos',
-            'Sensor de Nivel de Agua' => 0,
-            'Sensor de Oxígeno Disuelto' => 50, // 5.0
-            
-            'Sensor Fotorresistor' => 100,
-            'Sensor de Radiación Solar' => 0,
-            
-            'Evaporímetro' => 0,
-            'Sensor de Amonio/Nitrito/Nitrato' => 0,
-            
-            'Sensor de Flujo de Agua' => 100, // 10.0
-            'Sensor de Presión de Agua' => 10, // 1.0
-            
-            default => 0
-        };
-    }
-
-    private function getMaxValue($sensorName)
-    {
-        return match ($sensorName) {
-            'Sensor de Temperatura y Humedad', 
-            'Sensor Temperatura Ambiente Alta Resolución' => 32,
-            'Sensor de Temperatura del Suelo' => 30,
-            
-            'Sensor de Humedad en Tierra',
-            'Sensor de Humedad del Suelo' => 90,
-            'Sensor de Lluvia' => 100,
-            
-            'Sensor de pH' => 75, // 7.5
-            'Sensor de Conductividad Eléctrica/CE' => 30, // 3.0
-            'Sensor Nivel de Líquidos',
-            'Sensor de Nivel de Agua' => 100,
-            'Sensor de Oxígeno Disuelto' => 90, // 9.0
-            
-            'Sensor Fotorresistor' => 10000,
-            'Sensor de Radiación Solar' => 1200,
-            
-            'Evaporímetro' => 100,
-            'Sensor de Amonio/Nitrito/Nitrato' => 50,
-            
-            'Sensor de Flujo de Agua' => 2000, // 200.0
-            'Sensor de Presión de Agua' => 60, // 6.0
-            
-            default => 100
         };
     }
 }

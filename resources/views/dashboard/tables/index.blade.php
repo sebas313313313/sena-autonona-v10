@@ -2,11 +2,18 @@
 
 @section('content')
 <div class="container-fluid">
-    <h2 class="mb-4">Usuarios</h2>
+    <h2 class="mb-4">Usuarios de {{ $farm->name }}</h2>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -25,31 +32,27 @@
     <!-- Tabla de Usuarios -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="card-title mb-0">Usuarios de la Granja</h5>
+            <h5 class="card-title mb-0">Usuarios Actuales</h5>
         </div>
         <div class="card-body">
-            @if(count($users ?? []) > 0)
+            @if(count($users) > 0)
                 <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Nombre</th>
                             <th scope="col">Correo</th>
-                            <th scope="col">Rol en la Granja</th>
+                            <th scope="col">Rol</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($users ?? [] as $user)
+                        @foreach($users as $user)
                         <tr>
                             <th scope="row">{{ $loop->iteration }}</th>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>
-                                @if($user->id === $owner->id)
-                                    <span class="badge bg-primary">Propietario</span>
-                                @else
-                                    <span class="badge bg-info">{{ ucfirst($user->pivot->role ?? 'Invitado') }}</span>
-                                @endif
+                                <span class="badge bg-info">{{ ucfirst($user->pivot->role ?? 'Usuario') }}</span>
                             </td>
                         </tr>
                         @endforeach
@@ -64,17 +67,20 @@
     </div>
 
     <!-- Formulario de Invitación -->
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-header">
-            <h5 class="card-title mb-0">Enviar Invitación</h5>
+            <h5 class="card-title mb-0">Invitar Usuario</h5>
         </div>
         <div class="card-body">
-            <form action="{{ route('invitation.sendByEmail') }}" method="POST">
+            <form action="{{ route('invitations.send') }}" method="POST">
                 @csrf
+                <input type="hidden" name="farm_id" value="{{ $farm->id }}">
+                <input type="hidden" name="return_to" value="{{ route('dashboard.users', ['farm_id' => $farm->id]) }}">
+                
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo Electrónico</label>
                     <input type="email" class="form-control" id="email" name="email" required 
-                           placeholder="Ingrese el correo electrónico">
+                           placeholder="Ingrese el correo electrónico del usuario">
                 </div>
                 
                 <div class="mb-3">
@@ -94,15 +100,5 @@
             </form>
         </div>
     </div>
-
-    @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
 </div>
 @endsection
-
-@push('scripts')
-@endpush

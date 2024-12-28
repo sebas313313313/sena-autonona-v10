@@ -15,6 +15,10 @@
             </div>
         </div>
 
+        <h4 class="mb-0 text-center flex-grow-1 mx-3">
+            <i class="fas fa-warehouse text-success me-2"></i>{{ $farm->name ?? 'Sin Granja Seleccionada' }}
+        </h4>
+
         <!-- Menú derecho -->
         <div class="navbar-right">
             <!-- Perfil de usuario -->
@@ -33,17 +37,10 @@
     padding: 1rem;
     background: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: relative;
-}
-
-.navbar-toggler {
-    border: none;
-    background: none;
-    padding: 0.5rem;
 }
 
 .search-form {
-    max-width: 300px;
+    width: 250px;
 }
 
 .search-form .input-group {
@@ -64,58 +61,17 @@
     color: #6c757d;
 }
 
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.granjas-btn {
-    position: absolute;
-    right: 1rem;
-}
-
-.dropdown .btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.3s;
-}
-
-.dropdown .btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-.navbar-right .badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translate(25%, -25%);
-}
-
-.dropdown-menu {
-    min-width: 200px;
-    padding: 0.5rem;
-    border: none;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.dropdown-item {
+.navbar-right .btn {
     padding: 0.5rem 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    border-radius: 4px;
 }
 
-.dropdown-item:hover {
-    background: #f8f9fa;
-}
-
-.dropdown-divider {
-    margin: 0.5rem 0;
+h4.flex-grow-1 {
+    font-size: 1.25rem;
+    color: #2c3e50;
+    font-weight: 500;
 }
 </style>
 

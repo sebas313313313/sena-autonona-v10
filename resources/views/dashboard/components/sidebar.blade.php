@@ -25,17 +25,17 @@
     <nav class="sidebar-nav">
         <ul>
             {{-- Datos siempre visible para todos --}}
-            <li>
-                <a href="{{ route('dashboard.home', ['farm_id' => session('current_farm_id')]) }}" class="{{ request()->routeIs('dashboard.home') ? 'active' : '' }}">
-                    <i class="fas fa-home"></i>
+            <li class="nav-item">
+                <a href="{{ route('dashboard.home', ['farm_id' => session('current_farm_id')]) }}" class="nav-link {{ request()->routeIs('dashboard.home') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line"></i>
                     <span>Datos</span>
                 </a>
             </li>
             
             {{-- Tareas visible para todos dentro de una granja --}}
             @if(session('current_farm_id'))
-                <li>
-                    <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'active' : '' }}">
+                <li class="nav-item">
+                    <a href="{{ route('tasks.index', ['farm_id' => session('current_farm_id')]) }}" class="nav-link {{ request()->routeIs('tasks.index') ? 'active' : '' }}">
                         <i class="fas fa-tasks"></i>
                         <span>Tareas</span>
                     </a>
@@ -45,25 +45,18 @@
             {{-- Las siguientes opciones solo son visibles para administradores --}}
             @if(session('farm_role') === 'admin')
                 {{-- Granjas siempre visible para administradores --}}
-                <li>
-                    <a href="{{ route('widgets') }}" class="{{ request()->routeIs('widgets') ? 'active' : '' }}">
-                        <i class="fas fa-th"></i>
-                        <span>Granjas</span>
+                <li class="nav-item">
+                    <a href="{{ route('sensores.index', ['farm_id' => session('current_farm_id')]) }}" class="nav-link {{ request()->routeIs('sensores.index') ? 'active' : '' }}">
+                        <i class="fas fa-microchip"></i>
+                        <span>Sensores</span>
                     </a>
                 </li>
                 
                 {{-- Usuarios y Estadísticas --}}
-                <li>
-                    <a href="{{ route('forms') }}" class="{{ request()->routeIs('forms') ? 'active' : '' }}">
+                <li class="nav-item">
+                    <a href="{{ route('dashboard.users', ['farm_id' => session('current_farm_id')]) }}" class="nav-link {{ request()->routeIs('dashboard.users') ? 'active' : '' }}">
                         <i class="fas fa-users"></i>
                         <span>Usuarios</span>
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="{{ route('tables') }}" class="{{ request()->routeIs('tables') ? 'active' : '' }}">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Estadísticas</span>
                     </a>
                 </li>
             @endif
