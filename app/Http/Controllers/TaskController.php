@@ -39,10 +39,15 @@ class TaskController extends Controller
             ]);
         }
         
-        // Si es admin, mostrar todas las tareas
-        $farm->load('tasks.user');
-        
+        // Si es admin, mostrar todas las tareas con su estado
+        $tasks = Component_Task::whereHas('farmComponent', function($query) use ($farm_id) {
+            $query->where('farm_id', $farm_id);
+        })
+        ->with('user')
+        ->get();
+
         return view('dashboard.tasks.index', [
+            'tasks' => $tasks,
             'farm' => $farm,
             'components' => $components,
             'isOperario' => false
@@ -89,7 +94,7 @@ class TaskController extends Controller
                 'date' => $request->date,
                 'time' => $request->time,
                 'comments' => $request->comments,
-                'status' => $request->status,
+                'status' => false, // Estado inicial como 'sin completar'
                 'farm_component_id' => $farmComponent->id // Usar el componente de la granja actual
             ]);
 
@@ -119,13 +124,14 @@ class TaskController extends Controller
         return redirect()->back()->with('success', 'Estado de la tarea actualizado');
     }
 
-    public function destroy(Component_Task $task)
+    public function destroy($farm_id, $task_id)
     {
         // Solo los administradores pueden eliminar tareas
         if (session('farm_role') !== 'admin') {
             abort(403, 'No tienes permiso para eliminar tareas.');
         }
 
+        $task = Component_Task::findOrFail($task_id);
         $task->delete();
         return redirect()->back()->with('success', 'Tarea eliminada exitosamente');
     }

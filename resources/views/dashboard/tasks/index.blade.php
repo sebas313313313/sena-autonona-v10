@@ -37,7 +37,7 @@
 
                             <!-- Fecha y Hora -->
                             <div class="col-md-4 mb-3">
-                                <label for="date" class="form-label">Fecha:</label>
+                                <label for="date" class="form-label">Fecha Límite:</label>
                                 <input type="date" class="form-control" id="date" name="date" required>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -96,17 +96,29 @@
                                         Hora: {{ \Carbon\Carbon::parse($task->time)->format('H:i') }}
                                     </small>
                                 </div>
-                                <div>
-                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
-                                        <button type="submit" 
-                                                class="btn btn-sm {{ $task->status ? 'btn-success' : 'btn-danger' }}"
-                                                title="{{ $task->status ? 'Completada' : 'Pendiente' }}">
-                                            <i class="fas {{ $task->status ? 'fa-check' : 'fa-times' }}"></i>
-                                        </button>
-                                    </form>
+                                <div class="d-flex align-items-center">
+                                    @if(session('farm_role') === 'admin')
+                                        <form action="{{ route('tasks.destroy', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarea?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if(session('farm_role') === 'operario')
+                                        <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
+                                            <button type="submit" 
+                                                    class="btn btn-sm {{ $task->status ? 'btn-success' : 'btn-danger' }}"
+                                                    title="{{ $task->status ? 'Completada' : 'Pendiente' }}">
+                                                <i class="fas {{ $task->status ? 'fa-check' : 'fa-times' }}"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -121,33 +133,36 @@
                         <div class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">{{ $task->user->name }}</h6>
-                                    <p class="mb-1">{{ $task->comments }}</p>
-                                    <small class="text-muted">
-                                        Fecha: {{ \Carbon\Carbon::parse($task->date)->format('d/m/Y') }} 
-                                        Hora: {{ \Carbon\Carbon::parse($task->time)->format('H:i') }}
-                                    </small>
+                                    <h5 class="mb-1">{{ $task->title }}</h5>
+                                    <p class="mb-1">Asignado a: {{ $task->user->name }}</p>
+                                    <p class="mb-1">Descripción: {{ $task->comments }}</p>
+                                    <small class="text-muted">Fecha Límite: {{ $task->date ? $task->date->format('d/m/Y') : 'No asignada' }}</small><br>
+                                    <small class="text-muted">Estado: {{ $task->status ? 'Completada' : 'Sin Completar' }}</small>
                                 </div>
                                 <div class="d-flex align-items-center">
-                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="me-2">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
-                                        <button type="submit" 
-                                                class="btn btn-sm {{ $task->status ? 'btn-success' : 'btn-danger' }}"
-                                                title="{{ $task->status ? 'Completada' : 'Pendiente' }}">
-                                            <i class="fas {{ $task->status ? 'fa-check' : 'fa-times' }}"></i>
-                                        </button>
-                                    </form>
-                                    
-                                    <form action="{{ route('tasks.destroy', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" 
-                                                onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarea?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <small>{{ $task->created_at->format('d/m/Y') }}</small>
+                                    @if(session('farm_role') === 'admin')
+                                        <form action="{{ route('tasks.destroy', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarea?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if(session('farm_role') === 'operario')
+                                        <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
+                                            <button type="submit" 
+                                                    class="btn btn-sm {{ $task->status ? 'btn-success' : 'btn-danger' }}"
+                                                    title="{{ $task->status ? 'Completada' : 'Pendiente' }}">
+                                                <i class="fas {{ $task->status ? 'fa-check' : 'fa-times' }}"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>

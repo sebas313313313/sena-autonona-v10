@@ -133,7 +133,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/tasks/{farm_id}', [App\Http\Controllers\TaskController::class, 'index'])->name('tasks.index');
         Route::post('/tasks/{farm_id}', [App\Http\Controllers\TaskController::class, 'store'])->name('tasks.store');
         Route::put('/tasks/{farm_id}/{task}', [App\Http\Controllers\TaskController::class, 'update'])->name('tasks.update');
-        Route::delete('/tasks/{farm_id}/{task}', [App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy');
+        Route::delete('/tasks/{farm_id}/{task}', [App\Http\Controllers\TaskController::class, 'destroy'])->name('tasks.destroy')->where('task', '[0-9]+');
 
         // Rutas de usuarios
         Route::get('/users/{farm_id}', function ($farm_id) {
