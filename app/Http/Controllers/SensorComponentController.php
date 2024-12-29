@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Component;
+use App\Models\Sensor;
 use App\Models\Sensor_Component;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,7 +26,9 @@ class SensorComponentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'farm_component_id' => 'required|exists:farm_components,id',
-            'sensor_id' => 'required|exists:sensors,id',
+            'description' => 'required',
+            'farm_type' => 'required',
+            'estado' => 'required',
             'min' => 'required|numeric',
             'max' => 'required|numeric|gt:min'
         ]);
@@ -34,7 +37,21 @@ class SensorComponentController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $sensor_component = Sensor_Component::create($request->all());
+        // Crear una nueva instancia de sensor para la granja
+        $sensor = Sensor::create([
+            'description' => $request->input('description'),
+            'farm_type' => $request->input('farm_type'),
+            'estado' => $request->input('estado')
+        ]);
+
+        // Asociar el nuevo sensor al componente de la granja
+        $sensor_component = Sensor_Component::create([
+            'farm_component_id' => $request->input('farm_component_id'),
+            'sensor_id' => $sensor->id,
+            'min' => $request->input('min'),
+            'max' => $request->input('max')
+        ]);
+
         return response()->json([
             'message' => 'Componente de sensor creado exitosamente',
             'data' => $sensor_component->load(['sensor', 'farmComponent'])

@@ -125,105 +125,63 @@ class FarmController extends Controller
                 'status' => 'active'
             ]);
 
-            // Crear los componentes seleccionados para la granja
-            if ($farm) {
-                \Log::info('Sensores seleccionados:', [
-                    'farm_id' => $farm->id,
-                    'farm_type' => $request->farm_type,
-                    'sensors' => $request->sensors
+            // Crear los sensores seleccionados para la granja
+            foreach ($request->sensors as $sensorType) {
+                \Log::info('Creando sensor para la granja:', [
+                    'sensor_type' => $sensorType,
+                    'farm_type' => $request->farm_type
                 ]);
 
-                // Obtener todos los sensores disponibles
-                $availableSensors = Sensor::where('farm_type', $request->farm_type)->get();
-                \Log::info('Sensores disponibles en BD:', $availableSensors->map(function($s) {
-                    return [
-                        'id' => $s->id,
-                        'description' => $s->description,
-                        'estado' => $s->estado
-                    ];
-                })->toArray());
+                // Crear un nuevo sensor para la granja
+                $sensor = Sensor::create([
+                    'description' => $sensorType,
+                    'farm_type' => $request->farm_type,
+                    'estado' => 'activo'
+                ]);
 
-                foreach ($request->sensors as $sensorType) {
-                    \Log::info('Procesando sensor:', [
-                        'sensor_type' => $sensorType,
-                        'farm_type' => $request->farm_type
-                    ]);
+                \Log::info('Sensor creado para la granja:', [
+                    'sensor_id' => $sensor->id,
+                    'description' => $sensor->description,
+                    'estado' => $sensor->estado
+                ]);
 
-                    // Buscar el sensor por tipo
-                    $sensor = Sensor::where('description', $sensorType)
-                                  ->where('farm_type', $request->farm_type)
-                                  ->first();
+                // Crear el componente del sensor para la granja
+                $component = Component::create([
+                    'name' => $sensorType,
+                    'description' => "Componente de {$sensorType}"
+                ]);
 
-                    if (!$sensor) {
-                        \Log::warning("Sensor no encontrado: {$sensorType} para tipo de granja: {$request->farm_type}. Buscando con LIKE...");
-                        
-                        // Intentar buscar con LIKE
-                        $sensor = Sensor::where('description', 'LIKE', '%' . $sensorType . '%')
-                                      ->where('farm_type', $request->farm_type)
-                                      ->first();
-                        
-                        if (!$sensor) {
-                            \Log::error("Sensor no encontrado ni siquiera con LIKE: {$sensorType}");
-                            
-                            // Crear el sensor si no existe
-                            $sensor = Sensor::create([
-                                'description' => $sensorType,
-                                'farm_type' => $request->farm_type,
-                                'estado' => 'activo'
-                            ]);
-                            
-                            \Log::info("Sensor creado automáticamente:", [
-                                'id' => $sensor->id,
-                                'description' => $sensor->description,
-                                'farm_type' => $sensor->farm_type
-                            ]);
-                        }
-                    }
+                \Log::info('Componente creado:', [
+                    'component_id' => $component->id,
+                    'name' => $component->name
+                ]);
 
-                    \Log::info('Sensor encontrado/creado:', [
-                        'sensor_id' => $sensor->id,
-                        'description' => $sensor->description,
-                        'estado' => $sensor->estado
-                    ]);
+                // Crear la relación farm_component
+                $farmComponent = Farm_Component::create([
+                    'farm_id' => $farm->id,
+                    'component_id' => $component->id,
+                    'description' => "Componente de {$sensorType} para {$farm->name}"
+                ]);
 
-                    // Crear el componente
-                    $component = Component::create([
-                        'name' => $sensorType,
-                        'description' => "Componente de {$sensorType}"
-                    ]);
+                \Log::info('Farm Component creado:', [
+                    'farm_component_id' => $farmComponent->id,
+                    'farm_id' => $farm->id,
+                    'component_id' => $component->id
+                ]);
 
-                    \Log::info('Componente creado:', [
-                        'component_id' => $component->id,
-                        'name' => $component->name
-                    ]);
+                // Crear la relación sensor_component
+                $sensorComponent = Sensor_Component::create([
+                    'farm_component_id' => $farmComponent->id,
+                    'sensor_id' => $sensor->id,
+                    'min' => 0,
+                    'max' => 100
+                ]);
 
-                    // Crear la relación farm_component
-                    $farmComponent = Farm_Component::create([
-                        'farm_id' => $farm->id,
-                        'component_id' => $component->id,
-                        'description' => "Componente de {$sensorType} para {$farm->name}"
-                    ]);
-
-                    \Log::info('Farm Component creado:', [
-                        'farm_component_id' => $farmComponent->id,
-                        'farm_id' => $farm->id,
-                        'component_id' => $component->id
-                    ]);
-
-                    // Crear la relación sensor_component
-                    $sensorComponent = Sensor_Component::create([
-                        'farm_component_id' => $farmComponent->id,
-                        'sensor_id' => $sensor->id,
-                        'min' => 0,
-                        'max' => 100
-                    ]);
-
-                    \Log::info('Sensor Component creado:', [
-                        'sensor_component_id' => $sensorComponent->id,
-                        'farm_component_id' => $farmComponent->id,
-                        'sensor_id' => $sensor->id
-                    ]);
-                }
+                \Log::info('Sensor Component creado:', [
+                    'sensor_component_id' => $sensorComponent->id,
+                    'farm_component_id' => $farmComponent->id,
+                    'sensor_id' => $sensor->id
+                ]);
             }
 
             return redirect()->route('farms.index')->with('success', 'Granja creada exitosamente');
