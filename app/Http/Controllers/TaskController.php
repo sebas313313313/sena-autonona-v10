@@ -76,7 +76,6 @@ class TaskController extends Controller
                 'date' => 'required|date',
                 'time' => 'required',
                 'comments' => 'required|string',
-                'status' => 'required|boolean'
             ], [
                 'user_id.required' => 'Por favor, selecciona un operario.',
                 'date.required' => 'La fecha es requerida.',
@@ -89,13 +88,14 @@ class TaskController extends Controller
                          ->where('users.id', $request->user_id)
                          ->firstOrFail();
 
+            $request->merge(['status' => $request->has('status')]);
             $task = Component_Task::create([
                 'user_id' => $request->user_id,
                 'date' => $request->date,
                 'time' => $request->time,
                 'comments' => $request->comments,
-                'status' => false, // Estado inicial como 'sin completar'
-                'farm_component_id' => $farmComponent->id // Usar el componente de la granja actual
+                'status' => $request->status,
+                'farm_component_id' => $farmComponent->id
             ]);
 
             return redirect()->back()->with('success', '¡Tarea asignada exitosamente al operario!');

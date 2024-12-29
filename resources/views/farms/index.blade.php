@@ -290,7 +290,7 @@
         <div class="farms-container">
             @forelse($invitedFarms ?? [] as $farm)
                 <div class="farm-card" onclick="window.location.href='{{ route('dashboard.home', ['farm_id' => $farm->id]) }}'">
-                    <h3 class="farm-title">{{ $farm->address }}</h3>
+                    <h3 class="farm-title">{{ $farm->name }}</h3>
                     <ul class="farm-details">
                         <li>
                             <i class="bi bi-geo-alt me-2"></i>
