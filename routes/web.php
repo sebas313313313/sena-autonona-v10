@@ -73,6 +73,21 @@ Route::middleware('guest')->group(function () {
     Route::post('/password/reset', [LoginController::class, 'resetPassword'])->name('password.update');
 });
 
+// Rutas para SuperD
+Route::get('/superD/blank', function () {
+    return view('superD.blank');
+})->name('superD.blank');
+
+Route::post('/superD/login', function () {
+    // Aquí normalmente iría la lógica de autenticación
+    // Por ahora solo redirigimos al dashboard
+    return redirect()->route('superD.dashboard');
+})->name('superD.login');
+
+Route::get('/superD/dashboard', function () {
+    return view('superD.dashboard');
+})->name('superD.dashboard');
+
 /**
  * Grupo de rutas para usuarios autenticados
  */

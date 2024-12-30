@@ -384,6 +384,15 @@
             <div class="form-group text-center">
                 <span class="register-text">¿No tienes una cuenta? <a href="{{ route('register') }}">Regístrate</a></span>
             </div>
+            <!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Icono de administrador -->
+<div class="text-center mt-3">
+    <a href="{{ route('superD.blank') }}" class="text-decoration-none">
+        <i class="fas fa-user-shield" style="font-size: 24px; color: #22c55e;"></i>
+    </a>
+</div>
         </form>
     </div>
 </div>
