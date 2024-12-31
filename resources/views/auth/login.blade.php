@@ -389,8 +389,9 @@
 
 <!-- Icono de administrador -->
 <div class="text-center mt-3">
-    <a href="{{ route('superD.blank') }}" class="text-decoration-none">
-        <i class="fas fa-user-shield" style="font-size: 24px; color: #22c55e;"></i>
+    <a href="{{ route('superD.login') }}" class="text-decoration-none">
+        <i class="fas fa-user-shield fa-2x text-primary"></i>
+        <p class="text-muted mt-1">Acceso SuperD</p>
     </a>
 </div>
         </form>

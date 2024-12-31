@@ -74,19 +74,14 @@ Route::middleware('guest')->group(function () {
 });
 
 // Rutas para SuperD
-Route::get('/superD/blank', function () {
-    return view('superD.blank');
-})->name('superD.blank');
-
-Route::post('/superD/login', function () {
-    // Aquí normalmente iría la lógica de autenticación
-    // Por ahora solo redirigimos al dashboard
-    return redirect()->route('superD.dashboard');
-})->name('superD.login');
-
-Route::get('/superD/dashboard', function () {
-    return view('superD.dashboard');
-})->name('superD.dashboard');
+Route::prefix('superD')->group(function () {
+    Route::get('/login', [App\Http\Controllers\SuperDController::class, 'showLoginForm'])->name('superD.login');
+    Route::post('/login', [App\Http\Controllers\SuperDController::class, 'login'])->name('superD.login.submit');
+    Route::post('/logout', [App\Http\Controllers\SuperDController::class, 'logout'])->name('superD.logout');
+    Route::get('/dashboard', [App\Http\Controllers\SuperDController::class, 'dashboard'])->name('superD.dashboard')->middleware('auth');
+    Route::delete('/components/{component}', [App\Http\Controllers\SuperDController::class, 'deleteComponent'])->name('superD.components.delete');
+    Route::get('/components/{component}/sensors', [App\Http\Controllers\SuperDController::class, 'getComponentSensors'])->name('superD.components.sensors');
+});
 
 /**
  * Grupo de rutas para usuarios autenticados
@@ -110,6 +105,12 @@ Route::middleware('auth')->group(function () {
     // Actualización de estado de sensores (fuera del middleware farm.access)
     Route::post('/sensores/{id}/estado', [App\Http\Controllers\SensorController::class, 'updateEstado'])
         ->name('sensores.updateEstado');
+
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/components', [App\Http\Controllers\ComponentController::class, 'store'])->name('components.store');
+        Route::get('/components/{component}/sensors', [App\Http\Controllers\SensorController::class, 'index'])->name('sensors.index');
+        Route::post('/components/{component}/sensors', [App\Http\Controllers\SensorController::class, 'store'])->name('sensors.store');
+    });
 
     /**
      * Grupo de rutas protegidas

@@ -3,6 +3,7 @@
 @section('title', 'Login SuperD')
 
 @section('content')
+
 <style>
     .login-superD {
         min-height: 100vh;
@@ -96,16 +97,34 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
     }
+
+    .alert {
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    .alert-danger {
+        background-color: rgba(220, 38, 38, 0.1);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        color: #dc2626;
+    }
 </style>
 
 <div class="login-superD">
     <div class="login-card">
         <div class="login-header">
-            <h4>SuperA Login</h4>
+            <h4>Acceso SuperD</h4>
             <p>Panel de Administración Especial</p>
         </div>
         
-        <form action="{{ route('superD.login') }}" method="POST" class="login-form">
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <form action="{{ route('superD.login.submit') }}" method="POST" class="login-form">
             @csrf
             
             <div class="input-group">
@@ -130,7 +149,7 @@
 
             <button type="submit" class="btn btn-login">
                 <i class="fas fa-sign-in-alt me-2"></i>
-                Iniciar Sesión
+                Ingresar
             </button>
         </form>
     </div>
