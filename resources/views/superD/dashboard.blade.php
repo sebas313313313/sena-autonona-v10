@@ -38,6 +38,12 @@
                     <span>Historial</span>
                 </a>
             </li>
+            <li class="menu-item" onclick="showSection('otros')">
+                <a href="#">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Otros</span>
+                </a>
+            </li>
         </ul>
 
         <div class="sidebar-footer">
@@ -399,6 +405,169 @@
 <!-- Sección de historial -->
 <div id="historial" class="content-section" style="display: none;">
     <!-- Contenido de historial aquí -->
+</div>
+
+<!-- Sección de otros -->
+<div id="otros" class="content-section" style="display: none;">
+    <div class="section-header">
+        <h2>Otros</h2>
+        <p>Configuraciones adicionales y herramientas del sistema</p>
+    </div>
+
+    <div class="cards-container">
+        <!-- Card para Tipos de Identificación -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-id-card"></i>
+                <h3>Tipos de Identificación</h3>
+            </div>
+            <div class="card-body">
+                <p>Gestiona los tipos de identificación disponibles en el sistema.</p>
+                <button class="btn-primary" onclick="showIdentificationTypes()">
+                    <i class="fa-solid fa-eye"></i> Ver Tipos
+                </button>
+            </div>
+        </div>
+
+        <!-- Card para Municipios -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <h3>Municipios</h3>
+            </div>
+            <div class="card-body">
+                <p>Administra los municipios registrados en el sistema.</p>
+                <button class="btn-primary" onclick="showMunicipalities()">
+                    <i class="fa-solid fa-eye"></i> Ver Municipios
+                </button>
+            </div>
+        </div>
+
+        <!-- Card para Preguntas de Seguridad -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h3>Preguntas de Seguridad</h3>
+            </div>
+            <div class="card-body">
+                <p>Gestiona las preguntas de seguridad para recuperación de cuentas.</p>
+                <button class="btn-primary" onclick="showSecurityQuestions()">
+                    <i class="fa-solid fa-eye"></i> Ver Preguntas
+                </button>
+            </div>
+        </div>
+
+        <!-- Card para Roles de Usuario -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fa-solid fa-user-tag"></i>
+                <h3>Roles de Usuario</h3>
+            </div>
+            <div class="card-body">
+                <p>Administra los roles y permisos de los usuarios.</p>
+                <button class="btn-primary" onclick="showUserRoles()">
+                    <i class="fa-solid fa-eye"></i> Ver Roles
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Tipos de Identificación -->
+    <div id="identificationTypesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Tipos de Identificación</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="identificationTypesTable">
+                        <!-- Datos de tipos de identificación -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Municipios -->
+    <div id="municipalitiesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Municipios</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="municipalitiesTable">
+                        <!-- Datos de municipios -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Preguntas de Seguridad -->
+    <div id="securityQuestionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Preguntas de Seguridad</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Pregunta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="securityQuestionsTable">
+                        <!-- Datos de preguntas de seguridad -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Roles de Usuario -->
+    <div id="userRolesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Roles de Usuario</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userRolesTable">
+                        <!-- Datos de roles de usuario -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section('styles')
@@ -887,6 +1056,145 @@
 .btn-primary:hover {
     background: var(--accent-darker);
 }
+
+/* Estilos para la sección de otros */
+#otros .cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 1rem;
+}
+
+#otros .card {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease;
+}
+
+#otros .card:hover {
+    transform: translateY(-5px);
+}
+
+#otros .card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#otros .card-header i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+#otros .card-header h3 {
+    margin: 0;
+    color: var(--text-dark);
+}
+
+#otros .card-body {
+    padding: 1.5rem;
+}
+
+#otros .card-body p {
+    color: var(--text-gray);
+    margin-bottom: 1rem;
+}
+
+#otros .btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 5px;
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.3s ease;
+}
+
+#otros .btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+/* Estilos para los modales */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--white);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    margin: 2rem auto;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-dark);
+}
+
+.modal-body {
+    padding: 1rem;
+}
+
+.close {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-gray);
+}
+
+.close:hover {
+    color: var(--text-dark);
+}
+
+/* Estilos para las tablas en los modales */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background: var(--background);
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.data-table tr:hover {
+    background: var(--hover-color);
+}
 </style>
 @endsection
 
@@ -1077,6 +1385,181 @@
 
     function hideNewSensorForm() {
         document.getElementById('newSensorModal').classList.remove('show');
+    }
+
+    // Funciones para mostrar/ocultar secciones
+    function showSection(sectionId) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
+
+        // Mostrar la sección seleccionada
+        document.getElementById(sectionId).style.display = 'block';
+
+        // Actualizar clases activas en el menú
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+    }
+
+    // Funciones para los modales de la sección Otros
+    function showModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Cerrar modales al hacer click fuera de ellos
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    // Agregar evento de cierre a todos los botones de cerrar
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.onclick = function() {
+            this.closest('.modal').style.display = 'none';
+        }
+    });
+
+    // Funciones para mostrar cada tipo de datos
+    function showIdentificationTypes() {
+        showModal('identificationTypesModal');
+        fetch('/api/identification-types')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('identificationTypesTable');
+                tbody.innerHTML = data.map(type => `
+                    <tr>
+                        <td>${type.id}</td>
+                        <td>${type.description}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editIdentificationType(${type.id})">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deleteIdentificationType(${type.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    function showMunicipalities() {
+        showModal('municipalitiesModal');
+        fetch('/api/municipalities')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('municipalitiesTable');
+                tbody.innerHTML = data.map(municipality => `
+                    <tr>
+                        <td>${municipality.id}</td>
+                        <td>${municipality.name}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editMunicipality(${municipality.id})">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deleteMunicipality(${municipality.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    function showSecurityQuestions() {
+        showModal('securityQuestionsModal');
+        fetch('/api/security-questions')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('securityQuestionsTable');
+                tbody.innerHTML = data.map(question => `
+                    <tr>
+                        <td>${question.id}</td>
+                        <td>${question.question}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editSecurityQuestion(${question.id})">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deleteSecurityQuestion(${question.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    function showUserRoles() {
+        showModal('userRolesModal');
+        fetch('/api/user-roles')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('userRolesTable');
+                tbody.innerHTML = data.map(role => `
+                    <tr>
+                        <td>${role.id}</td>
+                        <td>${role.name}</td>
+                        <td>${role.description}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editUserRole(${role.id})">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deleteUserRole(${role.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            });
+    }
+
+    // Funciones CRUD (a implementar según necesidad)
+    function editIdentificationType(id) {
+        // Implementar edición
+        console.log('Editar tipo de identificación:', id);
+    }
+
+    function deleteIdentificationType(id) {
+        // Implementar eliminación
+        console.log('Eliminar tipo de identificación:', id);
+    }
+
+    function editMunicipality(id) {
+        // Implementar edición
+        console.log('Editar municipio:', id);
+    }
+
+    function deleteMunicipality(id) {
+        // Implementar eliminación
+        console.log('Eliminar municipio:', id);
+    }
+
+    function editSecurityQuestion(id) {
+        // Implementar edición
+        console.log('Editar pregunta de seguridad:', id);
+    }
+
+    function deleteSecurityQuestion(id) {
+        // Implementar eliminación
+        console.log('Eliminar pregunta de seguridad:', id);
+    }
+
+    function editUserRole(id) {
+        // Implementar edición
+        console.log('Editar rol de usuario:', id);
+    }
+
+    function deleteUserRole(id) {
+        // Implementar eliminación
+        console.log('Eliminar rol de usuario:', id);
     }
 </script>
 @endsection
