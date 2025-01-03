@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -89,6 +90,53 @@ class UserController extends Controller
             'message' => 'Usuario actualizado exitosamente',
             'data' => $user
         ]);
+    }
+
+    /**
+     * Update the user name.
+     */
+    public function updateName(Request $request)
+    {
+        try {
+            \Log::info('Datos recibidos:', $request->all());
+
+            $validator = \Validator::make($request->all(), [
+                'name' => 'required|string|max:255'
+            ], [
+                'name.required' => 'El nombre es requerido',
+                'name.string' => 'El nombre debe ser texto',
+                'name.max' => 'El nombre no puede tener más de 255 caracteres'
+            ]);
+
+            if ($validator->fails()) {
+                \Log::warning('Validación fallida:', ['errors' => $validator->errors()->toArray()]);
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $user = auth()->user();
+            $user->name = $request->input('name');
+            $user->save();
+
+            \Log::info('Nombre actualizado exitosamente:', ['user_id' => $user->id, 'new_name' => $user->name]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Nombre actualizado exitosamente',
+                'name' => $user->name
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar nombre: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_data' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el nombre: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

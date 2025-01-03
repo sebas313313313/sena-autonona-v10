@@ -5,7 +5,7 @@ Has sido invitado para unirte a la granja "{{ $invitation->farm->name }}" como {
 
 Para aceptar la invitación, haz clic en el siguiente botón:
 
-@component('mail::button', ['url' => route('invitation.accept', ['token' => $invitation->token])])
+@component('mail::button', ['url' => route('invitations.accept', ['token' => $invitation->token])])
 Aceptar Invitación
 @endcomponent
 

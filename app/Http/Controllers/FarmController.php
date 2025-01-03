@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Component;
 use App\Models\Farm_Component;
+use App\Models\Sensor;
+use App\Models\Sensor_Component;
 use Database\Seeders\SensorSeeder;
 use Database\Seeders\SampleSeeder;
 
@@ -42,8 +44,9 @@ class FarmController extends Controller
                     ->get();
         Log::info('Granjas propias encontradas: ' . $farms->count());
 
-        // Obtener las granjas a las que ha sido invitado
+        // Obtener las granjas invitadas (excluyendo las propias)
         $invitedFarms = $user->farms()
+                            ->whereNotIn('farms.id', $farms->pluck('id'))
                             ->with('municipality')
                             ->get();
         Log::info('Granjas invitadas encontradas: ' . $invitedFarms->count());
@@ -51,28 +54,11 @@ class FarmController extends Controller
         // Obtener todos los componentes disponibles
         $components = \App\Models\Component::all();
 
-        // Log de los IDs de las granjas invitadas
-        foreach ($invitedFarms as $farm) {
-            Log::info('Granja invitada: ID=' . $farm->id . ', Role=' . $farm->pivot->role);
-        }
-
         return view('farms.index', [
             'farms' => $farms,
             'invitedFarms' => $invitedFarms,
             'municipalities' => Municipality::all(),
-            'components' => $components,
-            'debug' => [
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'invited_farms_count' => $invitedFarms->count(),
-                'invited_farms' => $invitedFarms->map(function($farm) {
-                    return [
-                        'id' => $farm->id,
-                        'address' => $farm->address,
-                        'role' => $farm->pivot->role ?? 'No role'
-                    ];
-                })
-            ]
+            'components' => $components
         ]);
     }
 
@@ -91,44 +77,120 @@ class FarmController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'farm_type' => 'required|string|in:acuaponica,hidroponica,vigilancia,riego',
-            'address' => 'required|string|max:255',
-            'vereda' => 'required|string|max:255',
-            'extension' => 'required|numeric',
-            'municipality_id' => 'required|exists:municipalities,id',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'sensors' => 'required|array|min:1',
-            'sensors.*' => 'required|string'
-        ]);
+        try {
+            \Log::info('Creando granja con datos:', [
+                'farm_type' => $request->farm_type,
+                'sensors' => $request->sensors,
+                'all_request_data' => $request->all()
+            ]);
 
-        // Obtener el ID del rol del usuario
-        $userRoleId = auth()->user()->userRole()->first()->id;
+            // Validar los datos recibidos
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'farm_type' => 'required|string|in:acuaponica,hidroponica,vigilancia,riego',
+                'address' => 'required|string|max:255',
+                'vereda' => 'required|string|max:255',
+                'extension' => 'required|numeric',
+                'municipality_id' => 'required|exists:municipalities,id',
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'sensors' => 'required|array|min:1',
+                'sensors.*' => 'required|string'
+            ]);
 
-        $farm = Farm::create([
-            'name' => $request->name,
-            'farm_type' => $request->farm_type,
-            'address' => $request->address,
-            'vereda' => $request->vereda,
-            'extension' => $request->extension,
-            'municipality_id' => $request->municipality_id,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'users_role_id' => $userRoleId
-        ]);
+            // Obtener el ID del rol del usuario
+            $userRoleId = auth()->user()->userRole()->first()->id;
 
-        // Crear sensores seleccionados
-        $sensorSeeder = new SensorSeeder();
-        $sensorSeeder->run($farm, $request->sensors);
+            // Crear la granja
+            $farm = Farm::create([
+                'name' => $request->name,
+                'farm_type' => $request->farm_type,
+                'address' => $request->address,
+                'vereda' => $request->vereda,
+                'extension' => $request->extension,
+                'municipality_id' => $request->municipality_id,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'users_role_id' => $userRoleId
+            ]);
 
-        // Generar datos de ejemplo para los sensores
-        $sampleSeeder = new SampleSeeder();
-        $sampleSeeder->run();
+            \Log::info('Granja creada:', [
+                'farm_id' => $farm->id,
+                'name' => $farm->name
+            ]);
 
-        return redirect()->route('farms.index')
-            ->with('success', 'Granja creada exitosamente con los sensores seleccionados.');
+            // Asignar al usuario como administrador de la granja
+            $farm->users()->attach(auth()->id(), [
+                'role' => 'admin',
+                'status' => 'active'
+            ]);
+
+            // Crear los sensores seleccionados para la granja
+            foreach ($request->sensors as $sensorType) {
+                \Log::info('Creando sensor para la granja:', [
+                    'sensor_type' => $sensorType,
+                    'farm_type' => $request->farm_type
+                ]);
+
+                // Crear un nuevo sensor para la granja
+                $sensor = Sensor::create([
+                    'description' => $sensorType,
+                    'farm_type' => $request->farm_type,
+                    'estado' => 'activo'
+                ]);
+
+                \Log::info('Sensor creado para la granja:', [
+                    'sensor_id' => $sensor->id,
+                    'description' => $sensor->description,
+                    'estado' => $sensor->estado
+                ]);
+
+                // Crear el componente del sensor para la granja
+                $component = Component::create([
+                    'name' => $sensorType,
+                    'description' => "Componente de {$sensorType}"
+                ]);
+
+                \Log::info('Componente creado:', [
+                    'component_id' => $component->id,
+                    'name' => $component->name
+                ]);
+
+                // Crear la relación farm_component
+                $farmComponent = Farm_Component::create([
+                    'farm_id' => $farm->id,
+                    'component_id' => $component->id,
+                    'description' => "Componente de {$sensorType} para {$farm->name}"
+                ]);
+
+                \Log::info('Farm Component creado:', [
+                    'farm_component_id' => $farmComponent->id,
+                    'farm_id' => $farm->id,
+                    'component_id' => $component->id
+                ]);
+
+                // Crear la relación sensor_component
+                $sensorComponent = Sensor_Component::create([
+                    'farm_component_id' => $farmComponent->id,
+                    'sensor_id' => $sensor->id,
+                    'min' => 0,
+                    'max' => 100
+                ]);
+
+                \Log::info('Sensor Component creado:', [
+                    'sensor_component_id' => $sensorComponent->id,
+                    'farm_component_id' => $farmComponent->id,
+                    'sensor_id' => $sensor->id
+                ]);
+            }
+
+            return redirect()->route('farms.index')->with('success', 'Granja creada exitosamente');
+        } catch (\Exception $e) {
+            \Log::error('Error al crear granja: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'Error al crear la granja: ' . $e->getMessage())->withInput();
+        }
     }
 
     /**
@@ -213,5 +275,11 @@ class FarmController extends Controller
 
         $farm->delete();
         return redirect()->back()->with('success', 'Granja eliminada exitosamente.');
+    }
+
+    private function createFarmComponents(Farm $farm)
+    {
+        // Crear los componentes según el tipo de granja
+        // Este método debe ser implementado según las necesidades específicas
     }
 }

@@ -19,7 +19,7 @@
                         No hay operarios disponibles en esta granja. Invita operarios desde la sección de usuarios para poder asignar tareas.
                     </div>
                 @else
-                    <form action="{{ route('tasks.store') }}" method="POST">
+                    <form action="{{ route('tasks.store', ['farm_id' => $farm->id]) }}" method="POST">
                         @csrf
                         <input type="hidden" name="farm_id" value="{{ $farm->id }}">
                         
@@ -37,11 +37,11 @@
 
                             <!-- Fecha y Hora -->
                             <div class="col-md-4 mb-3">
-                                <label for="date" class="form-label">Fecha:</label>
+                                <label for="date" class="form-label">Fecha Límite:</label>
                                 <input type="date" class="form-control" id="date" name="date" required>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="time" class="form-label">Hora:</label>
+                                <label for="time" class="form-label">Hora limite:</label>
                                 <input type="time" class="form-control" id="time" name="time" required>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                                 <input class="form-check-input" type="checkbox" id="taskStatus" name="status" value="1" checked>
                                 <label class="form-check-label" for="taskStatus">Activa</label>
                             </div>
-                        </div>
+                        </div> 
 
                         <!-- Comentarios -->
                         <div class="mb-3">
@@ -86,76 +86,80 @@
             <div class="list-group">
                 @if($isOperario)
                     @forelse($tasks as $task)
-                        <div class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">Tarea #{{ $task->id }}</h6>
-                                    <p class="mb-1">{{ $task->comments }}</p>
-                                    <small class="text-muted">
-                                        Fecha: {{ \Carbon\Carbon::parse($task->date)->format('d/m/Y') }} 
-                                        Hora: {{ \Carbon\Carbon::parse($task->time)->format('H:i') }}
-                                    </small>
-                                </div>
-                                <div>
-                                    <form action="{{ route('tasks.update', $task) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
-                                        <button type="submit" 
-                                                class="btn btn-sm {{ $task->status ? 'btn-success' : 'btn-danger' }}"
-                                                title="{{ $task->status ? 'Completada' : 'Pendiente' }}">
-                                            <i class="fas {{ $task->status ? 'fa-check' : 'fa-times' }}"></i>
-                                        </button>
-                                    </form>
+                        @if($task->status)
+                            <div class="card mb-3 shadow-sm bg-light">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="card-title">Tarea #{{ $task->id }}</h5>
+                                            <p class="card-text mb-1">{{ $task->comments }}</p>
+                                            <small class="text-muted">
+                                                Fecha: {{ \Carbon\Carbon::parse($task->date)->format('d/m/Y') }} 
+                                                Hora: {{ \Carbon\Carbon::parse($task->time)->format('H:i') }}
+                                            </small>
+                                        </div>
+                                        <div class="text-right">
+                                            <small class="text-muted">{{ $task->created_at->format('d/m/Y') }}</small>
+                                            <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
+                                                <button type="submit" 
+                                                        class="btn btn-sm {{ $task->status ? 'btn-success' : 'btn-danger' }}"
+                                                        title="{{ $task->status ? 'Completada' : 'Pendiente' }}">
+                                                    <i class="fas {{ $task->status ? 'fa-check' : 'fa-times' }}"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     @empty
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            No tienes tareas asignadas en esta granja.
-                        </div>
+                        <div class="alert alert-info">No hay tareas asignadas.</div>
                     @endforelse
                 @else
                     @forelse($farm->tasks as $task)
-                        <div class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">{{ $task->user->name }}</h6>
-                                    <p class="mb-1">{{ $task->comments }}</p>
-                                    <small class="text-muted">
-                                        Fecha: {{ \Carbon\Carbon::parse($task->date)->format('d/m/Y') }} 
-                                        Hora: {{ \Carbon\Carbon::parse($task->time)->format('H:i') }}
-                                    </small>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <form action="{{ route('tasks.update', $task) }}" method="POST" class="me-2">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="{{ $task->status ? '0' : '1' }}">
-                                        <button type="submit" 
-                                                class="btn btn-sm {{ $task->status ? 'btn-success' : 'btn-danger' }}"
-                                                title="{{ $task->status ? 'Completada' : 'Pendiente' }}">
-                                            <i class="fas {{ $task->status ? 'fa-check' : 'fa-times' }}"></i>
-                                        </button>
-                                    </form>
-                                    
-                                    <form action="{{ route('tasks.destroy', $task) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" 
-                                                onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarea?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                        @if($task->status || session('farm_role') === 'admin')
+                            <div class="card mb-3 shadow-sm {{ $task->status ? 'bg-light' : 'bg-white' }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="card-title">{{ $task->title }}</h5>
+                                            <p class="card-text mb-1"><strong>Asignado a:</strong> {{ $task->user->name }}</p>
+                                            <p class="card-text mb-1"><strong>Descripción:</strong> {{ $task->comments }}</p>
+                                            <p class="card-text mb-1"><strong>Fecha Límite:</strong> {{ $task->date ? $task->date->format('d/m/Y') : 'No asignada' }}</p>
+                                            <p class="card-text"><strong>Estado:</strong> {{ $task->status ? 'Completada' : 'Sin Completar' }}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <small class="text-muted">{{ $task->created_at->format('d/m/Y') }}</small>
+                                            @if(session('farm_role') === 'admin')
+                                                <form action="{{ route('tasks.destroy', ['farm_id' => $farm->id, 'task' => $task->id]) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('¿Estás seguro de que deseas eliminar esta tarea?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                                @if(!$task->status)
+                                                    <form action="{{ route('tasks.update', ['farm_id' => $farm->id, 'task' => $task]) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status" value="1">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                                            Activar
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     @empty
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            No hay tareas asignadas en esta granja.
-                        </div>
+                        <div class="alert alert-info">No hay tareas asignadas.</div>
                     @endforelse
                 @endif
             </div>
@@ -176,7 +180,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Obtener el formulario de asignación de tareas
-    const taskForm = document.querySelector('form[action="{{ route('tasks.store') }}"]');
+    const taskForm = document.querySelector('form[action="{{ route('tasks.store', ['farm_id' => $farm->id]) }}"]');
     
     if (taskForm) {
         taskForm.addEventListener('submit', function(e) {

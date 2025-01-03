@@ -45,4 +45,27 @@ class ComponentController extends Controller
         $component->delete();
         return response()->json(['message' => "Registro Elimiinado Exitosamente", $component]);
     }
+
+    public function store(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'description' => 'required|string|max:255',
+            ]);
+
+            $component = Component::create($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Componente creado exitosamente',
+                'component' => $component
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al crear componente: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el componente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

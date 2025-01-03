@@ -12,6 +12,7 @@ use Database\Seeders\SecurityQuestionsSeeder;
 use Database\Seeders\ComponentSeeder;
 use Database\Seeders\UsersRoleSeeder;
 use Database\Seeders\SampleSeeder;
+use Database\Seeders\SuperDUserSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -29,7 +30,8 @@ class DatabaseSeeder extends Seeder
             SensorSeeder::class,
             UserSeeder::class,
             SensorDataSeeder::class,
-            SampleSeeder::class  // Agregando el nuevo seeder
+            SampleSeeder::class,  // Agregando el nuevo seeder
+            SuperDUserSeeder::class,
         ]);
     }
 }

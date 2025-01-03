@@ -9,7 +9,9 @@ class Component extends Model
 {
     use HasFactory;
 
-    protected $fillable =['description'];
+    protected $fillable = [
+        'description'
+    ];
 
     protected $allowFilter = ['description'];
 

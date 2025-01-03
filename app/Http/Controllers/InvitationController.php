@@ -24,26 +24,40 @@ class InvitationController extends Controller
     /**
      * Envía una invitación por correo electrónico
      * 
-     * @param Request $request Contiene: email, role
+     * @param Request $request Contiene: email, role, farm_id
      * @return \Illuminate\Http\JsonResponse
      */
     public function send(Request $request)
     {
+        // Log de los datos recibidos
+        \Log::info('Datos de invitación recibidos:', $request->all());
+
         $request->validate([
             'email' => 'required|email',
             'role' => 'required|in:admin,operario'
         ]);
 
         try {
-            // Obtener el ID de la granja de la sesión
-            $farm_id = session('current_farm_id');
+            // Verificar si el usuario existe en la base de datos
+            $user = User::where('email', $request->email)->first();
+            if (!$user) {
+                throw new \Exception('El correo electrónico no está registrado en el sistema. El usuario debe registrarse primero.');
+            }
+
+            // Obtener el ID de la granja de la sesión o del request
+            $farm_id = $request->farm_id ?? session('current_farm_id');
             if (!$farm_id) {
-                \Log::error('Farm ID no encontrado en la sesión');
-                return redirect()->back()->with('error', 'Error: No se pudo identificar la granja actual');
+                throw new \Exception('No se pudo identificar la granja actual');
             }
 
             // Verificar que la granja existe
             $farm = Farm::findOrFail($farm_id);
+            \Log::info('Granja encontrada:', ['farm' => $farm->toArray()]);
+
+            // Verificar si el usuario ya está en la granja
+            if ($user->farms()->where('farm_id', $farm_id)->exists()) {
+                throw new \Exception('Este usuario ya es miembro de la granja');
+            }
 
             // Verificar si el usuario ya está invitado
             $existingInvitation = Invitation::where('email', $request->email)
@@ -53,7 +67,7 @@ class InvitationController extends Controller
                 ->first();
 
             if ($existingInvitation) {
-                return redirect()->back()->with('error', 'Ya existe una invitación pendiente para este usuario');
+                throw new \Exception('Ya existe una invitación pendiente para este usuario');
             }
 
             // Crear la invitación
@@ -66,13 +80,35 @@ class InvitationController extends Controller
                 'accepted' => false
             ]);
 
+            \Log::info('Invitación creada:', ['invitation' => $invitation->toArray()]);
+
             // Enviar el correo
             Mail::to($request->email)->send(new InvitationMail($invitation));
+            \Log::info('Correo enviado exitosamente');
+            
+            // Responder según el tipo de solicitud
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Invitación enviada exitosamente'
+                ]);
+            }
+            
+            return redirect()->route('dashboard.users', ['farm_id' => $farm_id])
+                ->with('success', 'Invitación enviada exitosamente');
 
-            return redirect()->back()->with('success', 'Invitación enviada exitosamente');
         } catch (\Exception $e) {
             \Log::error('Error al enviar invitación: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al enviar la invitación: ' . $e->getMessage());
+            
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 422);
+            }
+            
+            return redirect()->route('dashboard.users', ['farm_id' => $farm_id])
+                ->with('error', $e->getMessage());
         }
     }
 

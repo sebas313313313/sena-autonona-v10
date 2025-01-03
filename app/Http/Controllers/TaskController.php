@@ -9,18 +9,15 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index($farm_id)
     {
-        // Obtener el ID de la granja de la sesión
-        $farm_id = session('current_farm_id');
-        if (!$farm_id) {
-            return redirect()->back()->with('error', 'No se pudo identificar la granja actual');
-        }
-
         // Obtener la granja
         $farm = Farm::with(['users' => function($query) {
             $query->wherePivot('role', 'operario');
         }])->findOrFail($farm_id);
+
+        // Guardar el farm_id en la sesión
+        session(['current_farm_id' => $farm_id]);
 
         // Obtener los componentes de la granja para el formulario
         $components = Farm_Component::where('farm_id', $farm_id)->get();
@@ -42,17 +39,22 @@ class TaskController extends Controller
             ]);
         }
         
-        // Si es admin, mostrar todas las tareas
-        $farm->load('tasks.user');
-        
+        // Si es admin, mostrar todas las tareas con su estado
+        $tasks = Component_Task::whereHas('farmComponent', function($query) use ($farm_id) {
+            $query->where('farm_id', $farm_id);
+        })
+        ->with('user')
+        ->get();
+
         return view('dashboard.tasks.index', [
+            'tasks' => $tasks,
             'farm' => $farm,
             'components' => $components,
             'isOperario' => false
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $farm_id)
     {
         try {
             // Solo los administradores pueden crear tareas
@@ -60,11 +62,6 @@ class TaskController extends Controller
                 return redirect()->back()->with('error', 'No tienes permiso para crear tareas.');
             }
 
-            $farm_id = session('current_farm_id');
-            if (!$farm_id) {
-                return redirect()->back()->with('error', 'Por favor, selecciona una granja primero.');
-            }
-            
             $farm = Farm::findOrFail($farm_id);
             
             // Obtener el farm_component_id de la granja actual
@@ -79,7 +76,6 @@ class TaskController extends Controller
                 'date' => 'required|date',
                 'time' => 'required',
                 'comments' => 'required|string',
-                'status' => 'required|boolean'
             ], [
                 'user_id.required' => 'Por favor, selecciona un operario.',
                 'date.required' => 'La fecha es requerida.',
@@ -92,13 +88,14 @@ class TaskController extends Controller
                          ->where('users.id', $request->user_id)
                          ->firstOrFail();
 
+            $request->merge(['status' => $request->has('status')]);
             $task = Component_Task::create([
                 'user_id' => $request->user_id,
                 'date' => $request->date,
                 'time' => $request->time,
                 'comments' => $request->comments,
                 'status' => $request->status,
-                'farm_component_id' => $farmComponent->id // Usar el componente de la granja actual
+                'farm_component_id' => $farmComponent->id
             ]);
 
             return redirect()->back()->with('success', '¡Tarea asignada exitosamente al operario!');
@@ -109,7 +106,7 @@ class TaskController extends Controller
         }
     }
 
-    public function update(Request $request, Component_Task $task)
+    public function update(Request $request, $farm_id, Component_Task $task)
     {
         // Verificar que el usuario tenga permiso para actualizar esta tarea
         if (session('farm_role') !== 'admin' && $task->user_id !== auth()->id()) {
@@ -127,13 +124,14 @@ class TaskController extends Controller
         return redirect()->back()->with('success', 'Estado de la tarea actualizado');
     }
 
-    public function destroy(Component_Task $task)
+    public function destroy($farm_id, $task_id)
     {
         // Solo los administradores pueden eliminar tareas
         if (session('farm_role') !== 'admin') {
             abort(403, 'No tienes permiso para eliminar tareas.');
         }
 
+        $task = Component_Task::findOrFail($task_id);
         $task->delete();
         return redirect()->back()->with('success', 'Tarea eliminada exitosamente');
     }

@@ -10,29 +10,37 @@ class FarmAccess
 {
     public function handle(Request $request, Closure $next)
     {
+        // Obtener el farm_id de la ruta o de la sesión
         $farm_id = $request->route('farm_id') ?? session('current_farm_id');
         
         if (!$farm_id) {
-            return redirect()->route('home')->with('error', 'Por favor, selecciona una granja.');
+            return redirect()->route('farms.index')->with('error', 'Por favor, selecciona una granja.');
         }
 
-        $user = auth()->user();
-        $farm = Farm::findOrFail($farm_id);
+        try {
+            $user = auth()->user();
+            $farm = Farm::findOrFail($farm_id);
 
-        // Verificar si el usuario es el dueño de la granja
-        if ($farm->users_role_id === $user->userRole->id) {
+            // Guardar el farm_id en la sesión
+            session(['current_farm_id' => $farm_id]);
+
+            // Verificar si el usuario tiene acceso a la granja
+            $farmUser = $farm->users()->where('user_id', $user->id)->first();
+            
+            if (!$farmUser) {
+                return redirect()->route('farms.index')
+                    ->with('error', 'No tienes acceso a esta granja.');
+            }
+
+            // Guardar el rol en la sesión
+            session(['farm_role' => $farmUser->pivot->role]);
+
             return $next($request);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error en FarmAccess middleware: ' . $e->getMessage());
+            return redirect()->route('farms.index')
+                ->with('error', 'Error al acceder a la granja.');
         }
-
-        // Verificar si el usuario está invitado a la granja
-        $isInvited = $farm->users()
-            ->where('users.id', $user->id)
-            ->exists();
-
-        if (!$isInvited) {
-            return redirect()->route('home')->with('error', 'No tienes acceso a esta granja.');
-        }
-
-        return $next($request);
     }
 }
