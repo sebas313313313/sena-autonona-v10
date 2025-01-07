@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Models\Municipality;
 use App\Models\IdentificationType;
+use App\Models\FarmType;
 use Illuminate\Http\Request;
 
 /**
@@ -43,12 +44,44 @@ Route::get('/', function () {
         ->whereNotIn('farms.id', $farms->pluck('id'))
         ->with('municipality')
         ->get();
-    
+
+    // Obtener los componentes y usarlos como tipos de granja
+    $components = \App\Models\Component::all();
+    $farmTypes = $components->pluck('description', 'id')->toArray();
+
+    // Obtener los sensores asociados a cada componente
+    $sensorsByComponent = [];
+    foreach ($components as $component) {
+        // Mapear los nombres de componentes a farm_type
+        $farmTypeMap = [
+            'Acuaponia' => 'acuaponica',
+            'Hidroponia' => 'hidroponica',
+            'Sistema de Riego' => 'riego',
+            'Sistema de Vigilancia' => 'vigilancia'
+        ];
+        
+        // Obtener el farm_type correspondiente
+        $farmType = $farmTypeMap[$component->description] ?? null;
+        
+        if ($farmType) {
+            // Obtener los sensores activos para este tipo de granja
+            $sensors = \App\Models\Sensor::where('farm_type', $farmType)
+                                       ->where('estado', 'activo')
+                                       ->get();
+
+            $sensorsByComponent[$component->id] = $sensors->pluck('description')->toArray();
+        } else {
+            $sensorsByComponent[$component->id] = [];
+        }
+    }
+
     return view('farms.index', [
         'farms' => $farms,
         'invitedFarms' => $invitedFarms,
         'municipalities' => \App\Models\Municipality::all(),
-        'components' => \App\Models\Component::all()
+        'components' => $components,
+        'farmTypes' => $farmTypes,
+        'sensorsByComponent' => $sensorsByComponent
     ]);
 })->name('home');
 
@@ -79,8 +112,18 @@ Route::prefix('superD')->group(function () {
     Route::post('/login', [App\Http\Controllers\SuperDController::class, 'login'])->name('superD.login.submit');
     Route::post('/logout', [App\Http\Controllers\SuperDController::class, 'logout'])->name('superD.logout');
     Route::get('/dashboard', [App\Http\Controllers\SuperDController::class, 'dashboard'])->name('superD.dashboard')->middleware('auth');
+    Route::post('/users/{id}/change-password', [App\Http\Controllers\SuperDController::class, 'changePassword'])->name('superD.users.changePassword')->middleware('auth');
+    Route::post('/create-superd', [App\Http\Controllers\SuperDController::class, 'createSuperD'])->name('superD.create')->middleware('auth');
+    Route::delete('/users/{id}', [App\Http\Controllers\SuperDController::class, 'deleteUser'])->name('superD.users.delete')->middleware('auth');
+    Route::get('/users', [App\Http\Controllers\SuperDController::class, 'getUsers'])->name('superD.users.list')->middleware('auth');
     Route::delete('/components/{component}', [App\Http\Controllers\SuperDController::class, 'deleteComponent'])->name('superD.components.delete');
     Route::get('/components/{component}/sensors', [App\Http\Controllers\SuperDController::class, 'getComponentSensors'])->name('superD.components.sensors');
+    
+    // Rutas para preguntas de seguridad
+    Route::get('/security-questions', [App\Http\Controllers\SecurityQuestionController::class, 'index'])->name('security-questions.index');
+    Route::post('/security-questions', [App\Http\Controllers\SecurityQuestionController::class, 'store'])->name('security-questions.store');
+    Route::put('/security-questions/{question}', [App\Http\Controllers\SecurityQuestionController::class, 'update'])->name('security-questions.update');
+    Route::delete('/security-questions/{question}', [App\Http\Controllers\SecurityQuestionController::class, 'destroy'])->name('security-questions.destroy');
 });
 
 /**
@@ -108,6 +151,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['auth'])->group(function () {
         Route::post('/components', [App\Http\Controllers\ComponentController::class, 'store'])->name('components.store');
+        Route::put('/components/{component}', [App\Http\Controllers\ComponentController::class, 'update'])->name('components.update');
         Route::get('/components/{component}/sensors', [App\Http\Controllers\SensorController::class, 'index'])->name('sensors.index');
         Route::post('/components/{component}/sensors', [App\Http\Controllers\SensorController::class, 'store'])->name('sensors.store');
     });

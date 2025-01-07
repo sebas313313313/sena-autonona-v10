@@ -75,8 +75,8 @@
                 <div class="section-header">
                     <h2>Gestión de Usuarios</h2>
                     <div class="header-actions">
-                        <button class="btn-action" onclick="showNewUserForm()">
-                            <i class="fa-solid fa-plus"></i> Nuevo Usuario
+                        <button class="btn-action" onclick="showNewSuperDModal()">
+                            <i class="fa-solid fa-plus"></i> Nuevo SuperD
                         </button>
                     </div>
                 </div>
@@ -89,11 +89,10 @@
                                     <th>ID</th>
                                     <th>Nombre</th>
                                     <th>Correo</th>
-                                    <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="usersTableBody">
                                 @foreach($users as $user)
                                 <tr>
                                     <td>{{ $user->id }}</td>
@@ -105,24 +104,17 @@
                                     </td>
                                     <td>{{ $user->email }}</td>
                                     <td>
-                                        @if($user->email === 'super.d@example.com')
-                                            <span class="badge admin">SuperD</span>
-                                        @else
-                                            <span class="badge admin">Activo</span>
-                                        @endif
-                                    </td>
-                                    <td>
                                         <div class="action-buttons">
                                             <button class="btn-icon" title="Ver">
                                                 <i class="fa-solid fa-eye"></i>
                                             </button>
-                                            <button class="btn-icon" title="Cambiar Contraseña" onclick="showChangePasswordModal()">
+                                            <button class="btn-icon" title="Cambiar Contraseña" onclick="showChangePasswordModal({{ $user->id }})">
                                                 <i class="fa-solid fa-key"></i>
                                             </button>
                                             <button class="btn-icon" title="Editar">
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
-                                            <button class="btn-icon" title="Eliminar">
+                                            <button class="btn-icon" title="Eliminar" onclick="deleteUser({{ $user->id }}, '{{ $user->email }}')">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -134,38 +126,29 @@
                     </div>
                 </div>
 
-                <!-- Modal Nuevo Usuario -->
-                <div class="modal" id="newUserModal">
+                <!-- Modal Nuevo SuperD -->
+                <div class="modal" id="newSuperDModal">
                     <div class="modal-content">
                         <div class="modal-header">
                             <div class="modal-title">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <h3>Nuevo Super Usuario</h3>
+                                <i class="fa-solid fa-user-shield"></i>
+                                <h2>Nuevo SuperD</h2>
                             </div>
-                            <button class="close-modal" onclick="hideNewUserForm()">×</button>
+                            <span class="close" onclick="closeNewSuperDModal()">&times;</span>
                         </div>
                         <div class="modal-body">
-                            <form id="newUserForm">
+                            <form id="newSuperDForm" onsubmit="handleCreateSuperD(event)">
                                 <div class="form-group">
-                                    <label>Correo Electrónico</label>
-                                    <div class="input-group">
-                                        <i class="fa-solid fa-envelope"></i>
-                                        <input type="email" required>
-                                    </div>
+                                    <label for="superDEmail">Correo Electrónico</label>
+                                    <input type="email" id="superDEmail" name="email" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Contraseña</label>
-                                    <div class="input-group">
-                                        <i class="fa-solid fa-lock"></i>
-                                        <input type="password" required>
-                                        <button type="button" class="toggle-password">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
-                                    </div>
+                                    <label for="superDPassword">Contraseña</label>
+                                    <input type="password" id="superDPassword" name="password" required>
                                 </div>
                                 <div class="form-actions">
-                                    <button type="button" class="btn-secondary" onclick="hideNewUserForm()">Cancelar</button>
-                                    <button type="submit" class="btn-primary">Guardar</button>
+                                    <button type="submit" class="btn-primary">Crear SuperD</button>
+                                    <button type="button" class="btn-secondary" onclick="closeNewSuperDModal()">Cancelar</button>
                                 </div>
                             </form>
                         </div>
@@ -178,25 +161,24 @@
                         <div class="modal-header">
                             <div class="modal-title">
                                 <i class="fa-solid fa-key"></i>
-                                <h3>Cambiar Contraseña</h3>
+                                <h2>Cambiar Contraseña</h2>
                             </div>
-                            <button class="close-modal" onclick="hideChangePasswordModal()">×</button>
+                            <span class="close" onclick="closeChangePasswordModal()">&times;</span>
                         </div>
                         <div class="modal-body">
-                            <form id="changePasswordForm">
+                            <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                                <input type="hidden" id="userId" name="userId">
                                 <div class="form-group">
-                                    <label>Nueva Contraseña</label>
-                                    <div class="input-group">
-                                        <i class="fa-solid fa-lock"></i>
-                                        <input type="password" id="newPassword" required>
-                                        <button type="button" class="toggle-password">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
-                                    </div>
+                                    <label for="newPassword">Nueva Contraseña</label>
+                                    <input type="password" id="newPassword" name="newPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirmar Contraseña</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword" required>
                                 </div>
                                 <div class="form-actions">
-                                    <button type="button" class="btn-secondary" onclick="hideChangePasswordModal()">Cancelar</button>
-                                    <button type="submit" class="btn-primary">Aceptar</button>
+                                    <button type="submit" class="btn-primary">Guardar Cambios</button>
+                                    <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">Cancelar</button>
                                 </div>
                             </form>
                         </div>
@@ -528,6 +510,11 @@
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
+                <div class="modal-actions">
+                    <button class="btn-primary" onclick="showNewSecurityQuestionForm()">
+                        <i class="fa-solid fa-plus"></i> Nueva Pregunta
+                    </button>
+                </div>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -540,6 +527,32 @@
                         <!-- Datos de preguntas de seguridad -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nueva Pregunta de Seguridad -->
+    <div id="newSecurityQuestionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nueva Pregunta de Seguridad</h2>
+                <span class="close" onclick="hideNewSecurityQuestionForm()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="newSecurityQuestionForm">
+                    @csrf
+                    <div class="form-group">
+                        <label>Pregunta</label>
+                        <div class="input-group">
+                            <i class="fa-solid fa-question"></i>
+                            <input type="text" name="question" required placeholder="Ingrese la pregunta de seguridad">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="hideNewSecurityQuestionForm()">Cancelar</button>
+                        <button type="submit" class="btn-primary">Guardar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -872,21 +885,11 @@
     height: 100%;
     background: rgba(0,0,0,0.5);
     z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal.show {
-    display: flex !important;
-}
-
-#newSensorModal {
-    z-index: 1100; /* Mayor que el modal de sensores */
 }
 
 .modal-content {
     background: white;
-    border-radius: 8px;
+    border-radius: 10px;
     width: 90%;
     max-width: 500px;
     max-height: 90vh;
@@ -897,7 +900,7 @@
     padding: 1rem;
     background: var(--accent-color);
     color: white;
-    border-radius: 8px 8px 0 0;
+    border-radius: 10px 10px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1131,7 +1134,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.5);
     z-index: 1000;
 }
 
@@ -1194,6 +1197,19 @@
 
 .data-table tr:hover {
     background: var(--hover-color);
+}
+
+/* Modal acciones */
+.modal-actions {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-actions .btn-primary {
+    padding: 0.5rem 1rem;
+    display: inline-flex;
+    width: auto;
 }
 </style>
 @endsection
@@ -1282,34 +1298,129 @@
     }
 
     function showSection(sectionId) {
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
-        });
+        try {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
 
-        document.getElementById(sectionId).style.display = 'block';
-
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('onclick').includes(sectionId)) {
-                item.classList.add('active');
+            // Mostrar la sección seleccionada
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.style.display = 'block';
             }
+
+            // Actualizar menú
+            document.querySelectorAll('.menu-item').forEach(item => {
+                if (item && item.classList) {
+                    item.classList.remove('active');
+                    const onclickAttr = item.getAttribute('onclick');
+                    if (onclickAttr && onclickAttr.includes(sectionId)) {
+                        item.classList.add('active');
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error en showSection:', error);
+        }
+    }
+
+    function showNewSuperDModal() {
+        document.getElementById('newSuperDModal').style.display = 'block';
+    }
+
+    function closeNewSuperDModal() {
+        document.getElementById('newSuperDModal').style.display = 'none';
+        document.getElementById('newSuperDForm').reset();
+    }
+
+    function showChangePasswordModal(userId) {
+        document.getElementById('userId').value = userId;
+        document.getElementById('changePasswordModal').style.display = 'block';
+    }
+
+    function closeChangePasswordModal() {
+        document.getElementById('changePasswordModal').style.display = 'none';
+        document.getElementById('changePasswordForm').reset();
+    }
+
+    function handleChangePassword(event) {
+        event.preventDefault();
+        
+        const userId = document.getElementById('userId').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword !== confirmPassword) {
+            alert('Las contraseñas no coinciden');
+            return;
+        }
+
+        fetch(`/superD/users/${userId}/change-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                password: newPassword
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al cambiar la contraseña');
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('Contraseña cambiada exitosamente');
+            closeChangePasswordModal();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cambiar la contraseña');
         });
     }
 
-    function showNewUserForm() {
-        document.getElementById('newUserModal').classList.add('show');
-    }
+    function handleCreateSuperD(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('superDEmail').value;
+        const password = document.getElementById('superDPassword').value;
 
-    function hideNewUserForm() {
-        document.getElementById('newUserModal').classList.remove('show');
-    }
-
-    function showChangePasswordModal() {
-        document.getElementById('changePasswordModal').classList.add('show');
-    }
-
-    function hideChangePasswordModal() {
-        document.getElementById('changePasswordModal').classList.remove('show');
+        fetch('/superD/create-superd', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                // Si es un error de validación (422)
+                if (response.status === 422) {
+                    const errorMessages = Object.values(data.error).flat().join('\n');
+                    throw new Error(errorMessages);
+                }
+                throw new Error(data.error || 'Error al crear SuperD');
+            }
+            return data;
+        })
+        .then(data => {
+            alert('SuperD creado exitosamente');
+            closeNewSuperDModal();
+            // Recargar la lista de usuarios
+            loadUsers();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'Error al crear SuperD');
+        });
     }
 
     function showSensorsModal(componentId) {
@@ -1395,7 +1506,10 @@
         });
 
         // Mostrar la sección seleccionada
-        document.getElementById(sectionId).style.display = 'block';
+        const selectedSection = document.getElementById(sectionId);
+        if (selectedSection) {
+            selectedSection.style.display = 'block';
+        }
 
         // Actualizar clases activas en el menú
         document.querySelectorAll('.menu-item').forEach(item => {
@@ -1409,7 +1523,7 @@
         document.getElementById(modalId).style.display = 'block';
     }
 
-    function closeModal(modalId) {
+    function hideModal(modalId) {
         document.getElementById(modalId).style.display = 'none';
     }
 
@@ -1476,7 +1590,7 @@
 
     function showSecurityQuestions() {
         showModal('securityQuestionsModal');
-        fetch('/api/security-questions')
+        fetch('{{ route("security-questions.index") }}')
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('securityQuestionsTable');
@@ -1494,6 +1608,10 @@
                         </td>
                     </tr>
                 `).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cargar las preguntas de seguridad');
             });
     }
 
@@ -1560,6 +1678,146 @@
     function deleteUserRole(id) {
         // Implementar eliminación
         console.log('Eliminar rol de usuario:', id);
+    }
+
+    // Funciones para las preguntas de seguridad
+    function showNewSecurityQuestionForm() {
+        document.getElementById('newSecurityQuestionModal').style.display = 'block';
+    }
+
+    function hideNewSecurityQuestionForm() {
+        document.getElementById('newSecurityQuestionModal').style.display = 'none';
+        document.getElementById('newSecurityQuestionForm').reset();
+    }
+
+    // Manejar el envío del formulario de nueva pregunta
+    document.getElementById('newSecurityQuestionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch('{{ route("security-questions.store") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Pregunta de seguridad agregada exitosamente');
+                hideNewSecurityQuestionForm();
+                showSecurityQuestions(); // Recargar la lista
+            } else {
+                alert('Error al agregar la pregunta: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al agregar la pregunta de seguridad');
+        });
+    });
+
+    function deleteSecurityQuestion(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta pregunta de seguridad?')) {
+            fetch(`{{ url('superD/security-questions') }}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Pregunta de seguridad eliminada exitosamente');
+                    showSecurityQuestions(); // Recargar la lista
+                } else {
+                    alert('Error al eliminar la pregunta: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar la pregunta de seguridad');
+            });
+        }
+    }
+
+    function loadUsers() {
+        fetch('/superD/users')
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error al cargar los usuarios');
+                }
+                return data;
+            })
+            .then(users => {
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>
+                            <button class="btn-action" onclick="showChangePasswordModal(${user.id})">
+                                <i class="fa-solid fa-key"></i>
+                            </button>
+                            <button class="btn-edit" onclick="editUser(${user.id})">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deleteUser(${user.id}, '${user.email}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Solo mostrar alerta si realmente hay un error
+                if (!document.getElementById('usersTableBody').innerHTML) {
+                    alert(error.message || 'Error al cargar los usuarios');
+                }
+            });
+    }
+
+    function deleteUser(userId, userEmail) {
+        // No permitir eliminar al SuperD principal
+        if (userEmail === 'super.d@example.com') {
+            alert('No se puede eliminar al SuperD principal');
+            return;
+        }
+
+        if (!confirm('¿Está seguro de que desea eliminar este usuario?')) {
+            return;
+        }
+
+        fetch(`/superD/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Error al eliminar usuario');
+            }
+            return data;
+        })
+        .then(data => {
+            alert('Usuario eliminado exitosamente');
+            loadUsers(); // Recargar la lista de usuarios
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'Error al eliminar usuario');
+        });
     }
 </script>
 @endsection
