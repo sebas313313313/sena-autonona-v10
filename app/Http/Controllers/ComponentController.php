@@ -37,7 +37,12 @@ class ComponentController extends Controller
         ]);
 
         $component->update($request->all());
-        return response()->json(['message' => "Registro Actualizado Exitosamente", $component]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Componente actualizado exitosamente',
+            'data' => $component
+        ]);
     }
     /* Con el metodo DESTROY eliminamos cualquier questions/preguntas especifico alojado en nuestra bd. */
     public function destroy(Component $component)

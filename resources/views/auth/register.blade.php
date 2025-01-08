@@ -90,6 +90,8 @@
                        name="email" 
                        value="{{ old('email') }}" 
                        placeholder="Correo electrónico"
+                       pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                       maxlength="255"
                        required>
                 @error('email')
                     <span class="invalid-feedback">{{ $message }}</span>
@@ -101,6 +103,8 @@
                        class="form-control @error('password') is-invalid @enderror" 
                        name="password" 
                        placeholder="Contraseña"
+                       minlength="8"
+                       maxlength="255"
                        required>
                 @error('password')
                     <span class="invalid-feedback">{{ $message }}</span>
@@ -112,6 +116,8 @@
                        class="form-control @error('password_confirmation') is-invalid @enderror" 
                        name="password_confirmation" 
                        placeholder="Confirmar contraseña"
+                       minlength="8"
+                       maxlength="255"
                        required>
                 @error('password_confirmation')
                     <span class="invalid-feedback">{{ $message }}</span>
@@ -170,6 +176,8 @@
                        name="identification" 
                        value="{{ old('identification') }}" 
                        placeholder="Número de identificación"
+                       pattern="[0-9]{6,15}"
+                       title="El número de identificación debe tener entre 6 y 15 dígitos"
                        maxlength="15"
                        required>
                 @error('identification')
@@ -183,6 +191,8 @@
                        name="name" 
                        value="{{ old('name') }}" 
                        placeholder="Nombres"
+                       pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
+                       title="Solo se permiten letras y espacios"
                        maxlength="50"
                        required>
                 @error('name')
@@ -196,6 +206,8 @@
                        name="last_name" 
                        value="{{ old('last_name') }}" 
                        placeholder="Apellidos"
+                       pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
+                       title="Solo se permiten letras y espacios"
                        maxlength="50"
                        required>
                 @error('last_name')
@@ -208,6 +220,8 @@
                        class="form-control @error('birth_date') is-invalid @enderror" 
                        name="birth_date" 
                        value="{{ old('birth_date') }}" 
+                       max="{{ date('Y-m-d', strtotime('-18 years')) }}"
+                       title="Debes ser mayor de 18 años"
                        required>
                 @error('birth_date')
                     <span class="invalid-feedback">{{ $message }}</span>
@@ -249,8 +263,9 @@
                        name="contact_number" 
                        value="{{ old('contact_number') }}" 
                        placeholder="Teléfono de contacto"
-                       maxlength="15"
                        pattern="[0-9]{10}"
+                       title="Ingresa un número de teléfono válido de 10 dígitos"
+                       maxlength="10"
                        required>
                 @error('contact_number')
                     <span class="invalid-feedback">{{ $message }}</span>

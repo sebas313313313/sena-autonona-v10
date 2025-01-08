@@ -42,9 +42,9 @@ class Sensor extends Model
         }
     }
 
-    public function sensorComponents()
+    public function sensor_components()
     {
-        return $this->hasMany(\App\Models\Sensor_Component::class);
+        return $this->hasMany(Sensor_Component::class, 'sensor_id');
     }
 
     public function farmComponents()

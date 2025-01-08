@@ -8,6 +8,7 @@ use App\Models\Component_Task;
 use App\Models\Farm;
 use App\Models\Component;
 use App\Models\Sensor_Component;
+use App\Models\Sensor;
 
 class Farm_Component extends Model
 {
@@ -16,9 +17,9 @@ class Farm_Component extends Model
     protected $table = 'farm_components';
 
     protected $fillable = [
-        'description',
         'farm_id',
-        'component_id'
+        'component_id',
+        'description'
     ];
 
     protected $allowFilter = [
@@ -43,6 +44,11 @@ class Farm_Component extends Model
     public function sensorComponents()
     {
         return $this->hasMany(Sensor_Component::class, 'farm_component_id');
+    }
+
+    public function sensors()
+    {
+        return $this->belongsToMany(Sensor::class, 'sensor_components', 'farm_component_id', 'sensor_id');
     }
 
     public function scopeFilter($query)

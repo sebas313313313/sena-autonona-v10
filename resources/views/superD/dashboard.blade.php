@@ -105,7 +105,7 @@
                                     <td>{{ $user->email }}</td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn-icon" title="Ver">
+                                            <button class="btn-icon" title="Ver" onclick="showUserDetails({{ $user->id }})">
                                                 <i class="fa-solid fa-eye"></i>
                                             </button>
                                             <button class="btn-icon" title="Cambiar Contraseña" onclick="showChangePasswordModal({{ $user->id }})">
@@ -184,6 +184,95 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal Ver Usuario -->
+                <div class="modal" id="viewUserModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title">
+                                <i class="fa-solid fa-user"></i>
+                                <h2>Detalles del Usuario</h2>
+                            </div>
+                            <span class="close" onclick="closeViewUserModal()">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div class="user-details">
+                                <div class="detail-group">
+                                    <label>Nombre:</label>
+                                    <span id="userDetailName"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Correo:</label>
+                                    <span id="userDetailEmail"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Tipo de Identificación:</label>
+                                    <span id="userDetailIdType"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Número de Identificación:</label>
+                                    <span id="userDetailIdNumber"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Teléfono:</label>
+                                    <span id="userDetailPhone"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Dirección:</label>
+                                    <span id="userDetailAddress"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Roles:</label>
+                                    <span id="userDetailRoles"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Fecha de Registro:</label>
+                                    <span id="userDetailCreatedAt"></span>
+                                </div>
+                                <div class="detail-group">
+                                    <label>Preguntas de Seguridad:</label>
+                                    <div id="userDetailSecurityQuestions"></div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn-secondary" onclick="closeViewUserModal()">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .user-details {
+                        padding: 20px;
+                    }
+                    .detail-group {
+                        margin-bottom: 15px;
+                    }
+                    .detail-group label {
+                        font-weight: bold;
+                        display: inline-block;
+                        width: 180px;
+                        margin-right: 10px;
+                    }
+                    .detail-group span {
+                        color: #666;
+                    }
+                    #userDetailSecurityQuestions {
+                        margin-top: 10px;
+                        padding-left: 180px;
+                    }
+                    #userDetailSecurityQuestions .question {
+                        margin-bottom: 10px;
+                        padding: 5px;
+                        background: #f5f5f5;
+                        border-radius: 4px;
+                    }
+                    #userDetailSecurityQuestions .question strong {
+                        display: block;
+                        margin-bottom: 5px;
+                    }
+                </style>
+
             </div>
 
             <div id="granjas" class="content-section" style="display: none;">
@@ -1310,16 +1399,11 @@
                 selectedSection.style.display = 'block';
             }
 
-            // Actualizar menú
+            // Actualizar clases activas en el menú
             document.querySelectorAll('.menu-item').forEach(item => {
-                if (item && item.classList) {
-                    item.classList.remove('active');
-                    const onclickAttr = item.getAttribute('onclick');
-                    if (onclickAttr && onclickAttr.includes(sectionId)) {
-                        item.classList.add('active');
-                    }
-                }
+                item.classList.remove('active');
             });
+            event.currentTarget.classList.add('active');
         } catch (error) {
             console.error('Error en showSection:', error);
         }
@@ -1359,8 +1443,9 @@
         fetch(`/superD/users/${userId}/change-password`, {
             method: 'POST',
             headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 password: newPassword
@@ -1763,11 +1848,14 @@
                         <td>${user.name}</td>
                         <td>${user.email}</td>
                         <td>
+                            <button class="btn-action" onclick="showUserDetails(${user.id})">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
                             <button class="btn-action" onclick="showChangePasswordModal(${user.id})">
                                 <i class="fa-solid fa-key"></i>
                             </button>
                             <button class="btn-edit" onclick="editUser(${user.id})">
-                                <i class="fa-solid fa-edit"></i>
+                                <i class="fa-solid fa-pen"></i>
                             </button>
                             <button class="btn-delete" onclick="deleteUser(${user.id}, '${user.email}')">
                                 <i class="fa-solid fa-trash"></i>
@@ -1818,6 +1906,52 @@
             console.error('Error:', error);
             alert(error.message || 'Error al eliminar usuario');
         });
+    }
+
+    function showUserDetails(userId) {
+        fetch(`/superD/users/${userId}`)
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error al obtener detalles del usuario');
+                }
+                return data;
+            })
+            .then(user => {
+                // Llenar los detalles en el modal
+                document.getElementById('userDetailName').textContent = user.name;
+                document.getElementById('userDetailEmail').textContent = user.email;
+                document.getElementById('userDetailIdType').textContent = user.identification_type;
+                document.getElementById('userDetailIdNumber').textContent = user.identification_number;
+                document.getElementById('userDetailPhone').textContent = user.phone;
+                document.getElementById('userDetailAddress').textContent = user.address;
+                document.getElementById('userDetailRoles').textContent = user.roles;
+                document.getElementById('userDetailCreatedAt').textContent = user.created_at;
+
+                // Mostrar preguntas de seguridad
+                const questionsContainer = document.getElementById('userDetailSecurityQuestions');
+                if (user.security_questions && user.security_questions.length > 0) {
+                    questionsContainer.innerHTML = user.security_questions.map(q => `
+                        <div class="question">
+                            <strong>Pregunta:</strong> ${q.question}
+                            <div><strong>Respuesta:</strong> ${q.answer}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    questionsContainer.innerHTML = '<p>No hay preguntas de seguridad registradas</p>';
+                }
+
+                // Mostrar el modal
+                document.getElementById('viewUserModal').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+    }
+
+    function closeViewUserModal() {
+        document.getElementById('viewUserModal').style.display = 'none';
     }
 </script>
 @endsection

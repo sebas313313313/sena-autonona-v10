@@ -46,7 +46,11 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('home')
+            
+            // Asegurarse de que el token CSRF se regenere
+            $request->session()->regenerateToken();
+            
+            return redirect()->intended('/')
                 ->with('success', '¡Bienvenido ' . Auth::user()->name . '!');
         }
 

@@ -235,4 +235,50 @@ class SuperDController extends Controller
             return response()->json(['error' => 'Error al obtener usuarios'], 500);
         }
     }
+
+    public function getUserDetails($id)
+    {
+        try {
+            // Obtener el usuario con sus relaciones
+            $user = User::with([
+                'roles',
+                'identification_type',
+                'security_questions' => function($query) {
+                    $query->select('security_questions.id', 'security_questions.question');
+                }
+            ])->findOrFail($id);
+
+            // Formatear la información para mostrar
+            $userDetails = [
+                'id' => $user->id,
+                'name' => $user->name ?? 'No especificado',
+                'email' => $user->email ?? 'No especificado',
+                'identification_type' => optional($user->identification_type)->name ?? 'No especificado',
+                'identification_number' => $user->identification_number ?? 'No especificado',
+                'phone' => $user->phone ?? 'No especificado',
+                'address' => $user->address ?? 'No especificada',
+                'created_at' => optional($user->created_at)->format('d/m/Y H:i:s') ?? 'No especificado',
+                'roles' => $user->roles->pluck('name')->implode(', ') ?: 'Sin roles asignados',
+                'security_questions' => []
+            ];
+
+            // Agregar preguntas de seguridad si existen
+            if ($user->security_questions) {
+                foreach ($user->security_questions as $question) {
+                    $userDetails['security_questions'][] = [
+                        'question' => $question->question,
+                        'answer' => optional($question->pivot)->answer ?? 'No especificada'
+                    ];
+                }
+            }
+
+            return response()->json($userDetails);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Usuario no encontrado: ' . $e->getMessage());
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener detalles del usuario: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al obtener detalles del usuario: ' . $e->getMessage()], 500);
+        }
+    }
 }

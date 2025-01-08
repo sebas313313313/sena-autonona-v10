@@ -12,6 +12,7 @@ use App\Models\Component;
 use App\Models\Farm_Component;
 use App\Models\Sensor;
 use App\Models\Sensor_Component;
+use App\Models\FarmType;
 use Database\Seeders\SensorSeeder;
 use Database\Seeders\SampleSeeder;
 
@@ -52,13 +53,45 @@ class FarmController extends Controller
         Log::info('Granjas invitadas encontradas: ' . $invitedFarms->count());
         
         // Obtener todos los componentes disponibles
-        $components = \App\Models\Component::all();
+        $components = Component::all();
+
+        // Crear array de tipos de granja a partir de los componentes
+        $components = $components->keyBy('id');
+        $farmTypes = $components->pluck('description', 'id')->toArray();
+
+        // Obtener los sensores asociados a cada componente
+        $sensorsByComponent = [];
+        foreach ($components as $component) {
+            // Mapear los nombres de componentes a farm_type
+            $farmTypeMap = [
+                'Acuaponia' => 'acuaponica',
+                'Hidroponia' => 'hidroponica',
+                'Sistema de Riego' => 'riego',
+                'Sistema de Vigilancia' => 'vigilancia'
+            ];
+            
+            // Obtener el farm_type correspondiente
+            $farmType = $farmTypeMap[$component->description] ?? null;
+            
+            if ($farmType) {
+                // Obtener los sensores activos para este tipo de granja
+                $sensors = Sensor::where('farm_type', $farmType)
+                               ->where('estado', 'activo')
+                               ->get();
+
+                $sensorsByComponent[$component->id] = $sensors->pluck('description')->toArray();
+            } else {
+                $sensorsByComponent[$component->id] = [];
+            }
+        }
 
         return view('farms.index', [
             'farms' => $farms,
             'invitedFarms' => $invitedFarms,
             'municipalities' => Municipality::all(),
-            'components' => $components
+            'components' => $components,
+            'farmTypes' => $farmTypes,
+            'sensorsByComponent' => $sensorsByComponent
         ]);
     }
 
@@ -87,7 +120,7 @@ class FarmController extends Controller
             // Validar los datos recibidos
             $request->validate([
                 'name' => 'required|string|max:255',
-                'farm_type' => 'required|string|in:acuaponica,hidroponica,vigilancia,riego',
+                'farm_type' => 'required|exists:components,id',
                 'address' => 'required|string|max:255',
                 'vereda' => 'required|string|max:255',
                 'extension' => 'required|numeric',
@@ -101,10 +134,24 @@ class FarmController extends Controller
             // Obtener el ID del rol del usuario
             $userRoleId = auth()->user()->userRole()->first()->id;
 
+            // Obtener el componente (tipo de granja) seleccionado
+            $component = Component::findOrFail($request->farm_type);
+
+            // Mapear los nombres de componentes a farm_type
+            $farmTypeMap = [
+                'Acuaponia' => 'acuaponica',
+                'Hidroponia' => 'hidroponica',
+                'Sistema de Riego' => 'riego',
+                'Sistema de Vigilancia' => 'vigilancia'
+            ];
+            
+            // Obtener el farm_type correspondiente
+            $farmType = $farmTypeMap[$component->description] ?? 'otro';
+
             // Crear la granja
             $farm = Farm::create([
                 'name' => $request->name,
-                'farm_type' => $request->farm_type,
+                'farm_type' => $farmType, // Usar el tipo de granja mapeado
                 'address' => $request->address,
                 'vereda' => $request->vereda,
                 'extension' => $request->extension,
@@ -125,55 +172,45 @@ class FarmController extends Controller
                 'status' => 'active'
             ]);
 
+            // Crear el componente principal de la granja
+            $farmComponent = Farm_Component::create([
+                'farm_id' => $farm->id,
+                'component_id' => $component->id,
+                'description' => "Componente principal de {$farm->name}"
+            ]);
+
             // Crear los sensores seleccionados para la granja
-            foreach ($request->sensors as $sensorType) {
+            foreach ($request->sensors as $sensorDescription) {
                 \Log::info('Creando sensor para la granja:', [
-                    'sensor_type' => $sensorType,
-                    'farm_type' => $request->farm_type
+                    'sensor_description' => $sensorDescription,
+                    'farm_type' => $farmType
                 ]);
 
-                // Crear un nuevo sensor para la granja
-                $sensor = Sensor::create([
-                    'description' => $sensorType,
-                    'farm_type' => $request->farm_type,
-                    'estado' => 'activo'
-                ]);
+                // Buscar si ya existe un sensor con esta descripción y tipo
+                $sensor = Sensor::where('description', $sensorDescription)
+                               ->where('farm_type', $farmType)
+                               ->where('estado', 'activo')
+                               ->first();
 
-                \Log::info('Sensor creado para la granja:', [
+                if (!$sensor) {
+                    // Si no existe, crear un nuevo sensor
+                    $sensor = Sensor::create([
+                        'description' => $sensorDescription,
+                        'farm_type' => $farmType,
+                        'estado' => 'activo'
+                    ]);
+                }
+
+                \Log::info('Sensor obtenido/creado:', [
                     'sensor_id' => $sensor->id,
-                    'description' => $sensor->description,
-                    'estado' => $sensor->estado
-                ]);
-
-                // Crear el componente del sensor para la granja
-                $component = Component::create([
-                    'name' => $sensorType,
-                    'description' => "Componente de {$sensorType}"
-                ]);
-
-                \Log::info('Componente creado:', [
-                    'component_id' => $component->id,
-                    'name' => $component->name
-                ]);
-
-                // Crear la relación farm_component
-                $farmComponent = Farm_Component::create([
-                    'farm_id' => $farm->id,
-                    'component_id' => $component->id,
-                    'description' => "Componente de {$sensorType} para {$farm->name}"
-                ]);
-
-                \Log::info('Farm Component creado:', [
-                    'farm_component_id' => $farmComponent->id,
-                    'farm_id' => $farm->id,
-                    'component_id' => $component->id
+                    'description' => $sensor->description
                 ]);
 
                 // Crear la relación sensor_component
                 $sensorComponent = Sensor_Component::create([
                     'farm_component_id' => $farmComponent->id,
                     'sensor_id' => $sensor->id,
-                    'min' => 0,
+                    'min' => 0, // Valores por defecto
                     'max' => 100
                 ]);
 
@@ -184,7 +221,8 @@ class FarmController extends Controller
                 ]);
             }
 
-            return redirect()->route('farms.index')->with('success', 'Granja creada exitosamente');
+            return redirect()->route('farms.index')
+                ->with('success', 'Granja creada exitosamente');
         } catch (\Exception $e) {
             \Log::error('Error al crear granja: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()

@@ -34,14 +34,14 @@ class Sensor_Component extends Model
         'max' => 'float'
     ];
 
-    public function farmComponent()
+    public function farm_component()
     {
-        return $this->belongsTo(Farm_Component::class);
+        return $this->belongsTo(Farm_Component::class, 'farm_component_id');
     }
 
     public function sensor()
     {
-        return $this->belongsTo(Sensor::class);
+        return $this->belongsTo(Sensor::class, 'sensor_id');
     }
 
     public function samples()

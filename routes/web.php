@@ -116,6 +116,7 @@ Route::prefix('superD')->group(function () {
     Route::post('/create-superd', [App\Http\Controllers\SuperDController::class, 'createSuperD'])->name('superD.create')->middleware('auth');
     Route::delete('/users/{id}', [App\Http\Controllers\SuperDController::class, 'deleteUser'])->name('superD.users.delete')->middleware('auth');
     Route::get('/users', [App\Http\Controllers\SuperDController::class, 'getUsers'])->name('superD.users.list')->middleware('auth');
+    Route::get('/users/{id}', [App\Http\Controllers\SuperDController::class, 'getUserDetails'])->name('superD.users.details')->middleware('auth');
     Route::delete('/components/{component}', [App\Http\Controllers\SuperDController::class, 'deleteComponent'])->name('superD.components.delete');
     Route::get('/components/{component}/sensors', [App\Http\Controllers\SuperDController::class, 'getComponentSensors'])->name('superD.components.sensors');
     

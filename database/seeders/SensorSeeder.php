@@ -13,10 +13,48 @@ class SensorSeeder extends Seeder
 {
     public function run($farm = null, $selectedSensors = [])
     {
+        // Si no hay granja, crear sensores por defecto
         if (!$farm) {
+            // Sensores para Acuaponia
+            $this->createDefaultSensors('acuaponica', [
+                'Sensor de pH',
+                'Sensor de Temperatura del Agua',
+                'Sensor de Oxígeno Disuelto',
+                'Sensor de Nivel de Agua',
+                'Sensor de Amonio'
+            ]);
+
+            // Sensores para Hidroponia
+            $this->createDefaultSensors('hidroponica', [
+                'Sensor de pH',
+                'Sensor de Conductividad Eléctrica',
+                'Sensor de Temperatura',
+                'Sensor de Humedad',
+                'Sensor de Nivel de Solución'
+            ]);
+
+            // Sensores para Sistema de Vigilancia
+            $this->createDefaultSensors('vigilancia', [
+                'Sensor de Movimiento',
+                'Cámara de Seguridad',
+                'Sensor de Apertura de Puertas',
+                'Sensor de Ruido',
+                'Sensor de Presencia'
+            ]);
+
+            // Sensores para Sistema de Riego
+            $this->createDefaultSensors('riego', [
+                'Sensor de Humedad del Suelo',
+                'Sensor de Lluvia',
+                'Sensor de Temperatura',
+                'Sensor de Flujo de Agua',
+                'Sensor de Presión'
+            ]);
+
             return;
         }
 
+        // El resto del código para crear sensores específicos de una granja
         // Obtener o crear el componente basado en el tipo de granja
         $componentName = match ($farm->farm_type) {
             'acuaponica' => 'Acuaponia',
@@ -57,6 +95,21 @@ class SensorSeeder extends Seeder
                 [
                     'min' => $this->getMinValue($sensorName),
                     'max' => $this->getMaxValue($sensorName)
+                ]
+            );
+        }
+    }
+
+    private function createDefaultSensors($farmType, $sensorNames)
+    {
+        foreach ($sensorNames as $sensorName) {
+            Sensor::firstOrCreate(
+                [
+                    'description' => $sensorName,
+                    'farm_type' => $farmType
+                ],
+                [
+                    'estado' => true
                 ]
             );
         }

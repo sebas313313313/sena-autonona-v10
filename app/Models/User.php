@@ -49,6 +49,22 @@ class User extends Authenticatable
         }
     }
 
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'users_roles', 'user_id', 'role_id');
+    }
+
+    public function identification_type()
+    {
+        return $this->belongsTo(IdentificationType::class, 'identification_type_id');
+    }
+
+    public function security_questions()
+    {
+        return $this->belongsToMany(SecurityQuestion::class, 'user_security_questions', 'user_id', 'security_question_id')
+            ->withPivot('answer');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

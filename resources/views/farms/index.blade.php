@@ -348,10 +348,11 @@
                         <select class="form-select @error('farm_type') is-invalid @enderror" 
                                 id="farm_type" name="farm_type" required>
                             <option value="">Seleccione el tipo de granja</option>
-                            <option value="acuaponica">Acuaponia</option>
-                            <option value="hidroponica">Hidroponia</option>
-                            <option value="vigilancia">Sistema de Vigilancia</option>
-                            <option value="riego">Sistema de Riego</option>
+                            @foreach($farmTypes as $value => $label)
+                                <option value="{{ $value }}" {{ old('farm_type') == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
                         </select>
                         @error('farm_type')
                             <div class="invalid-feedback">
@@ -420,99 +421,44 @@
         let map;
         let marker;
 
-        // Definir los sensores por tipo de granja
-        const sensorsByType = {
-            'acuaponica': [
-                'Sensor de Humedad en Tierra',
-                'Sensor Nivel de Líquidos',
-                'Sensor de Temperatura y Humedad',
-                'Sensor Fotorresistor',
-                'Sensor de pH',
-                'Sensor Temperatura Ambiente Alta Resolución',
-                'Sensor de Oxígeno Disuelto',
-                'Sensor de Amonio/Nitrito/Nitrato',
-                'Display OLED',
-                'Joystick',
-                'Sensor Ultrasónico',
-                'LED RGB',
-                'Servo Motor'
-            ],
-            'hidroponica': [
-                'Sensor de Humedad en Tierra',
-                'Sensor Nivel de Líquidos',
-                'Sensor de Temperatura y Humedad',
-                'Sensor Fotorresistor',
-                'Sensor de pH',
-                'Sensor Temperatura Ambiente Alta Resolución',
-                'Sensor de Conductividad Eléctrica/CE',
-                'Display OLED',
-                'Joystick',
-                'Sensor Ultrasónico',
-                'LED RGB',
-                'Servo Motor'
-            ],
-            'vigilancia': [
-                'Sensor de Movimiento PIR',
-                'Sensor de Presencia',
-                'Cámara con Visión Nocturna',
-                'Sensor Magnético de Puerta/Ventana',
-                'Sensor de Rotura de Cristal',
-                'Sensor de Humo',
-                'Sensor de Gas',
-                'Sensor de Inundación',
-                'Sensor de Vibración',
-                'Micrófono'
-            ],
-            'riego': [
-                'Sensor de Humedad del Suelo',
-                'Sensor de Lluvia',
-                'Sensor de Nivel de Agua',
-                'Sensor de Flujo de Agua',
-                'Sensor de Presión de Agua',
-                'Sensor de Temperatura del Suelo',
-                'Evaporímetro',
-                'Sensor de Radiación Solar'
-            ]
-        };
+        // Obtener los sensores por componente desde PHP
+        const sensorsByComponent = @json($sensorsByComponent);
 
         // Función para actualizar la lista de sensores
         function updateSensorList() {
-            const farmType = document.getElementById('farm_type').value;
+            const componentId = document.getElementById('farm_type').value;
             const sensorList = document.getElementById('sensorList');
             sensorList.innerHTML = '';
 
-            console.log('Tipo de granja:', farmType);
-            console.log('Sensores disponibles:', sensorsByType[farmType]);
+            if (componentId && sensorsByComponent[componentId]) {
+                const sensors = sensorsByComponent[componentId];
+                
+                if (sensors.length > 0) {
+                    const title = document.createElement('div');
+                    title.className = 'fw-bold mb-2 mt-3';
+                    title.textContent = 'Sensores Disponibles';
+                    sensorList.appendChild(title);
 
-            if (farmType && sensorsByType[farmType]) {
-                const title = document.createElement('div');
-                title.className = 'fw-bold mb-2 mt-3';
-                title.textContent = 'Sensores Disponibles';
-                sensorList.appendChild(title);
-
-                sensorsByType[farmType].forEach(sensor => {
-                    const div = document.createElement('div');
-                    div.className = 'form-check';
-                    div.innerHTML = `
-                        <input class="form-check-input" type="checkbox" name="sensors[]" 
-                               value="${sensor}" id="sensor_${sensor.replace(/\s+/g, '_')}">
-                        <label class="form-check-label" for="sensor_${sensor.replace(/\s+/g, '_')}">
-                            ${sensor}
-                        </label>
-                    `;
-                    sensorList.appendChild(div);
-                });
+                    sensors.forEach(sensor => {
+                        const div = document.createElement('div');
+                        div.className = 'form-check';
+                        div.innerHTML = `
+                            <input class="form-check-input" type="checkbox" name="sensors[]" 
+                                   value="${sensor}" id="sensor_${sensor.replace(/\s+/g, '_')}">
+                            <label class="form-check-label" for="sensor_${sensor.replace(/\s+/g, '_')}">
+                                ${sensor}
+                            </label>
+                        `;
+                        sensorList.appendChild(div);
+                    });
+                } else {
+                    sensorList.innerHTML = '<div class="alert alert-info">No hay sensores disponibles para este tipo de granja</div>';
+                }
             }
         }
 
-        // Agregar el evento change al select de tipo de granja
+        // Escuchar cambios en el tipo de granja
         document.getElementById('farm_type').addEventListener('change', updateSensorList);
-
-        // Agregar evento al formulario para mostrar sensores seleccionados
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const selectedSensors = Array.from(document.querySelectorAll('input[name="sensors[]"]:checked')).map(cb => cb.value);
-            console.log('Sensores seleccionados:', selectedSensors);
-        });
 
         function initMap() {
             // Coordenadas iniciales (Colombia)
