@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Component;
 use App\Models\Sensor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SensorController extends Controller
 {
@@ -54,11 +55,52 @@ class SensorController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error al crear sensor: ' . $e->getMessage());
+            Log::error('Error al crear sensor: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear el sensor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualiza el estado de un sensor específico
+     * @param Request $request Datos de la actualización
+     * @param int $id ID del sensor a actualizar
+     * @return \Illuminate\Http\JsonResponse Respuesta con el resultado de la actualización
+     */
+    public function updateEstado(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'estado' => 'required|string|in:activo,inactivo,mantenimiento'
+            ]);
+
+            $sensor = Sensor::findOrFail($id);
+            $sensor->estado = $request->estado;
+            $sensor->save();
+
+            Log::info('Estado del sensor actualizado', [
+                'sensor_id' => $id,
+                'nuevo_estado' => $request->estado
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado del sensor actualizado exitosamente',
+                'sensor' => $sensor
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar estado del sensor: ' . $e->getMessage(), [
+                'sensor_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado del sensor: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -80,7 +122,7 @@ class SensorController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error al eliminar sensor: ' . $e->getMessage());
+            Log::error('Error al eliminar sensor: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
