@@ -31,15 +31,13 @@ class Sensor extends Model
         $filters = request('filter');
         $allowFilter = collect($this->allowFilter);
 
-        foreach ($filters as $filter => $value) {
-            if ($allowFilter->contains($filter)) {
-                if ($filter === 'id') {
-                    $query->where($filter, $value);
-                } else {
-                    $query->where($filter, 'LIKE', '%' . $value . '%');
-                }
-            }
-        }
+        collect($filters)
+            ->filter(function ($value, $field) use ($allowFilter) {
+                return $allowFilter->contains($field);
+            })
+            ->each(function ($value, $field) use ($query) {
+                $query->where($field, $value);
+            });
     }
 
     public function sensor_components()
@@ -49,7 +47,8 @@ class Sensor extends Model
 
     public function farmComponents()
     {
-        return $this->belongsToMany(\App\Models\Farm_Component::class, 'sensor_components');
+        return $this->belongsToMany(Farm_Component::class, 'sensor_components', 'sensor_id', 'farm_component_id')
+                    ->withPivot(['min', 'max']);
     }
 
     public function farms()

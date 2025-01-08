@@ -178,8 +178,8 @@ Route::middleware('auth')->group(function () {
             $farm = \App\Models\Farm::findOrFail($farm_id);
             
             // Obtener los sensores a través de las relaciones
-            $sensors = \App\Models\Sensor::whereHas('sensorComponents', function($query) use ($farm_id) {
-                $query->whereHas('farmComponent', function($q) use ($farm_id) {
+            $sensors = \App\Models\Sensor::whereHas('sensor_components', function($query) use ($farm_id) {
+                $query->whereHas('farm_component', function($q) use ($farm_id) {
                     $q->where('farm_id', $farm_id);
                 });
             })->select('id', 'description as nombre', 'estado')->get();
