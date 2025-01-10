@@ -605,6 +605,9 @@
                         <!-- Datos de municipios -->
                     </tbody>
                 </table>
+                <button class="btn-action" onclick="showNewMunicipalityForm()">
+                    <i class="fa-solid fa-plus"></i> Nuevo Municipio
+                </button>
             </div>
         </div>
     </div>
@@ -716,6 +719,33 @@
         </div>
     </div>
 
+    <!-- Modal para Nuevo Municipio -->
+    <div id="newMunicipalityModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Municipio</h2>
+                <span class="close" onclick="hideModal('newMunicipalityModal')">&times;</span>
+            </div>
+            <form id="newMunicipalityForm" onsubmit="handleNewMunicipality(event)">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="name">Nombre del Municipio:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="hideModal('newMunicipalityModal')">
+                            <i class="fa-solid fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fa-solid fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function showNewIdentificationTypeForm() {
             document.getElementById('newIdentificationTypeModal').style.display = 'block';
@@ -762,6 +792,57 @@
                     icon: 'error',
                     title: 'Error',
                     text: error.message || 'Error al crear el tipo de identificación'
+                });
+            });
+        }
+    </script>
+
+    <script>
+        function showNewMunicipalityForm() {
+            document.getElementById('newMunicipalityModal').style.display = 'block';
+        }
+
+        function handleNewMunicipality(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const name = formData.get('name');
+
+            fetch('/api/municipalities/create', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name
+                })
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Error al crear el municipio');
+                }
+                return data;
+            })
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Municipio creado exitosamente'
+                });
+                form.reset();
+                hideModal('newMunicipalityModal');
+                showMunicipalities();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al crear el municipio'
                 });
             });
         }
@@ -1451,7 +1532,7 @@
                         didOpen: () => Swal.showLoading()
                     });
 
-                    const response = await fetch('/components', {
+                    const response = await fetch('/api/components', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': token,
@@ -1761,7 +1842,7 @@
 
     function showMunicipalities() {
         showModal('municipalitiesModal');
-        fetch('/api/municipalities')
+        fetch('/api/municipalities/index')
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('municipalitiesTable');
@@ -1782,7 +1863,11 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al cargar los municipios');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al cargar los municipios'
+                });
             });
     }
 
@@ -1809,7 +1894,11 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al cargar las preguntas de seguridad');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al cargar las preguntas de seguridad'
+                });
             });
     }
 
