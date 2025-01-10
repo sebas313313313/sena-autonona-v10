@@ -353,7 +353,7 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="componentsTable">
                                 @foreach($components as $component)
                                 <tr data-component-id="{{ $component->id }}">
                                     <td>
@@ -422,7 +422,7 @@
             <button class="close-modal" onclick="hideNewComponentForm()">×</button>
         </div>
         <div class="modal-body">
-            <form id="newComponentForm" method="POST" action="{{ route('components.store') }}">
+            <form id="newComponentForm" onsubmit="handleNewComponent(event)">
                 @csrf
                 <div class="form-group">
                     <div class="input-group">
@@ -1532,7 +1532,7 @@
                         didOpen: () => Swal.showLoading()
                     });
 
-                    const response = await fetch('/api/components', {
+                    const response = await fetch('/api/component/create', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': token,
@@ -2154,6 +2154,88 @@
 
     function closeViewUserModal() {
         document.getElementById('viewUserModal').style.display = 'none';
+    }
+    function showNewComponentForm() {
+    document.getElementById('newComponentModal').style.display = 'block';
+}
+
+function handleNewComponent(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const description = formData.get('description');
+
+    fetch('/api/component/create', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            description: description
+        })
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al crear el componente');
+        }
+        return data;
+    })
+    .then(data => {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: 'Componente creado exitosamente'
+        });
+        form.reset();
+        hideNewComponentForm();
+        showComponents();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Error al crear el componente'
+        });
+    });
+    }
+    
+    function showComponents() {
+        fetch('/api/component/index')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Respuesta del servidor:', data); // Para ver la estructura
+                const tbody = document.getElementById('componentsTable');
+                // Verificar si data es un array o si está dentro de una propiedad
+                const components = Array.isArray(data) ? data : (data.components || data.data || []);
+                console.log('Componentes a mostrar:', components); // Para verificar los datos
+                tbody.innerHTML = components.map(component => `
+                    <tr>
+                        <td>${component.id}</td>
+                        <td>${component.description}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editComponent(${component.id})">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" onclick="deleteComponent(${component.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al cargar los componentes'
+                });
+            });
     }
 </script>
 @endsection
