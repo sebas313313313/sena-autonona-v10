@@ -64,7 +64,7 @@ Route::prefix('user')->group(function () {
 });
 
 // RUTAS_IDENTIFICATION_TYPE (SEBAS)
-Route::prefix('identification_type')->group(function () {
+Route::prefix('identification-types')->group(function () {
     Route::get('/index', [IdentificationTypeController::class, 'index']);
     Route::post('/create', [IdentificationTypeController::class, 'store']);
     Route::get('/show/{identification_type}', [IdentificationTypeController::class, 'show']);

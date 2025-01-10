@@ -146,9 +146,15 @@
                                     <label for="superDPassword">Contraseña</label>
                                     <input type="password" id="superDPassword" name="password" required>
                                 </div>
-                                <div class="form-actions">
-                                    <button type="submit" class="btn-primary">Crear SuperD</button>
-                                    <button type="button" class="btn-secondary" onclick="closeNewSuperDModal()">Cancelar</button>
+                                <div class="button-group">
+                                    <button type="button" class="btn-secondary" onclick="closeNewSuperDModal()">
+                                        <i class="fa-solid fa-times"></i>
+                                        <span>Cancelar</span>
+                                    </button>
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Crear SuperD</span>
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -176,9 +182,15 @@
                                     <label for="confirmPassword">Confirmar Contraseña</label>
                                     <input type="password" id="confirmPassword" name="confirmPassword" required>
                                 </div>
-                                <div class="form-actions">
-                                    <button type="submit" class="btn-primary">Guardar Cambios</button>
-                                    <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">Cancelar</button>
+                                <div class="button-group">
+                                    <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">
+                                        <i class="fa-solid fa-times"></i>
+                                        <span>Cancelar</span>
+                                    </button>
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Guardar Cambios</span>
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -234,8 +246,11 @@
                                     <div id="userDetailSecurityQuestions"></div>
                                 </div>
                             </div>
-                            <div class="form-actions">
-                                <button type="button" class="btn-secondary" onclick="closeViewUserModal()">Cerrar</button>
+                            <div class="button-group">
+                                <button type="button" class="btn-secondary" onclick="closeViewUserModal()">
+                                    <i class="fa-solid fa-times"></i>
+                                    <span>Cerrar</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -415,7 +430,7 @@
                         <input type="text" name="description" placeholder="Nombre del Componente" required>
                     </div>
                 </div>
-                <div class="form-actions">
+                <div class="button-group">
                     <button type="button" class="btn-secondary" onclick="hideNewComponentForm()">
                         <i class="fa-solid fa-times"></i>
                         <span>Cancelar</span>
@@ -464,7 +479,7 @@
                         <input type="text" name="unit" required>
                     </div>
                 </div>
-                <div class="form-actions">
+                <div class="button-group">
                     <button type="button" class="btn-secondary" onclick="hideNewSensorForm()">Cancelar</button>
                     <button type="submit" class="btn-primary">Guardar</button>
                 </div>
@@ -563,6 +578,9 @@
                         <!-- Datos de tipos de identificación -->
                     </tbody>
                 </table>
+                <button class="btn-action" onclick="showNewIdentificationTypeForm()">
+                    <i class="fa-solid fa-plus"></i> Nuevo Tipo de Identificación
+                </button>
             </div>
         </div>
     </div>
@@ -637,7 +655,7 @@
                             <input type="text" name="question" required placeholder="Ingrese la pregunta de seguridad">
                         </div>
                     </div>
-                    <div class="form-actions">
+                    <div class="button-group">
                         <button type="button" class="btn-secondary" onclick="hideNewSecurityQuestionForm()">Cancelar</button>
                         <button type="submit" class="btn-primary">Guardar</button>
                     </div>
@@ -670,6 +688,69 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para nuevo tipo de identificación -->
+    <div class="modal" id="newIdentificationTypeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Tipo de Identificación</h2>
+                <span class="close" onclick="hideModal('newIdentificationTypeModal')">&times;</span>
+            </div>
+            <form id="newIdentificationTypeForm" onsubmit="handleNewIdentificationType(event)">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="description">Descripción:</label>
+                        <input type="text" id="description" name="description" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="hideModal('newIdentificationTypeModal')">
+                            <i class="fa-solid fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fa-solid fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showNewIdentificationTypeForm() {
+            document.getElementById('newIdentificationTypeModal').style.display = 'block';
+        }
+
+        function handleNewIdentificationType(event) {
+            event.preventDefault();
+            const form = document.getElementById('newIdentificationTypeForm');
+            const formData = new FormData(form);
+
+            fetch('/api/identification-types', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(Object.fromEntries(formData))
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Tipo de identificación creado exitosamente');
+                    hideModal('newIdentificationTypeModal');
+                    form.reset();
+                    showIdentificationTypes();
+                } else {
+                    throw new Error(data.message || 'Error al crear el tipo de identificación');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al crear el tipo de identificación');
+            });
+        }
+    </script>
 </div>
 
 @section('styles')
@@ -846,15 +927,28 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    transition: var(--transition);
+    transition: background-color 0.3s;
 }
 
 .btn-action:hover {
-    opacity: 0.9;
+    background-color: var(--accent-darker);
 }
 
-.btn-action.secondary {
-    background: var(--secondary-color);
+.btn-secondary {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #6c757d;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
 }
 
 .table {
@@ -1006,7 +1100,7 @@
 }
 
 .modal-body {
-    padding: 1.5rem;
+    padding: 20px;
 }
 
 .modal-footer {
@@ -1040,11 +1134,11 @@
     font-size: 1rem;
 }
 
-.form-actions {
+.button-group {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    gap: 10px;
+    margin-top: 20px;
 }
 
 .close-modal {
@@ -1100,17 +1194,18 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: var(--accent-color);
-    color: white;
+    background: var(--accent-color) !important;
+    color: white !important;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.875rem;
     transition: background-color 0.2s;
+    max-width: 200px;
 }
 
 .btn-action:hover {
-    background: var(--accent-darker);
+    background-color: var(--accent-darker);
 }
 
 .btn-secondary {
@@ -1118,25 +1213,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: white;
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: background-color 0.2s;
-}
-
-.btn-secondary:hover {
-    background: var(--background-light);
-}
-
-.btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--accent-color);
+    background: #6c757d;
     color: white;
     border: none;
     border-radius: 4px;
@@ -1145,8 +1222,8 @@
     transition: background-color 0.2s;
 }
 
-.btn-primary:hover {
-    background: var(--accent-darker);
+.btn-secondary:hover {
+    background-color: #5a6268;
 }
 
 /* Estilos para la sección de otros */
@@ -1196,7 +1273,7 @@
 }
 
 #otros .btn-primary {
-    width: 100%;
+    width: fit-content;
     padding: 0.75rem;
     border: none;
     border-radius: 5px;
@@ -1232,14 +1309,14 @@
     border-radius: 10px;
     width: 90%;
     max-width: 800px;
-    margin: 2rem auto;
+    margin: auto;
     max-height: 90vh;
     overflow-y: auto;
 }
 
 .modal-header {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1251,7 +1328,7 @@
 }
 
 .modal-body {
-    padding: 1rem;
+    padding: 20px;
 }
 
 .close {
@@ -1299,6 +1376,23 @@
     padding: 0.5rem 1rem;
     display: inline-flex;
     width: auto;
+}
+
+/* Estilos para el botón primario */
+.btn-primary {
+    background-color: #3498DB !important;
+    color: white !important;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    justify-content: center;
+    max-width: 200px;
 }
 </style>
 @endsection
@@ -1443,7 +1537,7 @@
         fetch(`/superD/users/${userId}/change-password`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
