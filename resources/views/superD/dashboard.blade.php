@@ -1703,7 +1703,7 @@
         const sensorsList = modal.querySelector('.sensors-list');
 
         sensorsList.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando sensores...</div>';
-        modal.classList.add('show');
+        modal.style.display = 'block';
 
         fetch(`/superD/components/${componentId}/sensors`, {
             headers: { 'Accept': 'application/json' }
@@ -1724,7 +1724,7 @@
     }
 
     function hideSensorsModal() {
-        document.getElementById('sensorsModal').classList.remove('show');
+        document.getElementById('sensorsModal').style.display = 'none';
     }
 
     function deleteComponent(componentId) {
@@ -1753,11 +1753,11 @@
     }
 
     function showNewComponentForm() {
-        document.getElementById('newComponentModal').classList.add('show');
+        document.getElementById('newComponentModal').style.display = 'block';
     }
 
     function hideNewComponentForm() {
-        document.getElementById('newComponentModal').classList.remove('show');
+        document.getElementById('newComponentModal').style.display = 'none';
     }
 
     function showNewSensorForm() {
@@ -1766,11 +1766,11 @@
             console.error('No hay componente seleccionado');
             return;
         }
-        document.getElementById('newSensorModal').classList.add('show');
+        document.getElementById('newSensorModal').style.display = 'block';
     }
 
     function hideNewSensorForm() {
-        document.getElementById('newSensorModal').classList.remove('show');
+        document.getElementById('newSensorModal').style.display = 'none';
     }
 
     // Funciones para mostrar/ocultar secciones
@@ -2185,13 +2185,13 @@ function handleNewComponent(event) {
         return data;
     })
     .then(data => {
-        Swal.fire({
+        hideNewComponentForm(); // Primero cerramos el modal
+        Swal.fire({ // Luego mostramos el mensaje de éxito
             icon: 'success',
             title: '¡Éxito!',
             text: 'Componente creado exitosamente'
         });
         form.reset();
-        hideNewComponentForm();
         showComponents();
     })
     .catch(error => {
