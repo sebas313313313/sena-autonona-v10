@@ -65,11 +65,11 @@ Route::prefix('user')->group(function () {
 
 // RUTAS_IDENTIFICATION_TYPE (SEBAS)
 Route::prefix('identification-types')->group(function () {
-    Route::get('/index', [IdentificationTypeController::class, 'index']);
-    Route::post('/create', [IdentificationTypeController::class, 'store']);
-    Route::get('/show/{identification_type}', [IdentificationTypeController::class, 'show']);
-    Route::put('/update/{identification_type}', [IdentificationTypeController::class, 'update']);
-    Route::delete('/destroy/{identification_type}', [IdentificationTypeController::class, 'destroy']);
+    Route::get('/', [IdentificationTypeController::class, 'index']);
+    Route::post('/', [IdentificationTypeController::class, 'store']);
+    Route::get('/{id}', [IdentificationTypeController::class, 'show']);
+    Route::put('/{id}', [IdentificationTypeController::class, 'update']);
+    Route::delete('/{id}', [IdentificationTypeController::class, 'destroy']);
 });
 
 // RUTAS_FARM (SEBAS)

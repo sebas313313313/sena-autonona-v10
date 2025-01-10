@@ -723,31 +723,46 @@
 
         function handleNewIdentificationType(event) {
             event.preventDefault();
-            const form = document.getElementById('newIdentificationTypeForm');
+            
+            const form = event.target;
             const formData = new FormData(form);
+            const description = formData.get('description');
 
             fetch('/api/identification-types', {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json'
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify(Object.fromEntries(formData))
+                body: JSON.stringify({
+                    description: description
+                })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Tipo de identificación creado exitosamente');
-                    hideModal('newIdentificationTypeModal');
-                    form.reset();
-                    showIdentificationTypes();
-                } else {
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) {
                     throw new Error(data.message || 'Error al crear el tipo de identificación');
                 }
+                return data;
+            })
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Tipo de identificación creado exitosamente'
+                });
+                form.reset();
+                hideModal('newIdentificationTypeModal');
+                showIdentificationTypes();
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al crear el tipo de identificación');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message || 'Error al crear el tipo de identificación'
+                });
             });
         }
     </script>
