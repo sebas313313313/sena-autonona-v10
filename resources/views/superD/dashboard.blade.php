@@ -1633,7 +1633,7 @@
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('identificationTypesTable');
-                tbody.innerHTML = data.map(type => `
+                tbody.innerHTML = data.data.map(type => `
                     <tr>
                         <td>${type.id}</td>
                         <td>${type.description}</td>

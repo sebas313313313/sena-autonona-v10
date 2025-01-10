@@ -288,3 +288,6 @@ Route::middleware('auth')->group(function () {
 
 // Ruta para obtener los municipios
 Route::get('/api/municipalities', [App\Http\Controllers\MunicipalityController::class, 'index'])->name('municipalities.index');
+
+// Ruta para obtener los tipos de identificación
+Route::get('/api/identification-types', [App\Http\Controllers\IdentificationTypeController::class, 'index'])->name('identification-types.index');
