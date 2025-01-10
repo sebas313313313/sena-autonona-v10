@@ -285,3 +285,6 @@ Route::middleware('auth')->group(function () {
         })->name('tables');
     });
 });
+
+// Ruta para obtener los municipios
+Route::get('/api/municipalities', [App\Http\Controllers\MunicipalityController::class, 'index'])->name('municipalities.index');

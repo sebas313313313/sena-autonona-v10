@@ -1656,7 +1656,7 @@
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('municipalitiesTable');
-                tbody.innerHTML = data.map(municipality => `
+                tbody.innerHTML = data.data.map(municipality => `
                     <tr>
                         <td>${municipality.id}</td>
                         <td>${municipality.name}</td>
@@ -1670,6 +1670,10 @@
                         </td>
                     </tr>
                 `).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cargar los municipios');
             });
     }
 
