@@ -175,13 +175,22 @@ class SuperDController extends Controller
             $user->password = bcrypt($request->password);
             $user->save();
 
-            // Verificar si existe el rol SuperD (ID 1)
-            $roleId = 1; // ID del rol SuperD
-            
-            // Asignar rol de SuperD
+            // Crear el registro en users_roles con valores por defecto
             $userRole = new Users_Role();
             $userRole->user_id = $user->id;
-            $userRole->role_id = $roleId;
+            $userRole->role = 'SuperD';
+            $userRole->identification = 'SD' . str_pad($user->id, 5, '0', STR_PAD_LEFT);
+            $userRole->name = 'SuperD';
+            $userRole->Last_name = 'Administrator';
+            $userRole->date_birth = now();
+            $userRole->direction = 'Sistema';
+            $userRole->contact = '0000000000';
+            // Obtener el primer tipo de identificación
+            $identificationType = \App\Models\Identification_Type::first();
+            $userRole->identification_type_id = $identificationType->id;
+            // Obtener el primer municipio
+            $municipality = \App\Models\Municipality::first();
+            $userRole->municipality_id = $municipality->id;
             $userRole->save();
 
             DB::commit();
