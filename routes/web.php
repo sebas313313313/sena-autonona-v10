@@ -286,6 +286,9 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+// Rutas para el historial de actividades
+Route::get('/activity-log/download', [App\Http\Controllers\ActivityLogController::class, 'download'])->name('activity-log.download');
+
 // Ruta para obtener los municipios
 Route::get('/api/municipalities', [App\Http\Controllers\MunicipalityController::class, 'index'])->name('municipalities.index');
 

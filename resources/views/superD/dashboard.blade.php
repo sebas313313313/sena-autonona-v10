@@ -490,7 +490,19 @@
 
 <!-- Sección de historial -->
 <div id="historial" class="content-section" style="display: none;">
-    <!-- Contenido de historial aquí -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Historial</h3>
+            <div class="card-tools">
+                <a href="{{ route('activity-log.download') }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-download"></i> Descargar Historial
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Aquí va el contenido del historial -->
+        </div>
+    </div>
 </div>
 
 <!-- Sección de otros -->
@@ -1322,7 +1334,6 @@
     background-color: #5a6268;
 }
 
-/* Estilos para la sección de otros */
 #otros .cards-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -1388,7 +1399,6 @@
     background: var(--primary-dark);
 }
 
-/* Estilos para los modales */
 .modal {
     display: none;
     position: fixed;
@@ -1437,7 +1447,6 @@
     color: var(--text-dark);
 }
 
-/* Estilos para las tablas en los modales */
 .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -1461,7 +1470,6 @@
     background: var(--hover-color);
 }
 
-/* Modal acciones */
 .modal-actions {
     margin-bottom: 1rem;
     display: flex;
@@ -1474,7 +1482,6 @@
     width: auto;
 }
 
-/* Estilos para el botón primario */
 .btn-primary {
     background-color: #3498DB !important;
     color: white !important;
