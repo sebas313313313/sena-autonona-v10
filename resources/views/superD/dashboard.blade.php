@@ -111,8 +111,8 @@
                                             <button class="btn-icon" title="Cambiar Contraseña" onclick="showChangePasswordModal({{ $user->id }})">
                                                 <i class="fa-solid fa-key"></i>
                                             </button>
-                                            <button class="btn-icon" title="Editar">
-                                                <i class="fa-solid fa-pen"></i>
+                                            <button class="btn-icon" title="Descargar Historial">
+                                                <i class="fa-solid fa-download"></i>
                                             </button>
                                             <button class="btn-icon" title="Eliminar" onclick="deleteUser({{ $user->id }}, '{{ $user->email }}')">
                                                 <i class="fa-solid fa-trash"></i>
@@ -329,6 +329,9 @@
                                             </button>
                                             <button class="btn-icon" title="Editar">
                                                 <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <button class="btn-icon" title="Descargar Historial">
+                                                <i class="fa-solid fa-download"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -2063,10 +2066,10 @@
                             <button class="btn-action" onclick="showChangePasswordModal(${user.id})">
                                 <i class="fa-solid fa-key"></i>
                             </button>
-                            <button class="btn-edit" onclick="editUser(${user.id})">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button class="btn-delete" onclick="deleteUser(${user.id}, '${user.email}')">
+                            <button class="btn-icon" title="Descargar Historial">
+                                                <i class="fa-solid fa-download"></i>
+                                            </button>
+                            <button class="btn-icon" title="Eliminar" onclick="deleteUser(${user.id}, '${user.email}')">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </td>
