@@ -1538,26 +1538,30 @@
     }
 
     function showSection(sectionId) {
-        try {
-            // Ocultar todas las secciones
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-
-            // Mostrar la sección seleccionada
-            const selectedSection = document.getElementById(sectionId);
-            if (selectedSection) {
-                selectedSection.style.display = 'block';
+        // Ocultar todas las secciones
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            if (section && section.classList) {
+                section.classList.remove('active');
             }
+        });
 
-            // Actualizar clases activas en el menú
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-        } catch (error) {
-            console.error('Error en showSection:', error);
+        // Mostrar la sección seleccionada
+        const selectedSection = document.getElementById(sectionId);
+        if (selectedSection && selectedSection.classList) {
+            selectedSection.classList.add('active');
         }
+
+        // Actualizar el botón activo
+        const buttons = document.querySelectorAll('.nav-button');
+        buttons.forEach(button => {
+            if (button && button.classList) {
+                button.classList.remove('active');
+                if (button.getAttribute('data-section') === sectionId) {
+                    button.classList.add('active');
+                }
+            }
+        });
     }
 
     function showNewSuperDModal() {
@@ -1737,21 +1741,29 @@
     // Funciones para mostrar/ocultar secciones
     function showSection(sectionId) {
         // Ocultar todas las secciones
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            if (section && section.classList) {
+                section.classList.remove('active');
+            }
         });
 
         // Mostrar la sección seleccionada
         const selectedSection = document.getElementById(sectionId);
-        if (selectedSection) {
-            selectedSection.style.display = 'block';
+        if (selectedSection && selectedSection.classList) {
+            selectedSection.classList.add('active');
         }
 
         // Actualizar clases activas en el menú
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.classList.remove('active');
+        const buttons = document.querySelectorAll('.nav-button');
+        buttons.forEach(button => {
+            if (button && button.classList) {
+                button.classList.remove('active');
+                if (button.getAttribute('data-section') === sectionId) {
+                    button.classList.add('active');
+                }
+            }
         });
-        event.currentTarget.classList.add('active');
     }
 
     // Funciones para los modales de la sección Otros
