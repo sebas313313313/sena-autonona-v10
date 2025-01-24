@@ -1735,24 +1735,7 @@
     }
 
     // Funciones para mostrar/ocultar secciones
-    function showSection(sectionId) {
-        // Ocultar todas las secciones
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.style.display = 'none';
-        });
-
-        // Mostrar la sección seleccionada
-        const selectedSection = document.getElementById(sectionId);
-        if (selectedSection) {
-            selectedSection.style.display = 'block';
-        }
-
-        // Actualizar clases activas en el menú
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        event.currentTarget.classList.add('active');
-    }
+    // Eliminar la función duplicada que estaba aquí
 
     // Funciones para los modales de la sección Otros
     function showModal(modalId) {
