@@ -198,59 +198,22 @@
                 </div>
 
                 <!-- Modal Ver Usuario -->
-                <div class="modal" id="viewUserModal">
+                <div class="modal" id="userDetailsModal">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <div class="modal-title">
-                                <i class="fa-solid fa-user"></i>
-                                <h2>Detalles del Usuario</h2>
-                            </div>
-                            <span class="close" onclick="closeViewUserModal()">&times;</span>
+                            <h2>Detalles del Usuario</h2>
+                            <button class="close-modal" onclick="document.getElementById('userDetailsModal').style.display='none'">×</button>
                         </div>
                         <div class="modal-body">
                             <div class="user-details">
-                                <div class="detail-group">
-                                    <label>Nombre:</label>
-                                    <span id="userDetailName"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Correo:</label>
-                                    <span id="userDetailEmail"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Tipo de Identificación:</label>
-                                    <span id="userDetailIdType"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Número de Identificación:</label>
-                                    <span id="userDetailIdNumber"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Teléfono:</label>
-                                    <span id="userDetailPhone"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Dirección:</label>
-                                    <span id="userDetailAddress"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Roles:</label>
-                                    <span id="userDetailRoles"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Fecha de Registro:</label>
-                                    <span id="userDetailCreatedAt"></span>
-                                </div>
-                                <div class="detail-group">
-                                    <label>Preguntas de Seguridad:</label>
-                                    <div id="userDetailSecurityQuestions"></div>
-                                </div>
-                            </div>
-                            <div class="button-group">
-                                <button type="button" class="btn-secondary" onclick="closeViewUserModal()">
-                                    <i class="fa-solid fa-times"></i>
-                                    <span>Cerrar</span>
-                                </button>
+                                <p><strong>Nombre:</strong> <span id="userDetailsName"></span></p>
+                                <p><strong>Apellido:</strong> <span id="userDetailsLastName"></span></p>
+                                <p><strong>Correo:</strong> <span id="userDetailsEmail"></span></p>
+                                <p><strong>Identificación:</strong> <span id="userDetailsIdentification"></span></p>
+                                <p><strong>Teléfono:</strong> <span id="userDetailsPhone"></span></p>
+                                <p><strong>Dirección:</strong> <span id="userDetailsAddress"></span></p>
+                                <p><strong>Rol:</strong> <span id="userDetailsRoles"></span></p>
+                                <p><strong>Fecha de Registro:</strong> <span id="userDetailsCreatedAt"></span></p>
                             </div>
                         </div>
                     </div>
@@ -1553,27 +1516,15 @@
                     });
 
                     const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || 'Error al crear el componente');
-
-                    form.reset();
-                    hideNewComponentForm();
-
-                    await Swal.fire({
-                        icon: 'success',
-                        title: '¡Éxito!',
-                        text: 'El componente se ha creado correctamente',
-                        confirmButtonText: 'Aceptar',
-                        confirmButtonColor: '#3498DB'
-                    });
-
-                    window.location.reload();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Error al crear el componente');
+                    }
+                    return data;
                 } catch (error) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: error.message || 'Hubo un error al crear el componente. Por favor, inténtelo de nuevo.',
-                        confirmButtonText: 'Aceptar',
-                        confirmButtonColor: '#3498DB'
+                        text: error.message || 'Error al crear el componente. Por favor, inténtelo de nuevo.'
                     });
                 }
             });
@@ -2121,49 +2072,45 @@
     }
 
     function showUserDetails(userId) {
-        fetch(`/superD/users/${userId}`)
-            .then(async response => {
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.error || 'Error al obtener detalles del usuario');
-                }
-                return data;
-            })
-            .then(user => {
-                // Llenar los detalles en el modal
-                document.getElementById('userDetailName').textContent = user.name;
-                document.getElementById('userDetailEmail').textContent = user.email;
-                document.getElementById('userDetailIdType').textContent = user.identification_type;
-                document.getElementById('userDetailIdNumber').textContent = user.identification_number;
-                document.getElementById('userDetailPhone').textContent = user.phone;
-                document.getElementById('userDetailAddress').textContent = user.address;
-                document.getElementById('userDetailRoles').textContent = user.roles;
-                document.getElementById('userDetailCreatedAt').textContent = user.created_at;
-
-                // Mostrar preguntas de seguridad
-                const questionsContainer = document.getElementById('userDetailSecurityQuestions');
-                if (user.security_questions && user.security_questions.length > 0) {
-                    questionsContainer.innerHTML = user.security_questions.map(q => `
-                        <div class="question">
-                            <strong>Pregunta:</strong> ${q.question}
-                            <div><strong>Respuesta:</strong> ${q.answer}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    questionsContainer.innerHTML = '<p>No hay preguntas de seguridad registradas</p>';
-                }
-
-                // Mostrar el modal
-                document.getElementById('viewUserModal').style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(error.message);
+        fetch(`/superD/users/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al obtener los datos del usuario');
+            }
+            return response.json();
+        })
+        .then(response => {
+            if (!response.success) {
+                throw new Error(response.message || 'Error al obtener los datos del usuario');
+            }
+            
+            const data = response.data;
+            document.getElementById('userDetailsName').textContent = data.name || 'No especificado';
+            document.getElementById('userDetailsLastName').textContent = data.last_name || 'No especificado';
+            document.getElementById('userDetailsEmail').textContent = data.email || 'No especificado';
+            document.getElementById('userDetailsIdentification').textContent = data.identification || 'No especificado';
+            document.getElementById('userDetailsPhone').textContent = data.phone || 'No especificado';
+            document.getElementById('userDetailsAddress').textContent = data.address || 'No especificada';
+            document.getElementById('userDetailsRoles').textContent = data.roles || 'Usuario';
+            document.getElementById('userDetailsCreatedAt').textContent = data.created_at || 'No especificado';
+            
+            document.getElementById('userDetailsModal').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Error al obtener los datos del usuario'
             });
-    }
-
-    function closeViewUserModal() {
-        document.getElementById('viewUserModal').style.display = 'none';
+        });
     }
     function showNewComponentForm() {
     document.getElementById('newComponentModal').style.display = 'block';

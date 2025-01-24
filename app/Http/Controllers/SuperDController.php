@@ -245,49 +245,51 @@ class SuperDController extends Controller
         }
     }
 
+    /**
+     * Obtener detalles de un usuario específico
+     */
     public function getUserDetails($id)
     {
         try {
-            // Obtener el usuario con sus relaciones
-            $user = User::with([
-                'roles',
-                'identification_type',
-                'security_questions' => function($query) {
-                    $query->select('security_questions.id', 'security_questions.question');
-                }
-            ])->findOrFail($id);
-
-            // Formatear la información para mostrar
-            $userDetails = [
-                'id' => $user->id,
-                'name' => $user->name ?? 'No especificado',
-                'email' => $user->email ?? 'No especificado',
-                'identification_type' => optional($user->identification_type)->name ?? 'No especificado',
-                'identification_number' => $user->identification_number ?? 'No especificado',
-                'phone' => $user->phone ?? 'No especificado',
-                'address' => $user->address ?? 'No especificada',
-                'created_at' => optional($user->created_at)->format('d/m/Y H:i:s') ?? 'No especificado',
-                'roles' => $user->roles->pluck('name')->implode(', ') ?: 'Sin roles asignados',
-                'security_questions' => []
-            ];
-
-            // Agregar preguntas de seguridad si existen
-            if ($user->security_questions) {
-                foreach ($user->security_questions as $question) {
-                    $userDetails['security_questions'][] = [
-                        'question' => $question->question,
-                        'answer' => optional($question->pivot)->answer ?? 'No especificada'
-                    ];
-                }
+            Log::info('Obteniendo detalles del usuario', ['user_id' => $id]);
+            
+            $user = User::with('userRole')->find($id);
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 404);
             }
 
-            return response()->json($userDetails);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Usuario no encontrado: ' . $e->getMessage());
-            return response()->json(['error' => 'Usuario no encontrado'], 404);
+            $userData = [
+                'success' => true,
+                'data' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->userRole ? $user->userRole->contact : 'No especificado',
+                    'address' => $user->userRole ? $user->userRole->direction : 'No especificada',
+                    'identification' => $user->userRole ? $user->userRole->identification : 'No especificado',
+                    'last_name' => $user->userRole ? $user->userRole->Last_name : 'No especificado',
+                    'roles' => $user->userRole ? ucfirst($user->userRole->role) : 'Usuario',
+                    'created_at' => $user->created_at ? $user->created_at->format('d/m/Y H:i:s') : 'No especificado'
+                ]
+            ];
+
+            Log::info('Datos del usuario obtenidos correctamente', ['user_data' => $userData]);
+            
+            return response()->json($userData);
         } catch (\Exception $e) {
-            Log::error('Error al obtener detalles del usuario: ' . $e->getMessage());
-            return response()->json(['error' => 'Error al obtener detalles del usuario: ' . $e->getMessage()], 500);
+            Log::error('Error al obtener detalles del usuario', [
+                'user_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los datos del usuario'
+            ], 500);
         }
     }
 }

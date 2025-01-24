@@ -112,19 +112,25 @@ Route::prefix('superD')->group(function () {
     Route::post('/login', [App\Http\Controllers\SuperDController::class, 'login'])->name('superD.login.submit');
     Route::post('/logout', [App\Http\Controllers\SuperDController::class, 'logout'])->name('superD.logout');
     Route::get('/dashboard', [App\Http\Controllers\SuperDController::class, 'dashboard'])->name('superD.dashboard')->middleware('auth');
-    Route::post('/users/{id}/change-password', [App\Http\Controllers\SuperDController::class, 'changePassword'])->name('superD.users.changePassword')->middleware('auth');
-    Route::post('/create-superd', [App\Http\Controllers\SuperDController::class, 'createSuperD'])->name('superD.create')->middleware('auth');
-    Route::delete('/users/{id}', [App\Http\Controllers\SuperDController::class, 'deleteUser'])->name('superD.users.delete')->middleware('auth');
-    Route::get('/users', [App\Http\Controllers\SuperDController::class, 'getUsers'])->name('superD.users.list')->middleware('auth');
-    Route::get('/users/{id}', [App\Http\Controllers\SuperDController::class, 'getUserDetails'])->name('superD.users.details')->middleware('auth');
-    Route::delete('/components/{component}', [App\Http\Controllers\SuperDController::class, 'deleteComponent'])->name('superD.components.delete');
-    Route::get('/components/{component}/sensors', [App\Http\Controllers\SuperDController::class, 'getComponentSensors'])->name('superD.components.sensors');
-    
-    // Rutas para preguntas de seguridad
-    Route::get('/security-questions', [App\Http\Controllers\SecurityQuestionController::class, 'index'])->name('security-questions.index');
-    Route::post('/security-questions', [App\Http\Controllers\SecurityQuestionController::class, 'store'])->name('security-questions.store');
-    Route::put('/security-questions/{question}', [App\Http\Controllers\SecurityQuestionController::class, 'update'])->name('security-questions.update');
-    Route::delete('/security-questions/{question}', [App\Http\Controllers\SecurityQuestionController::class, 'destroy'])->name('security-questions.destroy');
+
+    // Rutas protegidas por autenticación
+    Route::middleware('auth')->group(function () {
+        // Rutas de usuarios
+        Route::get('/users/{id}', [App\Http\Controllers\SuperDController::class, 'getUserDetails'])->name('superD.users.details');
+        Route::get('/users', [App\Http\Controllers\SuperDController::class, 'getUsers'])->name('superD.users.list');
+        Route::delete('/users/{id}', [App\Http\Controllers\SuperDController::class, 'deleteUser'])->name('superD.users.delete');
+        Route::post('/users/{id}/change-password', [App\Http\Controllers\SuperDController::class, 'changePassword'])->name('superD.users.changePassword');
+        Route::post('/create-superd', [App\Http\Controllers\SuperDController::class, 'createSuperD'])->name('superD.create');
+        Route::get('/users/{id}/details', [App\Http\Controllers\SuperDController::class, 'getUserDetails'])->name('superD.users.getDetails');
+        Route::delete('/components/{component}', [App\Http\Controllers\SuperDController::class, 'deleteComponent'])->name('superD.components.delete');
+        Route::get('/components/{component}/sensors', [App\Http\Controllers\SuperDController::class, 'getComponentSensors'])->name('superD.components.sensors');
+        
+        // Rutas para preguntas de seguridad
+        Route::get('/security-questions', [App\Http\Controllers\SecurityQuestionController::class, 'index'])->name('security-questions.index');
+        Route::post('/security-questions', [App\Http\Controllers\SecurityQuestionController::class, 'store'])->name('security-questions.store');
+        Route::put('/security-questions/{question}', [App\Http\Controllers\SecurityQuestionController::class, 'update'])->name('security-questions.update');
+        Route::delete('/security-questions/{question}', [App\Http\Controllers\SecurityQuestionController::class, 'destroy'])->name('security-questions.destroy');
+    });
 });
 
 /**
