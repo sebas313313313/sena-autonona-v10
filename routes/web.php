@@ -124,6 +124,7 @@ Route::prefix('superD')->group(function () {
         Route::get('/users/{id}/details', [App\Http\Controllers\SuperDController::class, 'getUserDetails'])->name('superD.users.getDetails');
         Route::delete('/components/{component}', [App\Http\Controllers\SuperDController::class, 'deleteComponent'])->name('superD.components.delete');
         Route::get('/components/{component}/sensors', [App\Http\Controllers\SuperDController::class, 'getComponentSensors'])->name('superD.components.sensors');
+        Route::get('/farms/{farm}', [App\Http\Controllers\SuperDController::class, 'getFarmDetails'])->name('superD.farms.details');
         
         // Rutas para preguntas de seguridad
         Route::get('/security-questions', [App\Http\Controllers\SecurityQuestionController::class, 'index'])->name('security-questions.index');

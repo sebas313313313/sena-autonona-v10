@@ -263,38 +263,25 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Nombre de la Granja</th>
-                                    <th>Ubicación</th>
-                                    <th>Propietario</th>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Municipio</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($farms as $farm)
                                 <tr>
-                                    <td>
-                                        <div class="farm-info">
-                                            <i class="fa-solid fa-warehouse text-success"></i>
-                                            <span>{{ $farm->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {{ optional($farm->municipality)->name }}, 
-                                        {{ $farm->vereda }}
-                                    </td>
-                                    <td>
-                                        {{ optional(optional($farm->usersRole)->user)->name ?? 'No asignado' }}
-                                    </td>
+                                    <td>{{ $farm->id }}</td>
+                                    <td>{{ $farm->name }}</td>
+                                    <td>{{ $farm->municipality->name }}</td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn-icon" title="Ver">
+                                            <button class="btn-icon" title="Ver" onclick="showFarmDetails({{ $farm->id }})">
                                                 <i class="fa-solid fa-eye"></i>
                                             </button>
-                                            <button class="btn-icon" title="Editar">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </button>
-                                            <button class="btn-icon" title="Descargar Historial">
-                                                <i class="fa-solid fa-download"></i>
+                                            <button class="btn-icon delete" title="Eliminar" onclick="deleteFarm({{ $farm->id }})">
+                                                <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -450,6 +437,47 @@
                     <button type="submit" class="btn-primary">Guardar</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Granja -->
+<div class="modal" id="farmDetailsModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">
+                <i class="fa-solid fa-warehouse"></i>
+                <h2>Detalles de la Granja</h2>
+            </div>
+            <span class="close" onclick="closeFarmDetailsModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="user-details">
+                <div class="detail-item">
+                    <strong>ID:</strong>
+                    <span id="farmId"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Nombre:</strong>
+                    <span id="farmName"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Municipio:</strong>
+                    <span id="farmMunicipality"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Dirección:</strong>
+                    <span id="farmAddress"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Propietario:</strong>
+                    <span id="farmOwner"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Fecha de Registro:</strong>
+                    <span id="farmCreatedAt"></span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1469,6 +1497,42 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 <script>
+    // Funciones para el modal de detalles de granja
+    function showFarmDetails(farmId) {
+        fetch(`/superD/farms/${farmId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('farmId').textContent = data.id || 'N/A';
+                document.getElementById('farmName').textContent = data.name || 'N/A';
+                document.getElementById('farmMunicipality').textContent = data.municipality ? data.municipality.name : 'N/A';
+                document.getElementById('farmAddress').textContent = data.address || 'N/A';
+                
+                // Manejar el caso del propietario de manera más segura
+                let ownerName = 'N/A';
+                if (data.users_role && data.users_role.user) {
+                    ownerName = data.users_role.user.name;
+                }
+                document.getElementById('farmOwner').textContent = ownerName;
+                
+                // Formatear la fecha de creación
+                let createdDate = 'N/A';
+                if (data.created_at) {
+                    createdDate = new Date(data.created_at).toLocaleDateString();
+                }
+                document.getElementById('farmCreatedAt').textContent = createdDate;
+                
+                document.getElementById('farmDetailsModal').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cargar los detalles de la granja');
+            });
+    }
+
+    function closeFarmDetailsModal() {
+        document.getElementById('farmDetailsModal').style.display = 'none';
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Mostrar sección predeterminada
         showSection('usuarios');
@@ -2007,22 +2071,29 @@
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = users.map(user => `
                     <tr>
-                        <td>${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
+                        <td>{{ $user->id }}</td>
                         <td>
-                            <button class="btn-action" onclick="showUserDetails(${user.id})">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                            <button class="btn-action" onclick="showChangePasswordModal(${user.id})">
-                                <i class="fa-solid fa-key"></i>
-                            </button>
-                            <button class="btn-icon" title="Descargar Historial">
-                                                <i class="fa-solid fa-download"></i>
-                                            </button>
-                            <button class="btn-icon" title="Eliminar" onclick="deleteUser(${user.id}, '${user.email}')">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
+                            <div class="user-info-cell">
+                                <div class="user-avatar">{{ substr($user->name, 0, 2) }}</div>
+                                <span>{{ $user->name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ $user->email }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" title="Ver" onclick="showUserDetails({{ $user->id }})">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="btn-icon" title="Cambiar Contraseña" onclick="showChangePasswordModal({{ $user->id }})">
+                                    <i class="fa-solid fa-key"></i>
+                                </button>
+                                <button class="btn-icon" title="Descargar Historial">
+                                    <i class="fa-solid fa-download"></i>
+                                </button>
+                                <button class="btn-icon" title="Eliminar" onclick="deleteUser({{ $user->id }}, '{{ $user->email }}')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `).join('');

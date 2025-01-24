@@ -292,4 +292,18 @@ class SuperDController extends Controller
             ], 500);
         }
     }
+
+    public function getFarmDetails(Farm $farm)
+    {
+        try {
+            $farm->load(['municipality', 'usersRole.user']);
+            return response()->json($farm);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener detalles de la granja: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los detalles de la granja'
+            ], 500);
+        }
+    }
 }
