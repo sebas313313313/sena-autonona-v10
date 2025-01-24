@@ -1487,7 +1487,7 @@
             });
         });
 
-        // Manejar el formulario de nuevo componente
+        // Manejar el formulario de nuevo compuuonente
         const form = document.getElementById('newComponentForm');
         if (form) {
             form.addEventListener('submit', async function(e) {
