@@ -19,9 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Registrar el observer para los modelos
+        // Observar modelos para registro de actividades
         \App\Models\User::observe(\App\Observers\ModelObserver::class);
         \App\Models\Farm::observe(\App\Observers\ModelObserver::class);
         \App\Models\Component::observe(\App\Observers\ModelObserver::class);
+        \App\Models\Farm_Component::observe(\App\Observers\ModelObserver::class);
+        \App\Models\Sensor::observe(\App\Observers\ModelObserver::class);
+        \App\Models\Sensor_Component::observe(\App\Observers\ModelObserver::class);
+        \App\Models\Sample::observe(\App\Observers\ModelObserver::class);
+        \App\Models\Component_Task::observe(\App\Observers\ModelObserver::class);
     }
 }
